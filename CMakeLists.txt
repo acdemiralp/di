@@ -16,6 +16,8 @@ set(PROJECT_SOURCES
   include/nano_engine/systems/display.hpp
   include/nano_engine/systems/input.hpp
   include/nano_engine/systems/renderer.hpp
+  include/nano_engine/utility/frame_timer.hpp
+  include/nano_engine/utility/gl_context.hpp
   include/nano_engine/engine.hpp
   include/nano_engine/system.hpp
 )
@@ -25,11 +27,18 @@ assign_source_group(${PROJECT_SOURCES})
 ##################################################  Dependencies  ##################################################
 include(import_library)
 
-find_package  (GLEW REQUIRED)
-import_library(GLEW_INCLUDE_DIRS GLEW_LIBRARIES)
+add_subdirectory(external/gl)
+set_property    (TARGET gl PROPERTY FOLDER "External") 
+list            (APPEND PROJECT_LIBRARIES gl)
 
-find_package  (SDL2 REQUIRED)
-import_library(SDL2_INCLUDE_DIR SDL2_LIBRARY)
+find_package    (Boost REQUIRED)
+import_library  (Boost_INCLUDE_DIRS)
+
+find_package    (GLEW REQUIRED)
+import_library  (GLEW_INCLUDE_DIRS GLEW_LIBRARIES)
+
+find_package    (SDL2 REQUIRED)
+import_library  (SDL2_INCLUDE_DIR SDL2_LIBRARY)
 if   (WIN32)
   list(APPEND PROJECT_LIBRARIES winmm.lib Imm32.lib)
 endif()
@@ -47,15 +56,16 @@ target_link_libraries     (${PROJECT_NAME} INTERFACE ${PROJECT_LIBRARIES})
 add_library(${PROJECT_NAME}_ STATIC ${PROJECT_SOURCES})
 target_include_directories(${PROJECT_NAME}_ 
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_BINARY_DIR})
-target_link_libraries(${PROJECT_NAME}_ PUBLIC ${PROJECT_LIBRARIES})
-set_target_properties(${PROJECT_NAME}_ PROPERTIES LINKER_LANGUAGE CXX)
+target_include_directories(${PROJECT_NAME}_ PUBLIC ${PROJECT_INCLUDE_DIRS})
+target_link_libraries     (${PROJECT_NAME}_ PUBLIC ${PROJECT_LIBRARIES})
+set_target_properties     (${PROJECT_NAME}_ PROPERTIES LINKER_LANGUAGE CXX)
 
 ##################################################    Testing     ##################################################
 if(BUILD_TESTS)
   enable_testing()
 
   set(PROJECT_TEST_SOURCES
-  
+    tests/engine_test.cpp
   )
 
   foreach(_SOURCE ${PROJECT_TEST_SOURCES})
