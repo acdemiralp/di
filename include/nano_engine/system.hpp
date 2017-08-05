@@ -17,7 +17,7 @@ public:
 protected:
   friend class engine;
 
-  engine* engine_;
+  engine* engine_ = nullptr;
 };
 }
 
