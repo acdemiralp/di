@@ -26,12 +26,14 @@ public:
   template<typename system_type>
   system_type* get_system   ()
   {
+    static_assert(std::is_base_of<system, system_type>::value, "The type does not inherit from system.");
     auto   iterator = std::find_if(systems_.begin(), systems_.end(), system_match_predicate<system_type>);
     return iterator != systems_.end() ? static_cast<system_type*>(iterator->get()) : nullptr;
   }
   template<typename system_type>
   void         remove_system()
   {
+    static_assert(std::is_base_of<system, system_type>::value, "The type does not inherit from system.");
     systems_.erase(std::remove_if(systems_.begin(), systems_.end(), &system_match_predicate<system_type>), systems_.end());
   }
 

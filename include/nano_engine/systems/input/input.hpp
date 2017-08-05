@@ -1,5 +1,5 @@
-#ifndef NANO_ENGINE_SYSTEMS_INPUT_HPP_
-#define NANO_ENGINE_SYSTEMS_INPUT_HPP_
+#ifndef NANO_ENGINE_SYSTEMS_INPUT_INPUT_HPP_
+#define NANO_ENGINE_SYSTEMS_INPUT_INPUT_HPP_
 
 #include <iostream>
 
@@ -14,6 +14,32 @@ namespace ne
 class input : public system
 {
 public:
+  input           ()
+  {
+    if (SDL_Init(SDL_INIT_EVENTS) != 0)
+      std::cout << "Failed to initialize display system. SDL Error: " << SDL_GetError() << std::endl;
+  }
+  input           (const input&  that) = default;
+  input           (      input&& temp) = default;
+  virtual ~input  ()
+  {
+    SDL_QuitSubSystem(SDL_INIT_EVENTS);
+  }
+  input& operator=(const input&  that) = default;
+  input& operator=(      input&& temp) = default;
+
+  bool get_key_state(unsigned char key ) const
+  {
+    assert(key < key_states_.size());
+    return key_states_[key];
+  }
+
+  static void lock_mouse(bool lock)
+  {
+    if (SDL_SetRelativeMouseMode(SDL_bool(lock)) != 0)
+      std::cout << "Unable to lock mouse. SDL Error: " << SDL_GetError() << std::endl;
+  }
+
   boost::signals2::signal<void()>                   on_quit          ;
   boost::signals2::signal<void(char)>               on_key_pressed   ;
   boost::signals2::signal<void(char)>               on_key_released  ;
@@ -21,24 +47,9 @@ public:
   boost::signals2::signal<void(unsigned)>           on_mouse_pressed ;
   boost::signals2::signal<void(unsigned)>           on_mouse_released;
 
-  bool get_key_state(unsigned char key ) const
-  {
-    return key_states_[key] != 0;
-  }
-  void lock_mouse   (bool          lock)
-  {
-    if (SDL_SetRelativeMouseMode(SDL_bool(lock)) != 0)
-      std::cout << "Unable to lock mouse. SDL Error: " << SDL_GetError() << std::endl;
-  }
-
 protected:
   void initialize() override
   {
-    if (SDL_Init(SDL_INIT_EVENTS) < 0)
-    {
-      std::cout << "Failed to initialize input system. SDL Error: " << SDL_GetError() << std::endl;
-      return;
-    }
     on_quit.connect(std::bind(&engine::stop, engine_));
   }
   void update    () override
@@ -57,14 +68,13 @@ protected:
         default: break;
       }
     }
-    key_states_ = const_cast<unsigned char*>(SDL_GetKeyboardState(nullptr));
-  }
-  void terminate () override
-  {
-    SDL_QuitSubSystem(SDL_INIT_EVENTS);
+
+    int  key_state_count;
+    auto key_states     = SDL_GetKeyboardState(&key_state_count);
+    key_states_.assign(key_states, key_states + key_state_count);
   }
 
-  unsigned char* key_states_;
+  std::vector<bool> key_states_;
 };
 }
 
