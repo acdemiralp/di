@@ -51,7 +51,7 @@ public:
   }
 
 protected:
-  void update    () override
+  void update() override
   {
     for(auto& window : windows_)
       window->swap_buffers();

@@ -16,6 +16,7 @@ set(PROJECT_SOURCES
   include/nano_engine/systems/display/display.hpp
   include/nano_engine/systems/display/window.hpp
   include/nano_engine/systems/input/input.hpp
+  include/nano_engine/systems/renderer/render_pass.hpp
   include/nano_engine/systems/renderer/renderer.hpp
   include/nano_engine/utility/frame_timer.hpp
   include/nano_engine/engine.hpp
