@@ -201,6 +201,8 @@ public:
   bool                    get_maximized () const { return maximized_ ; }
   bool                    get_grab_input() const { return grab_input_; }
   
+  SDL_Window*             native        () const { return native_    ; }
+
   boost::signals2::signal<void(const std::array<unsigned, 2>&)> on_resize;
 
 protected:
