@@ -32,11 +32,12 @@ TEST_CASE("Engine is tested.", "[engine]") {
       gl::shader fragment_shader(GL_FRAGMENT_SHADER);
       vertex_shader  .set_source("#version 420 \n layout(location = 0) in vec3 position; out vec3 color; void main() { color = position; gl_Position = vec4(position, 1.0); }");
       fragment_shader.set_source("#version 420 \n in vec3 color; out vec4 frag_color; void main() { frag_color = vec4(color.x + 0.5, 0.5, color.y + 0.5, 1.0); }");
-      assert(vertex_shader.compile() && fragment_shader.compile());
+      vertex_shader  .compile();
+      fragment_shader.compile();
 
       shader_program->attach_shader(vertex_shader  );
       shader_program->attach_shader(fragment_shader);
-      assert(shader_program->link());
+      shader_program->link();
 
       float points[] = { -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, -1.0f, 0.0f, -1.0f, -1.0f, 0.0f, -1.0f, 1.0f, 0.0f };
       gl::buffer vertex_buffer;
