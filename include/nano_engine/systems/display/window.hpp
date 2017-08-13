@@ -204,8 +204,6 @@ public:
   boost::signals2::signal<void(const std::array<unsigned, 2>&)> on_resize;
 
 protected:
-  friend class gl_context;
-
   void set_fullscreen_windowed()
   {
     SDL_DisplayMode video_mode;
