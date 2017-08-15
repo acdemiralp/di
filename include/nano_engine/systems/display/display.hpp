@@ -5,7 +5,6 @@
 #include <memory>
 #include <vector>
 
-#include <boost/signals2.hpp>
 #include <SDL2/SDL.h>
 
 #include <nano_engine/systems/display/window.hpp>
