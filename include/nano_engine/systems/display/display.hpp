@@ -5,7 +5,6 @@
 #include <memory>
 #include <vector>
 
-#include <boost/signals2.hpp>
 #include <SDL2/SDL.h>
 
 #include <nano_engine/systems/display/window.hpp>
@@ -30,7 +29,7 @@ public:
   display& operator=(const display&  that) = default;
   display& operator=(      display&& temp) = default;
 
-  window* create_window(const window::context_settings& settings = window::context_settings())
+  window* create_window(const boost::optional<opengl_settings>& settings = boost::none)
   {
     windows_.push_back(std::make_unique<window>(settings));
     return windows_.back().get();
@@ -54,7 +53,7 @@ protected:
   void update() override
   {
     for(auto& window : windows_)
-      window->swap_buffers();
+      window->refresh();
   }
 
   std::vector<std::unique_ptr<window>> windows_;

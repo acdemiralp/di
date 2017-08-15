@@ -5,47 +5,35 @@
 #include <iostream>
 #include <string>
 
+#include <boost/optional.hpp>
+#include <boost/signals2.hpp>
 #include <SDL2/SDL.h>
+
+#include <nano_engine/utility/opengl_settings.hpp>
 
 namespace ne
 {
 class window
 {
 public:
-  struct context_settings
-  {
-    enum class profile : unsigned
-    {
-      core             = 0x0001,
-      compatibility    = 0x0002,
-      embedded_systems = 0x0004
-    };
-
-    unsigned major_version = 4;
-    unsigned minor_version = 5;
-    profile  profile       = profile::core;
-  };
-
   enum class mode
   {
     windowed  ,
     fullscreen,
     fullscreen_windowed
   };
-  enum class swap_mode : int
-  {
-    late_swap_tearing = -1,
-    immediate         =  0,
-    vertical_sync     =  1
-  };
 
-  window           (const context_settings& settings = context_settings())
+  window           (const boost::optional<opengl_settings>& opengl_settings = boost::none)
   {
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, settings.major_version);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, settings.minor_version);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK , static_cast<int>(settings.profile));
+    unsigned int flags = 0;
 
-    unsigned int flags = SDL_WINDOW_OPENGL;
+    if(opengl_settings != boost::none)
+    {
+      flags |= SDL_WINDOW_OPENGL;
+      SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, opengl_settings->major_version);
+      SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, opengl_settings->minor_version);
+      SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK , static_cast<int>(opengl_settings->profile));
+    }
     
     if      (mode_ == mode::fullscreen)
       flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
@@ -66,37 +54,40 @@ public:
       return;
     }
 
-    context_ = SDL_GL_CreateContext(native_);
-    if (!context_)
+    if (opengl_settings != boost::none)
     {
-      std::cout << "Failed to create the context. SDL Error: " << SDL_GetError() << std::endl;
-      return;
+      opengl_context_ = SDL_GL_CreateContext(native_);
+      if (!opengl_context_)
+      {
+        std::cout << "Failed to create the context. SDL Error: " << SDL_GetError() << std::endl;
+        return;
+      }
+
+      if (SDL_GL_SetSwapInterval(static_cast<int>(opengl_settings->swap_mode)) != 0)
+        std::cout << "Failed to set the swap interval. SDL Error: " << SDL_GetError() << std::endl;
     }
   }
   window           (const window&  that) = delete ;
   window           (      window&& temp) = default;
   virtual ~window  ()
   {
-    if (context_)
-      SDL_GL_DeleteContext(context_);
+    if (opengl_context_)
+      SDL_GL_DeleteContext(opengl_context_);
     if (native_)
       SDL_DestroyWindow   (native_ );
   }
   window& operator=(const window&  that) = delete ;
   window& operator=(      window&& temp) = default;
 
-  void swap_buffers() const
+  void refresh() const
   {
-    if (native_)
-      SDL_GL_SwapWindow(native_);
-    else
-      std::cout << "Failed to swap buffers. Display does not have a window." << std::endl;
-  }
-
-  static void set_swap_mode(swap_mode swap_mode)
-  {
-    if (SDL_GL_SetSwapInterval(static_cast<int>(swap_mode)) != 0)
-      std::cout << "Failed to set the swap interval. SDL Error: " << SDL_GetError() << std::endl;
+    if(opengl_context_)
+    {
+      if (native_)
+        SDL_GL_SwapWindow(native_);
+      else
+        std::cout << "Failed to swap buffers. Display does not have a window." << std::endl;
+    }
   }
 
   void set_name      (const std::string&             name      )
@@ -214,20 +205,20 @@ protected:
     set_size    (std::array<unsigned, 2>{unsigned(video_mode.w - 1), unsigned(video_mode.h - 1)});
   }
 
-  std::string                 name_       = "";
-  std::array<unsigned, 2>     position_   = std::array<unsigned, 2>{32u , 32u };
-  std::array<unsigned, 2>     size_       = std::array<unsigned, 2>{800u, 600u};
-  mode                        mode_       = mode::windowed;
-  bool                        fullscreen_ = false;
-  bool                        hidden_     = false;
-  bool                        borderless_ = false;
-  bool                        resizable_  = true ;
-  bool                        minimized_  = false;
-  bool                        maximized_  = false;
-  bool                        grab_input_ = false;
-  
-  SDL_Window*                 native_     = nullptr;
-  SDL_GLContext               context_    = nullptr;
+  std::string             name_           = "";
+  std::array<unsigned, 2> position_       = std::array<unsigned, 2>{32u , 32u };
+  std::array<unsigned, 2> size_           = std::array<unsigned, 2>{800u, 600u};
+  mode                    mode_           = mode::windowed;
+  bool                    fullscreen_     = false;
+  bool                    hidden_         = false;
+  bool                    borderless_     = false;
+  bool                    resizable_      = true ;
+  bool                    minimized_      = false;
+  bool                    maximized_      = false;
+  bool                    grab_input_     = false;
+                          
+  SDL_Window*             native_         = nullptr;
+  SDL_GLContext           opengl_context_ = nullptr;
 };
 }
 
