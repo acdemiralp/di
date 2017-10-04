@@ -17,8 +17,7 @@ TEST_CASE("Engine is tested.", "[engine]") {
   auto input_system    = engine.add_system<ne::input>   ();
   auto renderer_system = engine.add_system<ne::renderer>();
   auto display_system  = engine.add_system<ne::display> ();
-  ne::opengl_settings ogl_settings = {4, 5, ne::opengl_settings::profile::core};
-  display_system->create_window(ogl_settings);
+  display_system->create_window(ne::opengl_settings());
 
   std::unique_ptr<gl::program>      shader_program;
   std::unique_ptr<gl::vertex_array> vertex_array  ;
