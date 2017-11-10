@@ -14,12 +14,13 @@ set(PROJECT_SOURCES
   cmake/import_library.cmake
   
   include/nano_engine/systems/display/display.hpp
+  include/nano_engine/systems/display/hmd.hpp
+  include/nano_engine/systems/display/opengl_window.hpp
   include/nano_engine/systems/display/window.hpp
   include/nano_engine/systems/input/input.hpp
   include/nano_engine/systems/renderer/render_pass.hpp
   include/nano_engine/systems/renderer/renderer.hpp
   include/nano_engine/utility/frame_timer.hpp
-  include/nano_engine/utility/opengl_settings.hpp
   include/nano_engine/engine.hpp
   include/nano_engine/system.hpp
 )
@@ -29,15 +30,8 @@ assign_source_group(${PROJECT_SOURCES})
 ##################################################  Dependencies  ##################################################
 include(import_library)
 
-add_subdirectory(external/gl)
-set_property    (TARGET gl PROPERTY FOLDER "External") 
-list            (APPEND PROJECT_LIBRARIES gl)
-
 find_package    (Boost REQUIRED)
 import_library  (Boost_INCLUDE_DIRS)
-
-find_package    (GLEW REQUIRED)
-import_library  (GLEW_INCLUDE_DIRS GLEW_LIBRARIES)
 
 find_package    (SDL2 REQUIRED)
 import_library  (SDL2_INCLUDE_DIR SDL2_LIBRARY)
