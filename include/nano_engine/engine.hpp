@@ -54,7 +54,7 @@ public:
     {
       frame_timer_.tick();
       for(auto& system : systems_)
-        system->update();
+        system->tick();
     }
 
     for (auto& system : systems_)

@@ -11,22 +11,22 @@
 
 namespace ne
 {
-class input : public system
+class input_system : public system
 {
 public:
-  input           ()
+  input_system           ()
   {
     if (SDL_Init(SDL_INIT_EVENTS) != 0)
       std::cout << "Failed to initialize display system. SDL Error: " << SDL_GetError() << std::endl;
   }
-  input           (const input&  that) = default;
-  input           (      input&& temp) = default;
-  virtual ~input  ()
+  input_system           (const input_system&  that) = default;
+  input_system           (      input_system&& temp) = default;
+  virtual ~input_system  ()
   {
     SDL_QuitSubSystem(SDL_INIT_EVENTS);
   }
-  input& operator=(const input&  that) = default;
-  input& operator=(      input&& temp) = default;
+  input_system& operator=(const input_system&  that) = default;
+  input_system& operator=(      input_system&& temp) = default;
 
   bool get_key_state(unsigned char key ) const
   {
@@ -52,7 +52,7 @@ protected:
   {
     on_quit.connect(std::bind(&engine::stop, engine_));
   }
-  void update    () override
+  void tick    () override
   {
     SDL_Event event;
     while (SDL_PollEvent(&event) != 0)

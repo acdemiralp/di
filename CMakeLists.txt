@@ -14,10 +14,11 @@ set(PROJECT_SOURCES
   cmake/import_library.cmake
   
   include/nano_engine/systems/display/display.hpp
+  include/nano_engine/systems/display/display_system.hpp
   include/nano_engine/systems/display/hmd.hpp
   include/nano_engine/systems/display/opengl_window.hpp
   include/nano_engine/systems/display/window.hpp
-  include/nano_engine/systems/input/input.hpp
+  include/nano_engine/systems/input/input_system.hpp
   include/nano_engine/systems/renderer/render_pass.hpp
   include/nano_engine/systems/renderer/renderer.hpp
   include/nano_engine/utility/frame_timer.hpp
@@ -32,6 +33,9 @@ include(import_library)
 
 find_package    (Boost REQUIRED)
 import_library  (Boost_INCLUDE_DIRS)
+
+find_package    (OpenVR REQUIRED)
+import_library  (OPENVR_INCLUDE_DIRS OPENVR_LIBRARY)
 
 find_package    (SDL2 REQUIRED)
 import_library  (SDL2_INCLUDE_DIR SDL2_LIBRARY)

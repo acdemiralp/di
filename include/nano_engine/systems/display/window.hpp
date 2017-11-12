@@ -9,8 +9,6 @@
 #include <boost/signals2.hpp>
 #include <SDL2/SDL.h>
 
-#include <nano_engine/utility/opengl_settings.hpp>
-
 namespace ne
 {
 class window
@@ -23,18 +21,8 @@ public:
     fullscreen_windowed
   };
 
-  window           (const boost::optional<opengl_settings>& opengl_settings = boost::none)
+  window           (unsigned int flags = 0)
   {
-    unsigned int flags = 0;
-
-    if(opengl_settings != boost::none)
-    {
-      flags |= SDL_WINDOW_OPENGL;
-      SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, opengl_settings->major_version);
-      SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, opengl_settings->minor_version);
-      SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK , static_cast<int>(opengl_settings->profile));
-    }
-    
     if      (mode_ == mode::fullscreen)
       flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
     else if (mode_ == mode::fullscreen_windowed)
@@ -53,42 +41,16 @@ public:
       std::cout << "Failed to create the window. SDL Error: " << SDL_GetError() << std::endl;
       return;
     }
-
-    if (opengl_settings != boost::none)
-    {
-      opengl_context_ = SDL_GL_CreateContext(native_);
-      if (!opengl_context_)
-      {
-        std::cout << "Failed to create the context. SDL Error: " << SDL_GetError() << std::endl;
-        return;
-      }
-
-      if (SDL_GL_SetSwapInterval(static_cast<int>(opengl_settings->swap_mode)) != 0)
-        std::cout << "Failed to set the swap interval. SDL Error: " << SDL_GetError() << std::endl;
-    }
   }
   window           (const window&  that) = delete ;
   window           (      window&& temp) = default;
   virtual ~window  ()
   {
-    if (opengl_context_)
-      SDL_GL_DeleteContext(opengl_context_);
     if (native_)
       SDL_DestroyWindow   (native_ );
   }
   window& operator=(const window&  that) = delete ;
   window& operator=(      window&& temp) = default;
-
-  void refresh() const
-  {
-    if(opengl_context_)
-    {
-      if (native_)
-        SDL_GL_SwapWindow(native_);
-      else
-        std::cout << "Failed to swap buffers. Display does not have a window." << std::endl;
-    }
-  }
 
   void set_name      (const std::string&             name      )
   {
@@ -218,7 +180,6 @@ protected:
   bool                    grab_input_     = false;
                           
   SDL_Window*             native_         = nullptr;
-  SDL_GLContext           opengl_context_ = nullptr;
 };
 }
 
