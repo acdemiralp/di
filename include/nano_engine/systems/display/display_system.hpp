@@ -166,14 +166,14 @@ public:
   }
   
   // Auxiliary functionality.
-  static void                       create_message_box   (
+  static void                       create_message_box     (
     const std::string&               title        , 
     const std::string&               message      , 
     const message_box_level&         level        = message_box_level::information)
   {
     SDL_ShowSimpleMessageBox(static_cast<Uint32>(level), title.c_str(), message.c_str(), nullptr);
   }
-  static std::string                create_message_box   (
+  static std::string                create_message_box     (
     const std::string&               title        , 
     const std::string&               message      , 
     const std::vector<std::string>&  buttons      , 
