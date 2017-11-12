@@ -16,7 +16,7 @@
 
 namespace ne
 {
-class display_system : public system
+class display_system final : public system
 {
 public:
   enum class message_box_level : unsigned
@@ -260,7 +260,7 @@ public:
     return SDL_IsScreenSaverEnabled() != 0;
   }
 
-protected:
+private:
   void tick() override
   {
     for(auto& window : opengl_windows_)
