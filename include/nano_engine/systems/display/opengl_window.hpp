@@ -98,7 +98,7 @@ public:
     SDL_GL_SwapWindow(native_); 
   }
 
-protected:
+private:
   static unsigned apply_context_settings(const context_settings& settings = context_settings())
   {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK      , static_cast<int>(settings.profile));
