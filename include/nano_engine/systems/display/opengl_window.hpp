@@ -102,24 +102,24 @@ protected:
   static unsigned apply_context_settings(const context_settings& settings = context_settings())
   {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK      , static_cast<int>(settings.profile));
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION     , settings.major_version);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION     , settings.minor_version);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION     , static_cast<int>(settings.major_version));
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION     , static_cast<int>(settings.minor_version));
                                                          
-    SDL_GL_SetAttribute(SDL_GL_RED_SIZE                  , settings.minimum_bits_red        );
-    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE                , settings.minimum_bits_green      );
-    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE                 , settings.minimum_bits_blue       );
-    SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE                , settings.minimum_bits_alpha      );
-    SDL_GL_SetAttribute(SDL_GL_ACCUM_RED_SIZE            , settings.minimum_bits_accum_red  );
-    SDL_GL_SetAttribute(SDL_GL_ACCUM_GREEN_SIZE          , settings.minimum_bits_accum_green);
-    SDL_GL_SetAttribute(SDL_GL_ACCUM_BLUE_SIZE           , settings.minimum_bits_accum_blue );
-    SDL_GL_SetAttribute(SDL_GL_ACCUM_ALPHA_SIZE          , settings.minimum_bits_accum_alpha);
+    SDL_GL_SetAttribute(SDL_GL_RED_SIZE                  , static_cast<int>(settings.minimum_bits_red        ));
+    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE                , static_cast<int>(settings.minimum_bits_green      ));
+    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE                 , static_cast<int>(settings.minimum_bits_blue       ));
+    SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE                , static_cast<int>(settings.minimum_bits_alpha      ));
+    SDL_GL_SetAttribute(SDL_GL_ACCUM_RED_SIZE            , static_cast<int>(settings.minimum_bits_accum_red  ));
+    SDL_GL_SetAttribute(SDL_GL_ACCUM_GREEN_SIZE          , static_cast<int>(settings.minimum_bits_accum_green));
+    SDL_GL_SetAttribute(SDL_GL_ACCUM_BLUE_SIZE           , static_cast<int>(settings.minimum_bits_accum_blue ));
+    SDL_GL_SetAttribute(SDL_GL_ACCUM_ALPHA_SIZE          , static_cast<int>(settings.minimum_bits_accum_alpha));
                                                          
-    SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE               , settings.minimum_bits_framebuffer);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE                , settings.minimum_bits_depth      );
-    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE              , settings.minimum_bits_stencil    );
+    SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE               , static_cast<int>(settings.minimum_bits_framebuffer));
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE                , static_cast<int>(settings.minimum_bits_depth      ));
+    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE              , static_cast<int>(settings.minimum_bits_stencil    ));
                                                          
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS        , settings.msaa_buffers);
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES        , settings.msaa_samples);
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS        , static_cast<int>(settings.msaa_buffers));
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES        , static_cast<int>(settings.msaa_samples));
 
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER              , settings.double_buffering      ? 1 : 0);
     SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL        , settings.hardware_acceleration ? 1 : 0);
