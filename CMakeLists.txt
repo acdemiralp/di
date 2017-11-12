@@ -13,7 +13,6 @@ set(PROJECT_SOURCES
   cmake/assign_source_group.cmake
   cmake/import_library.cmake
   
-  include/nano_engine/systems/display/display.hpp
   include/nano_engine/systems/display/display_system.hpp
   include/nano_engine/systems/display/hmd.hpp
   include/nano_engine/systems/display/opengl_window.hpp
