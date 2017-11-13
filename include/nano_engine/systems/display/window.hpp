@@ -8,6 +8,7 @@
 
 #include <boost/signals2.hpp>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_syswm.h>
 
 #include <nano_engine/systems/display/window_mode.hpp>
 
@@ -227,6 +228,48 @@ public:
   }
 
   boost::signals2::signal<void(const std::array<std::size_t, 2>&)> on_resize;
+
+#if   defined(SDL_VIDEO_DRIVER_ANDROID)
+  std::tuple<ANativeWindow*, EGLSurface>                  os_specific_native()
+  {
+    SDL_SysWMinfo sys_info;
+    SDL_VERSION(&sys_info.version);
+    SDL_GetWindowWMInfo(native_, &sys_info);
+    return {sys_info.info.android.window, sys_info.info.android.surface};
+  }
+#elif defined(SDL_VIDEO_DRIVER_WINDOWS)
+  std::tuple<HWND, HDC, HINSTANCE>                        os_specific_native()
+  {
+    SDL_SysWMinfo sys_info;
+    SDL_VERSION(&sys_info.version);
+    SDL_GetWindowWMInfo(native_, &sys_info);
+    return {sys_info.info.win.window, sys_info.info.win.hdc, reinterpret_cast<HINSTANCE>(GetWindowLong(sys_info.info.win.window, -6))};
+  }
+#elif defined(SDL_VIDEO_DRIVER_X11)
+  std::tuple<Display*, Window>                            os_specific_native()
+  {
+    SDL_SysWMinfo sys_info;
+    SDL_VERSION(&sys_info.version);
+    SDL_GetWindowWMInfo(native_, &sys_info);
+    return {sys_info.info.x11.display, sys_info.info.x11.window};
+  }
+#elif defined(SDL_VIDEO_DRIVER_WAYLAND)
+  std::tuple<wl_display*, wl_surface*, wl_shell_surface*> os_specific_native()
+  {
+    SDL_SysWMinfo sys_info;
+    SDL_VERSION(&sys_info.version);
+    SDL_GetWindowWMInfo(native_, &sys_info);
+    return {sys_info.info.wl.display, sys_info.info.wl.surface, sys_info.info.wl.shell_surface};
+  }
+#elif defined(SDL_VIDEO_DRIVER_MIR)
+  std::tuple<MirConnection*, MirSurface*>                 os_specific_native()
+  {
+    SDL_SysWMinfo sys_info;
+    SDL_VERSION(&sys_info.version);
+    SDL_GetWindowWMInfo(native_, &sys_info);
+    return {sys_info.info.mir.connection, sys_info.info.mir.surface};
+  }
+#endif
 
 protected:
   // FIX.
