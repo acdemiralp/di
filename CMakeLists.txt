@@ -40,14 +40,14 @@ assign_source_group(${PROJECT_SOURCES})
 ##################################################  Dependencies  ##################################################
 include(import_library)
 
-find_package    (Boost REQUIRED)
-import_library  (Boost_INCLUDE_DIRS)
+find_package  (Boost REQUIRED)
+import_library(Boost_INCLUDE_DIRS)
 
-find_package    (OpenVR REQUIRED)
-import_library  (OPENVR_INCLUDE_DIRS OPENVR_LIBRARY)
+find_package  (OpenVR REQUIRED)
+import_library(OPENVR_INCLUDE_DIRS OPENVR_LIBRARY)
 
-find_package    (SDL2 REQUIRED)
-import_library  (SDL2_INCLUDE_DIR SDL2_LIBRARY)
+find_package  (SDL2 REQUIRED)
+import_library(SDL2_INCLUDE_DIR SDL2_LIBRARY)
 if   (WIN32)
   list(APPEND PROJECT_LIBRARIES winmm.lib Imm32.lib)
 endif()
