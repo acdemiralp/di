@@ -9,18 +9,13 @@
 #include <boost/signals2.hpp>
 #include <SDL2/SDL.h>
 
+#include <nano_engine/systems/display/window_mode.hpp>
+
 namespace ne
 {
 class window
 {
 public:
-  enum class mode
-  {
-    windowed  ,
-    fullscreen,
-    fullscreen_windowed
-  };
-
   window           (const std::string& title, const std::array<std::size_t, 2>& position, const std::array<std::size_t, 2>& size, std::uint32_t flags = 0u)
   {
     native_ = SDL_CreateWindow(
@@ -128,17 +123,15 @@ public:
       rgb_translation_table[2].data());
   }
   
-  void set_mode        (mode mode)
+  void set_parent      (window*     parent)
   {
-    if      (mode == mode::windowed)
-      SDL_SetWindowFullscreen(native_, false);
-    else if (mode == mode::fullscreen)
-      SDL_SetWindowFullscreen(native_, true);
-    else if (mode == mode::fullscreen_windowed)
-    {
-      SDL_SetWindowFullscreen(native_, false);
+    SDL_SetWindowModalFor(native_, parent->native_);
+  }
+  void set_mode        (window_mode mode  )
+  {
+    SDL_SetWindowFullscreen(native_, mode == window_mode::fullscreen);
+    if (mode == window_mode::fullscreen_windowed)
       set_fullscreen_windowed();
-    }
     on_resize(this->size());
   }
 
@@ -155,7 +148,7 @@ public:
     return result;
   }
 
-  SDL_Window* native() const { return native_    ; }
+  SDL_Window* native() const { return native_; }
 
   boost::signals2::signal<void(const std::array<std::size_t, 2>&)> on_resize;
 
