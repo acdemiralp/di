@@ -106,14 +106,14 @@ public:
   display_system& operator=(      display_system&& temp) = default;
 
   // Factory functionality.
-  window*                     create_window        ()
+  window*                     create_window        (const std::string& name)
   {
-    windows_.emplace_back(std::make_unique<window>());
+    windows_.emplace_back(std::make_unique<window>(name));
     return windows_.back().get();
   }
-  opengl_window*              create_opengl_window (const opengl_window::context_settings& context_settings = opengl_window::context_settings())
+  opengl_window*              create_opengl_window (const std::string& name, const opengl_window::context_settings& context_settings = opengl_window::context_settings())
   {
-    opengl_windows_.emplace_back(std::make_unique<opengl_window>(context_settings));
+    opengl_windows_.emplace_back(std::make_unique<opengl_window>(name, context_settings));
     return opengl_windows_.back().get();
   }
   void                        destroy_window       (window*        window       )
