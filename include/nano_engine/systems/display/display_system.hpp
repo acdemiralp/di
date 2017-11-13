@@ -37,11 +37,13 @@ public:
   window*                          create_window        (const std::string& name)
   {
     windows_.emplace_back(std::make_unique<window>(name));
+    windows_.back()->owner_ = this;
     return windows_.back().get();
   }
   opengl_window*                   create_opengl_window (const std::string& name, const opengl_context_settings& context_settings = opengl_context_settings())
   {
     opengl_windows_.emplace_back(std::make_unique<opengl_window>(name, context_settings));
+    opengl_windows_.back()->owner_ = this;
     return opengl_windows_.back().get();
   }
 
