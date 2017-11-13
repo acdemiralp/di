@@ -61,10 +61,23 @@ public:
     bool        reset_isolation          = false;
   };
 
-  explicit opengl_window  (const context_settings& settings = context_settings()) : window(apply_context_settings(settings)), opengl_context_(SDL_GL_CreateContext(native_))
+  opengl_window  (
+    const std::string&                title    , 
+    const std::array<std::size_t, 2>& position , 
+    const std::array<std::size_t, 2>& size     , 
+    const context_settings&           settings = context_settings()) 
+  : window(title, position, size, apply_context_settings(settings)), opengl_context_(SDL_GL_CreateContext(native_))
   {
     if (!opengl_context_)
       throw std::runtime_error("Failed to create OpenGL context. SDL Error: " + std::string(SDL_GetError()));
+  }
+  explicit opengl_window(
+    const std::string&      title    , 
+    const context_settings& settings = context_settings()) 
+  : window(title, apply_context_settings(settings)), opengl_context_(SDL_GL_CreateContext(native_))
+  {
+    if (!opengl_context_)
+      throw std::runtime_error("Failed to create OpenGL context. SDL Error: " + std::string(SDL_GetError())); 
   }
   opengl_window           (const opengl_window&  that) = delete ;
   opengl_window           (      opengl_window&& temp) = default;
