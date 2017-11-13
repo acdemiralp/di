@@ -46,6 +46,14 @@ public:
   window& operator=(const window&  that) = delete ;
   window& operator=(      window&& temp) = default;
 
+  void set_visible   (bool visible) const
+  {
+    visible ? SDL_ShowWindow(native_) : SDL_HideWindow(native_);
+  }
+  void set_focus     ()             const
+  {
+    SDL_SetWindowInputFocus(native_);
+  }
   void bring_to_front() const
   {
     SDL_RaiseWindow(native_);
@@ -67,111 +75,95 @@ public:
     return SDL_GetGrabbedWindow() == native_;
   }
 
-  void set_title     (const std::string&                name      )
+  void set_title       (const std::string&                name      )
   {
     SDL_SetWindowTitle(native_, name.c_str());
   }
-  void set_position  (const std::array<std::size_t, 2>& position  )
+  void set_position    (const std::array<std::size_t, 2>& position  )
   {
     SDL_SetWindowPosition(native_, static_cast<int>(position[0]), static_cast<int>(position[1]));
   }
-  void set_size      (const std::array<std::size_t, 2>& size      )
+  void set_size        (const std::array<std::size_t, 2>& size      )
   {
     SDL_SetWindowSize(native_, static_cast<int>(size[0]), static_cast<int>(size[1]));
-    on_resize(size);
+    on_resize(this->size());
   }
-  void set_resizable (bool                              resizable )
+  void set_minimum_size(const std::array<std::size_t, 2>& size      )
+  {
+    SDL_SetWindowMinimumSize(native_, static_cast<int>(size[0]), static_cast<int>(size[1]));
+    on_resize(this->size());
+  }
+  void set_maximum_size(const std::array<std::size_t, 2>& size      )
+  {
+    SDL_SetWindowMaximumSize(native_, static_cast<int>(size[0]), static_cast<int>(size[1]));
+    on_resize(this->size());
+  }
+  void set_resizable   (bool                              resizable )
   {
     SDL_SetWindowResizable(native_, SDL_bool(resizable));
   }
-  
+  void set_bordered    (bool                              bordered  )
+  {
+    SDL_SetWindowBordered(native_, SDL_bool(bordered));
+  }
+  void set_input_grab  (bool                              input_grab)
+  {
+    SDL_SetWindowGrab(native_, SDL_bool(input_grab));
+  }
 
-  ////////
+  void set_brightness  (float brightness)
+  {
+    SDL_SetWindowBrightness(native_, brightness);
+  }
+  void set_opacity     (float opacity   )
+  {
+    SDL_SetWindowOpacity(native_, opacity);
+  }
+  void set_gamma_ramp  (const std::array<std::array<std::uint16_t, 256>, 3>& rgb_translation_table)
+  {
+    SDL_SetWindowGammaRamp(
+      native_, 
+      rgb_translation_table[0].data(), 
+      rgb_translation_table[1].data(), 
+      rgb_translation_table[2].data());
+  }
+  
+  void set_mode        (mode mode)
+  {
+    if      (mode == mode::windowed)
+      SDL_SetWindowFullscreen(native_, false);
+    else if (mode == mode::fullscreen)
+      SDL_SetWindowFullscreen(native_, true);
+    else if (mode == mode::fullscreen_windowed)
+    {
+      SDL_SetWindowFullscreen(native_, false);
+      set_fullscreen_windowed();
+    }
+    on_resize(this->size());
+  }
 
-  void set_mode      (mode                           mode      )
+  virtual std::array<std::size_t, 2> position() const
   {
-    mode_ = mode;
-    if (native_)
-    {
-      if      (mode_ == mode::windowed)
-        SDL_SetWindowFullscreen(native_, false);
-      else if (mode_ == mode::fullscreen)
-        SDL_SetWindowFullscreen(native_, true);
-      else if (mode_ == mode::fullscreen_windowed)
-      {
-        SDL_SetWindowFullscreen(native_, false);
-        set_fullscreen_windowed();
-      }
-      on_resize(get_size());
-    }
+    std::array<std::size_t, 2> result;
+    SDL_GetWindowPosition(native_, reinterpret_cast<int*>(&result[0]), reinterpret_cast<int*>(&result[1]));
+    return result;
   }
-  void set_hidden    (bool                           hidden    )
+  virtual std::array<std::size_t, 2> size    () const
   {
-    hidden_ = hidden;
-    if (native_)
-      hidden_ ? SDL_HideWindow(native_) : SDL_ShowWindow(native_);
+    std::array<std::size_t, 2> result;
+    SDL_GetWindowSize(native_, reinterpret_cast<int*>(&result[0]), reinterpret_cast<int*>(&result[1]));
+    return result;
   }
-  void set_borderless(bool                           borderless)
-  {
-    borderless_ = borderless;
-    if (native_)
-      SDL_SetWindowBordered(native_, SDL_bool(!borderless));
-  }
-  void set_minimized (bool                           minimized )
-  {
-    minimized_ = minimized;
-    if (minimized_ && native_)
-    {
-      SDL_MinimizeWindow(native_);
-      on_resize(get_size());
-    }
-  }
-  void set_maximized (bool                           maximized )
-  {
-    maximized_ = maximized;
-    if (maximized_ && native_)
-    {
-      SDL_MaximizeWindow(native_);
-      on_resize(get_size());
-    }
-  }
-  void set_grab_input(bool                           grab_input)
-  {
-    grab_input_ = grab_input;
-    if (native_)
-      SDL_SetWindowGrab(native_, SDL_bool(grab_input_));
-  }
-  
-  const std::string&      get_name      () const { return name_      ; }
-  std::array<unsigned, 2> get_position  ()
-  {
-    if (native_)
-      SDL_GetWindowPosition(native_, reinterpret_cast<int*>(&position_[0]), reinterpret_cast<int*>(&position_[1]));
-    return position_;
-  }
-  std::array<unsigned, 2> get_size      ()
-  {
-    if(native_)
-      SDL_GetWindowSize(native_, reinterpret_cast<int*>(&size_[0]), reinterpret_cast<int*>(&size_[1]));
-    return size_;
-  }
-  mode                    get_mode      () const { return mode_      ; }
-  bool                    get_hidden    () const { return hidden_    ; }
-  bool                    get_borderless() const { return borderless_; }
-  bool                    get_resizable () const { return resizable_ ; }
-  bool                    get_minimized () const { return minimized_ ; }
-  bool                    get_maximized () const { return maximized_ ; }
-  bool                    get_grab_input() const { return grab_input_; }
-  
-  SDL_Window*             native        () const { return native_    ; }
+
+  SDL_Window* native() const { return native_    ; }
 
   boost::signals2::signal<void(const std::array<std::size_t, 2>&)> on_resize;
 
 protected:
-  void set_fullscreen_windowed()
+  void set_fullscreen_windowed(std::size_t display_index = 0)
   {
     SDL_DisplayMode video_mode;
-    SDL_GetCurrentDisplayMode(0, &video_mode);
+    SDL_GetCurrentDisplayMode(static_cast<int>(display_index), &video_mode);
     set_position(std::array<std::size_t, 2>{0u, 0u});
     set_size    (std::array<std::size_t, 2>{video_mode.w - 1, video_mode.h - 1});
   }
