@@ -10,10 +10,13 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
 
+#include <nano_engine/systems/display/display_info.hpp>
 #include <nano_engine/systems/display/window_mode.hpp>
 
 namespace ne
 {
+class display_system;
+
 class window
 {
 public:
@@ -113,14 +116,19 @@ public:
       translation_tables[1].data(), 
       translation_tables[2].data());
   } 
-  void set_mode        (window_mode mode  )
+  void set_display_mode(const display_mode&                                  display_mode      )
+  {
+    auto native_display_mode = display_mode.native();
+    SDL_SetWindowDisplayMode(native_, &native_display_mode);
+  }
+  void set_mode        (window_mode  mode        )
   {
     SDL_SetWindowFullscreen(native_, mode == window_mode::fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
     if (mode == window_mode::fullscreen_windowed)
       set_fullscreen_windowed();
     on_resize(size());
   }
-  void set_parent      (window*     parent)
+  void set_parent      (window*      parent      )
   {
     SDL_SetWindowModalFor(native_, parent->native_);
   }
@@ -212,76 +220,89 @@ public:
       translation_tables[2].data());
     return translation_tables;
   }
+  display_mode                                  display_mode() const
+  {
+    SDL_DisplayMode native_display_mode;
+    SDL_GetWindowDisplayMode(native_, &native_display_mode);
+    return ne::display_mode(native_display_mode);
+  }
   // FIX.
+  display_info                                  display     () const
+  {
+    return owner_->displays()[SDL_GetWindowDisplayIndex(native_)];
+  }
   window_mode                                   mode        () const
   {
     if (SDL_GetWindowFlags(native_) & SDL_WINDOW_FULLSCREEN_DESKTOP)
       return window_mode::fullscreen;
-    //else if(TODO)
-    //  return window_mode::fullscreen_windowed;
+    
+    auto display_info = display();
+    if(position() == std::array<std::size_t, 2>{0, 0} && 
+       size    () == std::array<std::size_t, 2>{display_info.size[0] - 1, display_info.size[1] - 1})
+      return window_mode::fullscreen_windowed;
+
     return window_mode::windowed;
   }
+
 
   SDL_Window* native() const 
   {
     return native_;
   }
 
-  boost::signals2::signal<void(const std::array<std::size_t, 2>&)> on_resize;
-
 #if   defined(SDL_VIDEO_DRIVER_ANDROID)
-  std::tuple<ANativeWindow*, EGLSurface>                  os_specific_native()
+  std::tuple<ANativeWindow*, EGLSurface> driver_data() const
   {
-    SDL_SysWMinfo sys_info;
-    SDL_VERSION(&sys_info.version);
-    SDL_GetWindowWMInfo(native_, &sys_info);
-    return {sys_info.info.android.window, sys_info.info.android.surface};
-  }
-#elif defined(SDL_VIDEO_DRIVER_WINDOWS)
-  std::tuple<HWND, HDC, HINSTANCE>                        os_specific_native()
-  {
-    SDL_SysWMinfo sys_info;
-    SDL_VERSION(&sys_info.version);
-    SDL_GetWindowWMInfo(native_, &sys_info);
-    return {sys_info.info.win.window, sys_info.info.win.hdc, reinterpret_cast<HINSTANCE>(GetWindowLong(sys_info.info.win.window, -6))};
-  }
-#elif defined(SDL_VIDEO_DRIVER_X11)
-  std::tuple<Display*, Window>                            os_specific_native()
-  {
-    SDL_SysWMinfo sys_info;
-    SDL_VERSION(&sys_info.version);
-    SDL_GetWindowWMInfo(native_, &sys_info);
-    return {sys_info.info.x11.display, sys_info.info.x11.window};
-  }
-#elif defined(SDL_VIDEO_DRIVER_WAYLAND)
-  std::tuple<wl_display*, wl_surface*, wl_shell_surface*> os_specific_native()
-  {
-    SDL_SysWMinfo sys_info;
-    SDL_VERSION(&sys_info.version);
-    SDL_GetWindowWMInfo(native_, &sys_info);
-    return {sys_info.info.wl.display, sys_info.info.wl.surface, sys_info.info.wl.shell_surface};
+    auto data = driver_specific_data();
+    return {data.info.android.window, data.info.android.surface};
   }
 #elif defined(SDL_VIDEO_DRIVER_MIR)
-  std::tuple<MirConnection*, MirSurface*>                 os_specific_native()
+  std::tuple<MirConnection*, MirSurface*> driver_data() const
   {
-    SDL_SysWMinfo sys_info;
-    SDL_VERSION(&sys_info.version);
-    SDL_GetWindowWMInfo(native_, &sys_info);
-    return {sys_info.info.mir.connection, sys_info.info.mir.surface};
+    auto data = driver_specific_data();
+    return {data.info.mir.connection, data.info.mir.surface};
+  }
+#elif defined(SDL_VIDEO_DRIVER_WAYLAND)
+  std::tuple<wl_display*, wl_surface*, wl_shell_surface*> driver_data() const
+  {
+    auto data = driver_specific_data();
+    return {data.info.wl.display, data.info.wl.surface, data.info.wl.shell_surface};
+  }
+#elif defined(SDL_VIDEO_DRIVER_WINDOWS)
+  std::tuple<HWND, HDC, HINSTANCE> driver_data() const
+  {
+    auto data = driver_specific_data();
+    return {data.info.win.window, data.info.win.hdc, reinterpret_cast<HINSTANCE>(GetWindowLong(data.info.win.window, -6))};
+  }
+#elif defined(SDL_VIDEO_DRIVER_X11)
+  std::tuple<Display*, Window> driver_data() const
+  {
+    auto data = driver_specific_data();
+    return {data.info.x11.display, data.info.x11.window};
   }
 #endif
 
+  boost::signals2::signal<void(const std::array<std::size_t, 2>&)> on_resize;
+
 protected:
-  // FIX.
-  void set_fullscreen_windowed(std::size_t display_index = 0)
+  friend display_system;
+
+  void          set_fullscreen_windowed()
   {
-    SDL_DisplayMode video_mode;
-    SDL_GetCurrentDisplayMode(static_cast<int>(display_index), &video_mode);
-    set_position(std::array<std::size_t, 2>{0u, 0u});
-    set_size    (std::array<std::size_t, 2>{std::size_t(video_mode.w - 1), std::size_t(video_mode.h - 1)});
+    auto display_info = display();
+    set_position(std::array<std::size_t, 2>{0, 0});
+    set_size    (std::array<std::size_t, 2>{display_info.size[0] - 1, display_info.size[1] - 1});
+  }
+  SDL_SysWMinfo driver_specific_data   () const
+  {
+    SDL_SysWMinfo sys_wm_info;
+    SDL_VERSION(&sys_wm_info.version);
+    SDL_GetWindowWMInfo(native_, &sys_wm_info);
+    return sys_wm_info;
   }
 
-  SDL_Window* native_ = nullptr;
+  SDL_Window*     native_ = nullptr;
+  display_system* owner_  = nullptr;
 };
 }
 
