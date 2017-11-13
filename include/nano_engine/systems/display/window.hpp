@@ -16,19 +16,14 @@ namespace ne
 class window
 {
 public:
-  window           (const std::string& title, const std::array<std::size_t, 2>& position, const std::array<std::size_t, 2>& size, std::uint32_t flags = 0u)
+  window           (const std::string& title, const std::array<std::size_t, 2>& position, const std::array<std::size_t, 2>& size, std::uint32_t flags = 0u) 
+  : native_(SDL_CreateWindow(title.c_str(), static_cast<int>(position[0]), static_cast<int>(position[1]), static_cast<int>(size[0]), static_cast<int>(size[1]), flags |= SDL_WINDOW_ALLOW_HIGHDPI))
   {
-    native_ = SDL_CreateWindow(
-      title.c_str(), 
-      static_cast<int>(position[0]), 
-      static_cast<int>(position[1]), 
-      static_cast<int>(size    [0]), 
-      static_cast<int>(size    [1]), 
-      flags |= SDL_WINDOW_ALLOW_HIGHDPI);
     if (!native_)
       throw std::runtime_error("Failed to create SDL window. SDL Error: " + std::string(SDL_GetError()));
   }
-  explicit window  (const std::string& title, std::uint32_t flags = 0u) : window(title, {32, 32}, {800, 600}, flags)
+  explicit window  (const std::string& title, std::uint32_t flags = 0u) 
+  : window(title, {32, 32}, {800, 600}, flags)
   {
     set_fullscreen_windowed();
   }
@@ -41,31 +36,31 @@ public:
   window& operator=(const window&  that) = delete ;
   window& operator=(      window&& temp) = default;
 
-  void set_visible   (bool visible) const
+  void set_visible     (bool visible) const
   {
     visible ? SDL_ShowWindow(native_) : SDL_HideWindow(native_);
   }
-  void set_focus     ()             const
+  void set_focus       ()             const
   {
     SDL_SetWindowInputFocus(native_);
   }
-  void bring_to_front() const
+  void bring_to_front  () const
   {
     SDL_RaiseWindow(native_);
   }
-  void minimize      () const
+  void minimize        () const
   {
     SDL_MinimizeWindow(native_);
   }
-  void maximize      () const
+  void maximize        () const
   {
     SDL_MaximizeWindow(native_);
   }
-  void restore       () const
+  void restore         () const
   {
     SDL_RestoreWindow(native_);
   }
-  bool is_grabbed    () const
+  bool is_grabbed      () const
   {
     return SDL_GetGrabbedWindow() == native_;
   }
@@ -122,7 +117,7 @@ public:
       rgb_translation_table[1].data(), 
       rgb_translation_table[2].data());
   }
-  
+
   void set_parent      (window*     parent)
   {
     SDL_SetWindowModalFor(native_, parent->native_);
@@ -132,20 +127,76 @@ public:
     SDL_SetWindowFullscreen(native_, mode == window_mode::fullscreen);
     if (mode == window_mode::fullscreen_windowed)
       set_fullscreen_windowed();
-    on_resize(this->size());
+    on_resize(size());
   }
 
-  virtual std::array<std::size_t, 2> position() const
+  // TOFIX
+  template<typename pixel_type>
+  void set_icon(const std::array<std::size_t, 3>& dimensions, const std::vector<pixel_type>& pixels)
   {
-    std::array<std::size_t, 2> result;
-    SDL_GetWindowPosition(native_, reinterpret_cast<int*>(&result[0]), reinterpret_cast<int*>(&result[1]));
-    return result;
+    auto surface = SDL_CreateRGBSurfaceWithFormatFrom(pixels.data(), dimensions.x, dimensions.y, dimensions.z, dimensions.x * 4, SDL_PIXELFORMAT_RGBA32);
+    SDL_SetWindowIcon(native_, surface);
+    SDL_FreeSurface(surface);
   }
-  virtual std::array<std::size_t, 2> size    () const
+
+  std::string                        title       () const
   {
-    std::array<std::size_t, 2> result;
-    SDL_GetWindowSize(native_, reinterpret_cast<int*>(&result[0]), reinterpret_cast<int*>(&result[1]));
-    return result;
+    return std::string(SDL_GetWindowTitle(native_));
+  }
+  std::array<std::size_t, 2>         position    () const
+  {
+    std::array<std::size_t, 2> position;
+    SDL_GetWindowPosition(native_, reinterpret_cast<int*>(&position[0]), reinterpret_cast<int*>(&position[1]));
+    return position;
+  }
+  virtual std::array<std::size_t, 2> size        () const
+  {
+    std::array<std::size_t, 2> size;
+    SDL_GetWindowSize(native_, reinterpret_cast<int*>(&size[0]), reinterpret_cast<int*>(&size[1]));
+    return size;
+  }
+  std::array<std::size_t, 2>         minimum_size() const
+  {
+    std::array<std::size_t, 2> minimum_size;
+    SDL_GetWindowMinimumSize(native_, reinterpret_cast<int*>(&minimum_size[0]), reinterpret_cast<int*>(&minimum_size[1]));
+    return minimum_size;
+  }
+  std::array<std::size_t, 2>         maximum_size() const
+  {
+    std::array<std::size_t, 2> maximum_size;
+    SDL_GetWindowMaximumSize(native_, reinterpret_cast<int*>(&maximum_size[0]), reinterpret_cast<int*>(&maximum_size[1]));
+    return maximum_size;
+  }
+  bool                               input_grab  () const
+  {
+    return static_cast<bool>(SDL_GetWindowGrab(native_));
+  }
+  std::array<std::size_t, 4>         border_size () const // top, left, bottom, right
+  {
+    std::array<std::size_t, 4> border_size;
+    SDL_GetWindowBordersSize(native_, reinterpret_cast<int*>(&border_size[0]), reinterpret_cast<int*>(&border_size[1]), reinterpret_cast<int*>(&border_size[2]), reinterpret_cast<int*>(&border_size[3]));
+    return border_size;
+  }
+
+  float brightness() const
+  {
+    return SDL_GetWindowBrightness(native_);
+  }
+  float opacity   () const
+  {
+    float  opacity;
+    SDL_GetWindowOpacity(native_, &opacity);
+    return opacity;
+  }
+  std::array<std::array<std::uint16_t, 256>, 3> gamma_ramp() const
+  {
+    std::array<std::array<std::uint16_t, 256>, 3> rgb_translation_table;
+    SDL_GetWindowGammaRamp(
+      native_, 
+      rgb_translation_table[0].data(),
+      rgb_translation_table[1].data(),
+      rgb_translation_table[2].data());
+    return rgb_translation_table;
   }
 
   SDL_Window* native() const { return native_; }
