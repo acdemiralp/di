@@ -121,23 +121,26 @@ public:
     auto native_display_mode = display_mode.native();
     SDL_SetWindowDisplayMode(native_, &native_display_mode);
   }
-  void set_mode        (window_mode  mode        )
+  void set_mode        (window_mode                                          mode              )
   {
     SDL_SetWindowFullscreen(native_, mode == window_mode::fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
     if (mode == window_mode::fullscreen_windowed)
       set_fullscreen_windowed();
     on_resize(size());
   }
-  void set_parent      (window*      parent      )
+  void set_parent      (window*                                              parent            )
   {
     SDL_SetWindowModalFor(native_, parent->native_);
   }
-  // FIX!
-  template<typename pixel_type>
-  void set_icon        (const std::array<std::size_t, 3>& dimensions, 
-                        const std::vector<pixel_type>&    pixels    )
+  void set_icon        (const std::array<std::size_t, 2>& dimensions, const std::vector<std::uint8_t>& pixels)
   {
-    auto surface = SDL_CreateRGBSurfaceWithFormatFrom(pixels.data(), dimensions.x, dimensions.y, dimensions.z, dimensions.x * 4, SDL_PIXELFORMAT_RGBA32);
+    auto surface = SDL_CreateRGBSurfaceWithFormatFrom(
+      const_cast<void*>(reinterpret_cast<const void*>(pixels.data())), 
+      static_cast<int>(dimensions[0]), 
+      static_cast<int>(dimensions[1]), 
+      1, 
+      static_cast<int>(dimensions[0] * 4), 
+      SDL_PIXELFORMAT_RGBA32);
     SDL_SetWindowIcon(native_, surface);
     SDL_FreeSurface(surface);
   }
@@ -226,11 +229,7 @@ public:
     SDL_GetWindowDisplayMode(native_, &native_display_mode);
     return ne::display_mode(native_display_mode);
   }
-  // FIX.
-  display_info                                  display     () const
-  {
-    return owner_->displays()[SDL_GetWindowDisplayIndex(native_)];
-  }
+  display_info                                  display     () const;
   window_mode                                   mode        () const
   {
     if (SDL_GetWindowFlags(native_) & SDL_WINDOW_FULLSCREEN_DESKTOP)
@@ -243,7 +242,6 @@ public:
 
     return window_mode::windowed;
   }
-
 
   SDL_Window* native() const 
   {
@@ -300,9 +298,9 @@ protected:
     SDL_GetWindowWMInfo(native_, &sys_wm_info);
     return sys_wm_info;
   }
-
-  SDL_Window*     native_ = nullptr;
+  
   display_system* owner_  = nullptr;
+  SDL_Window*     native_ = nullptr;
 };
 }
 

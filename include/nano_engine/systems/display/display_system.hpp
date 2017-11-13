@@ -158,6 +158,11 @@ private:
   std::vector<std::unique_ptr<window>>        windows_       ;
   std::vector<std::unique_ptr<opengl_window>> opengl_windows_;
 };
+
+inline display_info window::display() const
+{
+  return owner_->displays()[SDL_GetWindowDisplayIndex(native_)];
+}
 }
 
 #endif
