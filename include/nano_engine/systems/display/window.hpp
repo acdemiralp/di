@@ -165,7 +165,7 @@ protected:
     SDL_DisplayMode video_mode;
     SDL_GetCurrentDisplayMode(static_cast<int>(display_index), &video_mode);
     set_position(std::array<std::size_t, 2>{0u, 0u});
-    set_size    (std::array<std::size_t, 2>{video_mode.w - 1, video_mode.h - 1});
+    set_size    (std::array<std::size_t, 2>{std::size_t(video_mode.w - 1), std::size_t(video_mode.h - 1)});
   }
 
   SDL_Window* native_ = nullptr;
