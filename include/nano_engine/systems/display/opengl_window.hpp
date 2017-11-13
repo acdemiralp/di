@@ -38,25 +38,31 @@ public:
   opengl_window& operator=(const opengl_window&  that) = delete ;
   opengl_window& operator=(      opengl_window&& temp) = default;
 
-  bool             is_current   ()                           const
+  bool                       current      ()                           const
   {
     return SDL_GL_GetCurrentWindow() == native_ && SDL_GL_GetCurrentContext() == opengl_context_;
   }
-  void             make_current ()                           const
+  void                       set_current  ()                           const
   {
     SDL_GL_MakeCurrent(native_, opengl_context_);
   }
-  void             set_swap_mode(opengl_swap_mode swap_mode) const
+  opengl_swap_mode           swap_mode    ()                           const
   {
-    if(!is_current()) make_current();
-    SDL_GL_SetSwapInterval(static_cast<int>(swap_mode));
-  }
-  opengl_swap_mode swap_mode    ()                           const
-  {
-    if (!is_current()) make_current();
+    if (!current()) set_current();
     return static_cast<opengl_swap_mode>(SDL_GL_GetSwapInterval());
   }
-  void             swap         ()                           const
+  void                       set_swap_mode(opengl_swap_mode swap_mode) const
+  {
+    if (!current()) set_current();
+    SDL_GL_SetSwapInterval(static_cast<int>(swap_mode));
+  }
+  std::array<std::size_t, 2> drawable_size()                           const
+  {
+    std::array<std::size_t, 2> drawable_size;
+    SDL_GL_GetDrawableSize(native_, reinterpret_cast<int*>(&drawable_size[0]), reinterpret_cast<int*>(&drawable_size[1]));
+    return drawable_size;
+  }                           
+  void                       swap         ()                           const
   {
     SDL_GL_SwapWindow(native_); 
   }
