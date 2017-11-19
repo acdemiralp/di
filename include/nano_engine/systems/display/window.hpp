@@ -141,75 +141,79 @@ public:
     SDL_FreeSurface(surface);
   }
 
-  bool                                          visible     () const
+  bool                                          visible         () const
   {
     return (SDL_GetWindowFlags(native_) & SDL_WINDOW_SHOWN) != 0;
   }
-  bool                                          resizable   () const
+  bool                                          resizable       () const
   {
     return (SDL_GetWindowFlags(native_) & SDL_WINDOW_RESIZABLE) != 0;
   }
-  bool                                          bordered    () const
+  bool                                          bordered        () const
   {
     return !(SDL_GetWindowFlags(native_) & SDL_WINDOW_BORDERLESS);
   }
-  bool                                          input_grab  () const
+  bool                                          input_grab      () const
   {
     return SDL_GetWindowGrab(native_) != 0;
   }
-  bool                                          input_focus () const
+  bool                                          input_focus     () const
   {
     return (SDL_GetWindowFlags(native_) & SDL_WINDOW_INPUT_FOCUS) != 0;
   }
-  bool                                          mouse_focus () const
+  bool                                          mouse_focus     () const
   {
     return (SDL_GetWindowFlags(native_) & SDL_WINDOW_MOUSE_FOCUS) != 0;
   }
-  float                                         opacity     () const
+  bool                                          keyboard_visible() const
+  {
+    return SDL_IsScreenKeyboardShown(native_);
+  }
+  float                                         opacity         () const
   {
     float opacity;
     SDL_GetWindowOpacity(native_, &opacity);
     return opacity;
   }
-  float                                         brightness  () const
+  float                                         brightness      () const
   {
     return SDL_GetWindowBrightness(native_);
   }
-  std::string                                   title       () const
+  std::string                                   title           () const
   {
     return std::string(SDL_GetWindowTitle(native_));
   }
-  std::array<std::size_t, 2>                    position    () const
+  std::array<std::size_t, 2>                    position        () const
   {
     std::array<std::size_t, 2> position;
     SDL_GetWindowPosition(native_, reinterpret_cast<int*>(&position[0]), reinterpret_cast<int*>(&position[1]));
     return position;
   }
-  std::array<std::size_t, 2>                    size        () const
+  std::array<std::size_t, 2>                    size            () const
   {
     std::array<std::size_t, 2> size;
     SDL_GetWindowSize(native_, reinterpret_cast<int*>(&size[0]), reinterpret_cast<int*>(&size[1]));
     return size;
   }
-  std::array<std::size_t, 2>                    minimum_size() const
+  std::array<std::size_t, 2>                    minimum_size    () const
   {
     std::array<std::size_t, 2> minimum_size;
     SDL_GetWindowMinimumSize(native_, reinterpret_cast<int*>(&minimum_size[0]), reinterpret_cast<int*>(&minimum_size[1]));
     return minimum_size;
   }
-  std::array<std::size_t, 2>                    maximum_size() const
+  std::array<std::size_t, 2>                    maximum_size    () const
   {
     std::array<std::size_t, 2> maximum_size;
     SDL_GetWindowMaximumSize(native_, reinterpret_cast<int*>(&maximum_size[0]), reinterpret_cast<int*>(&maximum_size[1]));
     return maximum_size;
   }
-  std::array<std::size_t, 4>                    border_size () const // top, left, bottom, right
+  std::array<std::size_t, 4>                    border_size     () const // top, left, bottom, right
   {
     std::array<std::size_t, 4> border_size;
     SDL_GetWindowBordersSize(native_, reinterpret_cast<int*>(&border_size[0]), reinterpret_cast<int*>(&border_size[1]), reinterpret_cast<int*>(&border_size[2]), reinterpret_cast<int*>(&border_size[3]));
     return border_size;
   }
-  std::array<std::array<std::uint16_t, 256>, 3> gamma_ramp  () const
+  std::array<std::array<std::uint16_t, 256>, 3> gamma_ramp      () const
   {
     std::array<std::array<std::uint16_t, 256>, 3> translation_tables;
     SDL_GetWindowGammaRamp(
@@ -219,17 +223,17 @@ public:
       translation_tables[2].data());
     return translation_tables;
   }
-  display_mode                                  display_mode() const
+  display_mode                                  display_mode    () const
   {
     SDL_DisplayMode native_display_mode;
     SDL_GetWindowDisplayMode(native_, &native_display_mode);
     return ne::display_mode(native_display_mode);
   }
-  display_info                                  display     () const
+  display_info                                  display         () const
   {
     return displays()[SDL_GetWindowDisplayIndex(native_)];
   }
-  window_mode                                   mode        () const
+  window_mode                                   mode            () const
   {
     if (SDL_GetWindowFlags(native_) & SDL_WINDOW_FULLSCREEN_DESKTOP)
       return window_mode::fullscreen;
