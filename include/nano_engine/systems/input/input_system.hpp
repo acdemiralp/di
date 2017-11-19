@@ -2,6 +2,7 @@
 #define NANO_ENGINE_SYSTEMS_INPUT_INPUT_HPP_
 
 #include <array>
+#include <bitset>
 #include <iostream>
 
 #include <boost/signals2.hpp>
@@ -29,6 +30,24 @@ public:
   input_system& operator=(const input_system&  that) = default;
   input_system& operator=(      input_system&& temp) = default;
 
+  static bool text_input_enabled    ()
+  {
+    return SDL_IsTextInputActive() != 0;
+  }
+  static void set_text_input_enabled(bool enabled)
+  {
+    enabled ? SDL_StartTextInput() : SDL_StopTextInput();
+  }
+  static void set_text_input_area   (const std::array<std::size_t, 2>& position, const std::array<std::size_t, 2>& size)
+  {
+    SDL_Rect rectangle {
+      static_cast<int>(position[0]), 
+      static_cast<int>(position[1]), 
+      static_cast<int>(size    [0]), 
+      static_cast<int>(size    [1])};
+    SDL_SetTextInputRect(&rectangle);
+  }
+  
   boost::signals2::signal<void()> on_quit;
 
 protected:
@@ -39,15 +58,15 @@ protected:
   void tick      () override
   {
     std::array<SDL_Event, 128> events;
-    std::size_t                count ;    
-    while (SDL_PumpEvents(), count = SDL_PeepEvents(events.data(), events.size(), SDL_GETEVENT, SDL_QUIT   , SDL_QUIT        ), count > 0)
+    int                        count ;    
+    while (SDL_PumpEvents(), count = SDL_PeepEvents(events.data(), static_cast<int>(events.size()), SDL_GETEVENT, SDL_QUIT   , SDL_QUIT        ), count > 0)
     {
-      for (std::size_t i = 0; i < count; ++i)
+      for (auto i = 0; i < count; ++i)
         on_quit();
     }
-    while (SDL_PumpEvents(), count = SDL_PeepEvents(events.data(), events.size(), SDL_GETEVENT, SDL_KEYDOWN, SDL_DROPCOMPLETE), count > 0)
+    while (SDL_PumpEvents(), count = SDL_PeepEvents(events.data(), static_cast<int>(events.size()), SDL_GETEVENT, SDL_KEYDOWN, SDL_DROPCOMPLETE), count > 0)
     {
-      for(std::size_t i = 0; i < count; ++i)
+      for(auto i = 0; i < count; ++i)
       {
         auto& event = events[i];
 
@@ -91,7 +110,7 @@ protected:
         else if (event.type == SDL_DROPBEGIN               ) {}
         else if (event.type == SDL_DROPCOMPLETE            ) {}
       }
-    }
+    } 
   }
 };
 }
