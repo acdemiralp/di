@@ -1,6 +1,7 @@
 #ifndef NANO_ENGINE_SYSTEMS_INPUT_INPUT_HPP_
 #define NANO_ENGINE_SYSTEMS_INPUT_INPUT_HPP_
 
+#include <array>
 #include <iostream>
 
 #include <boost/signals2.hpp>
@@ -16,8 +17,8 @@ class input_system : public system
 public:
   input_system           ()
   {
-    if (SDL_Init(SDL_INIT_EVENTS) != 0)
-      std::cout << "Failed to initialize display system. SDL Error: " << SDL_GetError() << std::endl;
+    if (SDL_InitSubSystem(SDL_INIT_EVENTS) != 0)
+      throw std::runtime_error("Failed to initialize SDL Events subsystem. Error: " + std::string(SDL_GetError()));
   }
   input_system           (const input_system&  that) = default;
   input_system           (      input_system&& temp) = default;
@@ -28,53 +29,70 @@ public:
   input_system& operator=(const input_system&  that) = default;
   input_system& operator=(      input_system&& temp) = default;
 
-  bool get_key_state(unsigned char key ) const
-  {
-    assert(key < key_states_.size());
-    return key_states_[key];
-  }
-
-  static void lock_mouse(bool lock)
-  {
-    if (SDL_SetRelativeMouseMode(SDL_bool(lock)) != 0)
-      std::cout << "Unable to lock mouse. SDL Error: " << SDL_GetError() << std::endl;
-  }
-
-  boost::signals2::signal<void()>                   on_quit          ;
-  boost::signals2::signal<void(char)>               on_key_pressed   ;
-  boost::signals2::signal<void(char)>               on_key_released  ;
-  boost::signals2::signal<void(unsigned, unsigned)> on_mouse_moved   ;
-  boost::signals2::signal<void(unsigned)>           on_mouse_pressed ;
-  boost::signals2::signal<void(unsigned)>           on_mouse_released;
+  boost::signals2::signal<void()> on_quit;
 
 protected:
   void initialize() override
   {
     on_quit.connect(std::bind(&engine::stop, engine_));
   }
-  void tick    () override
+  void tick      () override
   {
-    SDL_Event event;
-    while (SDL_PollEvent(&event) != 0)
+    std::array<SDL_Event, 128> events;
+    std::size_t                count ;    
+    while (SDL_PumpEvents(), count = SDL_PeepEvents(events.data(), events.size(), SDL_GETEVENT, SDL_QUIT   , SDL_QUIT        ), count > 0)
     {
-      switch (event.type)
+      for (std::size_t i = 0; i < count; ++i)
+        on_quit();
+    }
+    while (SDL_PumpEvents(), count = SDL_PeepEvents(events.data(), events.size(), SDL_GETEVENT, SDL_KEYDOWN, SDL_DROPCOMPLETE), count > 0)
+    {
+      for(std::size_t i = 0; i < count; ++i)
       {
-        case SDL_QUIT           : on_quit();                                               break;
-        case SDL_KEYDOWN        : on_key_pressed   (event.key.keysym.sym);                 break;
-        case SDL_KEYUP          : on_key_released  (event.key.keysym.sym);                 break;
-        case SDL_MOUSEBUTTONDOWN: on_mouse_pressed (event.button.button);                  break;
-        case SDL_MOUSEBUTTONUP  : on_mouse_released(event.button.button);                  break;
-        case SDL_MOUSEMOTION    : on_mouse_moved   (event.motion.xrel, event.motion.yrel); break;
-        default: break;
+        auto& event = events[i];
+
+        if      (event.type == SDL_KEYDOWN                 ) {}
+        else if (event.type == SDL_KEYUP                   ) {}
+        else if (event.type == SDL_TEXTEDITING             ) {}
+        else if (event.type == SDL_TEXTINPUT               ) {}
+        else if (event.type == SDL_KEYMAPCHANGED           ) {}
+        
+        else if (event.type == SDL_MOUSEMOTION             ) {}
+        else if (event.type == SDL_MOUSEBUTTONDOWN         ) {}
+        else if (event.type == SDL_MOUSEBUTTONUP           ) {}
+        else if (event.type == SDL_MOUSEWHEEL              ) {}
+        
+        else if (event.type == SDL_JOYAXISMOTION           ) {}
+        else if (event.type == SDL_JOYBALLMOTION           ) {}
+        else if (event.type == SDL_JOYHATMOTION            ) {}
+        else if (event.type == SDL_JOYBUTTONDOWN           ) {}
+        else if (event.type == SDL_JOYBUTTONUP             ) {}
+        else if (event.type == SDL_JOYDEVICEADDED          ) {}
+        else if (event.type == SDL_JOYDEVICEREMOVED        ) {}
+        
+        else if (event.type == SDL_CONTROLLERAXISMOTION    ) {}
+        else if (event.type == SDL_CONTROLLERBUTTONDOWN    ) {}
+        else if (event.type == SDL_CONTROLLERBUTTONUP      ) {}
+        else if (event.type == SDL_CONTROLLERDEVICEADDED   ) {}
+        else if (event.type == SDL_CONTROLLERDEVICEREMOVED ) {}
+        else if (event.type == SDL_CONTROLLERDEVICEREMAPPED) {}
+        
+        else if (event.type == SDL_FINGERDOWN              ) {}
+        else if (event.type == SDL_FINGERUP                ) {}
+        else if (event.type == SDL_FINGERMOTION            ) {}
+        else if (event.type == SDL_DOLLARGESTURE           ) {}
+        else if (event.type == SDL_DOLLARRECORD            ) {}
+        else if (event.type == SDL_MULTIGESTURE            ) {}
+        
+        else if (event.type == SDL_CLIPBOARDUPDATE         ) {}
+        
+        else if (event.type == SDL_DROPFILE                ) {}
+        else if (event.type == SDL_DROPTEXT                ) {}
+        else if (event.type == SDL_DROPBEGIN               ) {}
+        else if (event.type == SDL_DROPCOMPLETE            ) {}
       }
     }
-
-    int  key_state_count;
-    auto key_states     = SDL_GetKeyboardState(&key_state_count);
-    key_states_.assign(key_states, key_states + key_state_count);
   }
-
-  std::vector<bool> key_states_;
 };
 }
 

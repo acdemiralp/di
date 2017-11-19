@@ -29,7 +29,13 @@ set(PROJECT_SOURCES
   include/nano_engine/systems/display/window.hpp
   include/nano_engine/systems/display/window_mode.hpp
   include/nano_engine/systems/input/clipboard.hpp
+  include/nano_engine/systems/input/game_controller.hpp
+  include/nano_engine/systems/input/haptic_device.hpp
   include/nano_engine/systems/input/input_system.hpp
+  include/nano_engine/systems/input/joystick.hpp
+  include/nano_engine/systems/input/keyboard.hpp
+  include/nano_engine/systems/input/mouse.hpp
+  include/nano_engine/systems/input/touch_device.hpp
   include/nano_engine/systems/renderer/render_pass.hpp
   include/nano_engine/systems/renderer/renderer.hpp
   include/nano_engine/utility/frame_timer.hpp
