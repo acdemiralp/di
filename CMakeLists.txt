@@ -27,6 +27,7 @@ set(PROJECT_SOURCES
   include/nano_engine/systems/display/screensaver.hpp
   include/nano_engine/systems/display/window.hpp
   include/nano_engine/systems/display/window_mode.hpp
+  include/nano_engine/systems/input/clipboard.hpp
   include/nano_engine/systems/input/input_system.hpp
   include/nano_engine/systems/renderer/render_pass.hpp
   include/nano_engine/systems/renderer/renderer.hpp
