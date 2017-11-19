@@ -7,13 +7,16 @@
 
 namespace ne
 {
-inline std::string clipboard_text    ()
+namespace clipboard
+{
+inline std::string get()
 {
   return std::string(SDL_GetClipboardText());
 }
-inline void        set_clipboard_text(const std::string& text)
+inline void        set(const std::string& text)
 {
   SDL_SetClipboardText(text.c_str());
+}
 }
 }
 
