@@ -85,9 +85,9 @@ public:
   {
     SDL_SetWindowBrightness(native_, brightness);
   }
-  void set_title       (const std::string&                                   name              )
+  void set_title       (const std::string&                                   title             )
   {
-    SDL_SetWindowTitle(native_, name.c_str());
+    SDL_SetWindowTitle(native_, title.c_str());
   }
   void set_position    (const std::array<std::size_t, 2>&                    position          )
   {

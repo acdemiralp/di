@@ -7,11 +7,11 @@ namespace ne
 {
 namespace screensaver
 {
-static void set_enabled(bool enabled)
+inline void set_enabled(bool enabled)
 {
   enabled ? SDL_EnableScreenSaver() : SDL_DisableScreenSaver();
 }
-static bool enabled    ()
+inline bool enabled    ()
 {
   return SDL_IsScreenSaverEnabled() != 0;
 }

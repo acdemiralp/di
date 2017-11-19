@@ -13,7 +13,7 @@ namespace ne
 {
 namespace message_box
 {
-static void        create(
+inline void        create(
   const std::string&               title        , 
   const std::string&               message      , 
   const message_box_level&         level        = message_box_level::information)
@@ -21,7 +21,7 @@ static void        create(
   SDL_ShowSimpleMessageBox(static_cast<std::uint32_t>(level), title.c_str(), message.c_str(), nullptr);
 }
 
-static std::string create(
+inline std::string create(
   const std::string&               title        , 
   const std::string&               message      , 
   const std::vector<std::string>&  buttons      , 
