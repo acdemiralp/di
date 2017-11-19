@@ -29,7 +29,6 @@ set(PROJECT_SOURCES
   include/nano_engine/systems/display/window_mode.hpp
   include/nano_engine/systems/input/clipboard.hpp
   include/nano_engine/systems/input/game_controller.hpp
-  include/nano_engine/systems/input/haptic_device.hpp
   include/nano_engine/systems/input/input_system.hpp
   include/nano_engine/systems/input/joystick.hpp
   include/nano_engine/systems/input/keyboard.hpp
