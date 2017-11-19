@@ -78,10 +78,10 @@ private:
   void tick() override
   {
     std::array<SDL_Event, 128> events;
-    std::size_t                count ;    
-    while (SDL_PumpEvents(), count = SDL_PeepEvents(events.data(), events.size(), SDL_GETEVENT, SDL_WINDOWEVENT         , SDL_WINDOWEVENT        ), count > 0)
+    int                        count ;    
+    while (SDL_PumpEvents(), count = SDL_PeepEvents(events.data(), static_cast<int>(events.size()), SDL_GETEVENT, SDL_WINDOWEVENT         , SDL_WINDOWEVENT        ), count > 0)
     {
-      for (std::size_t i = 0; i < count; ++i)
+      for (auto i = 0; i < count; ++i)
       {
         auto& event  = events[i];        
         auto& window = *std::find_if(windows_.begin(), windows_.end(), [&event] (const std::unique_ptr<ne::window>& iteratee)
@@ -107,9 +107,9 @@ private:
         else if (event.window.event == SDL_WINDOWEVENT_TAKE_FOCUS  ) window->set_focus               ();
       }
     }
-    while (SDL_PumpEvents(), count = SDL_PeepEvents(events.data(), events.size(), SDL_GETEVENT, SDL_RENDER_TARGETS_RESET, SDL_RENDER_DEVICE_RESET), count > 0)
+    while (SDL_PumpEvents(), count = SDL_PeepEvents(events.data(), static_cast<int>(events.size()), SDL_GETEVENT, SDL_RENDER_TARGETS_RESET, SDL_RENDER_DEVICE_RESET), count > 0)
     {
-      for (std::size_t i = 0; i < count; ++i)
+      for (auto i = 0; i < count; ++i)
       {
         auto& event = events[i];
         if      (event.type == SDL_RENDER_TARGETS_RESET) on_render_targets_reset();

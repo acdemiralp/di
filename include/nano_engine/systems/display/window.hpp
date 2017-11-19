@@ -143,11 +143,11 @@ public:
 
   bool                                          visible     () const
   {
-    return SDL_GetWindowFlags(native_) & SDL_WINDOW_SHOWN;
+    return (SDL_GetWindowFlags(native_) & SDL_WINDOW_SHOWN) != 0;
   }
   bool                                          resizable   () const
   {
-    return SDL_GetWindowFlags(native_) & SDL_WINDOW_RESIZABLE;
+    return (SDL_GetWindowFlags(native_) & SDL_WINDOW_RESIZABLE) != 0;
   }
   bool                                          bordered    () const
   {
@@ -155,15 +155,15 @@ public:
   }
   bool                                          input_grab  () const
   {
-    return static_cast<bool>(SDL_GetWindowGrab(native_));
+    return SDL_GetWindowGrab(native_) != 0;
   }
   bool                                          input_focus () const
   {
-    return SDL_GetWindowFlags(native_) & SDL_WINDOW_INPUT_FOCUS;
+    return (SDL_GetWindowFlags(native_) & SDL_WINDOW_INPUT_FOCUS) != 0;
   }
   bool                                          mouse_focus () const
   {
-    return SDL_GetWindowFlags(native_) & SDL_WINDOW_MOUSE_FOCUS;
+    return (SDL_GetWindowFlags(native_) & SDL_WINDOW_MOUSE_FOCUS) != 0;
   }
   float                                         opacity     () const
   {
@@ -273,7 +273,7 @@ public:
   std::tuple<HWND, HDC, HINSTANCE> driver_data() const
   {
     auto data = driver_specific_data();
-    return {data.info.win.window, data.info.win.hdc, reinterpret_cast<HINSTANCE>(GetWindowLong(data.info.win.window, -6))};
+    return {data.info.win.window, data.info.win.hdc, reinterpret_cast<HINSTANCE>(GetWindowLong(data.info.win.window, -6))}; // Reports C4312
   }
 #elif defined(SDL_VIDEO_DRIVER_X11)
   std::tuple<Display*, Window> driver_data() const
