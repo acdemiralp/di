@@ -38,6 +38,11 @@ public:
   opengl_window& operator=(const opengl_window&  that) = delete ;
   opengl_window& operator=(      opengl_window&& temp) = default;
 
+  void update() override
+  {
+    SDL_GL_SwapWindow(native_);
+  }
+
   bool                       current      ()                           const
   {
     return SDL_GL_GetCurrentWindow() == native_ && SDL_GL_GetCurrentContext() == opengl_context_;
@@ -61,10 +66,6 @@ public:
     std::array<std::size_t, 2> drawable_size;
     SDL_GL_GetDrawableSize(native_, reinterpret_cast<int*>(&drawable_size[0]), reinterpret_cast<int*>(&drawable_size[1]));
     return drawable_size;
-  }                           
-  void                       swap         ()                           const
-  {
-    SDL_GL_SwapWindow(native_); 
   }
 
 private:

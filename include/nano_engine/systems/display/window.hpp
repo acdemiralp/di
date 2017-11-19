@@ -15,8 +15,6 @@
 
 namespace ne
 {
-class display_system;
-
 class window
 {
 public:
@@ -39,6 +37,8 @@ public:
   }
   window& operator=(const window&  that) = delete ;
   window& operator=(      window&& temp) = default;
+
+  virtual void update() { }
 
   void set_focus       () const
   {
@@ -96,17 +96,14 @@ public:
   void set_size        (const std::array<std::size_t, 2>&                    size              )
   {
     SDL_SetWindowSize(native_, static_cast<int>(size[0]), static_cast<int>(size[1]));
-    on_resize(this->size());
   }
   void set_minimum_size(const std::array<std::size_t, 2>&                    minimum_size      )
   {
     SDL_SetWindowMinimumSize(native_, static_cast<int>(minimum_size[0]), static_cast<int>(minimum_size[1]));
-    on_resize(this->size());
   }
   void set_maximum_size(const std::array<std::size_t, 2>&                    maximum_size      )
   {
     SDL_SetWindowMaximumSize(native_, static_cast<int>(maximum_size[0]), static_cast<int>(maximum_size[1]));
-    on_resize(this->size());
   }
   void set_gamma_ramp  (const std::array<std::array<std::uint16_t, 256>, 3>& translation_tables)
   {
@@ -126,7 +123,6 @@ public:
     SDL_SetWindowFullscreen(native_, mode == window_mode::fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
     if (mode == window_mode::fullscreen_windowed)
       set_fullscreen_windowed();
-    on_resize(size());
   }
   void set_parent      (window*                                              parent            )
   {
@@ -229,7 +225,10 @@ public:
     SDL_GetWindowDisplayMode(native_, &native_display_mode);
     return ne::display_mode(native_display_mode);
   }
-  display_info                                  display     () const;
+  display_info                                  display     () const
+  {
+    return displays()[SDL_GetWindowDisplayIndex(native_)];
+  }
   window_mode                                   mode        () const
   {
     if (SDL_GetWindowFlags(native_) & SDL_WINDOW_FULLSCREEN_DESKTOP)
@@ -243,9 +242,13 @@ public:
     return window_mode::windowed;
   }
 
-  SDL_Window* native() const 
+  SDL_Window*   native   () const 
   {
     return native_;
+  }
+  std::uint32_t native_id() const
+  {
+    return SDL_GetWindowID(native_);
   }
 
 #if   defined(SDL_VIDEO_DRIVER_ANDROID)
@@ -280,17 +283,18 @@ public:
   }
 #endif
 
-  boost::signals2::signal<void(const std::array<std::size_t, 2>&)> on_resize;
+  boost::signals2::signal<void(bool)>                              on_visibility_change    ;
+  boost::signals2::signal<void()>                                  on_expose               ;
+  boost::signals2::signal<void(const std::array<std::size_t, 2>&)> on_move                 ;
+  boost::signals2::signal<void(const std::array<std::size_t, 2>&)> on_resize               ;
+  boost::signals2::signal<void()>                                  on_minimize             ;
+  boost::signals2::signal<void()>                                  on_maximize             ;
+  boost::signals2::signal<void()>                                  on_restore              ;
+  boost::signals2::signal<void(bool)>                              on_mouse_focus_change   ;
+  boost::signals2::signal<void(bool)>                              on_keyboard_focus_change;
+  boost::signals2::signal<void()>                                  on_close                ;
 
 protected:
-  friend display_system;
-
-  void          set_fullscreen_windowed()
-  {
-    auto display_info = display();
-    set_position(std::array<std::size_t, 2>{0, 0});
-    set_size    (std::array<std::size_t, 2>{display_info.size[0] - 1, display_info.size[1] - 1});
-  }
   SDL_SysWMinfo driver_specific_data   () const
   {
     SDL_SysWMinfo sys_wm_info;
@@ -298,9 +302,14 @@ protected:
     SDL_GetWindowWMInfo(native_, &sys_wm_info);
     return sys_wm_info;
   }
+  void          set_fullscreen_windowed()
+  {
+    auto display_info = display();
+    set_position(std::array<std::size_t, 2>{0, 0});
+    set_size    (std::array<std::size_t, 2>{display_info.size[0] - 1, display_info.size[1] - 1});
+  }
   
-  display_system* owner_  = nullptr;
-  SDL_Window*     native_ = nullptr;
+  SDL_Window* native_ = nullptr;
 };
 }
 
