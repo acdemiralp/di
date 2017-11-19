@@ -16,7 +16,6 @@ set(PROJECT_SOURCES
   include/nano_engine/systems/display/display_info.hpp
   include/nano_engine/systems/display/display_mode.hpp
   include/nano_engine/systems/display/display_system.hpp
-  include/nano_engine/systems/display/hmd.hpp
   include/nano_engine/systems/display/message_box.hpp
   include/nano_engine/systems/display/message_box_color_scheme.hpp
   include/nano_engine/systems/display/message_box_level.hpp
