@@ -18,16 +18,16 @@ namespace ne
 class window
 {
 public:
+  explicit window  (const std::string& title, std::uint32_t flags = 0u) 
+  : window(title, {32, 32}, {800, 600}, flags)
+  {
+    set_fullscreen_windowed();
+  }
   window           (const std::string& title, const std::array<std::size_t, 2>& position, const std::array<std::size_t, 2>& size, std::uint32_t flags = 0u) 
   : native_(SDL_CreateWindow(title.c_str(), static_cast<int>(position[0]), static_cast<int>(position[1]), static_cast<int>(size[0]), static_cast<int>(size[1]), flags |= SDL_WINDOW_ALLOW_HIGHDPI))
   {
     if (!native_)
       throw std::runtime_error("Failed to create SDL window. SDL Error: " + std::string(SDL_GetError()));
-  }
-  explicit window  (const std::string& title, std::uint32_t flags = 0u) 
-  : window(title, {32, 32}, {800, 600}, flags)
-  {
-    set_fullscreen_windowed();
   }
   window           (const window&  that) = delete ;
   window           (      window&& temp) = default;

@@ -17,6 +17,7 @@ TEST_CASE("Engine is tested.", "[engine]") {
   auto display_system  = engine.add_system<ne::display_system>();
   auto input_system    = engine.add_system<ne::input_system>  ();
   auto renderer_system = engine.add_system<ne::renderer>      ();
-  display_system->create_opengl_window("Test");
+  auto opengl_window   = display_system->create_opengl_window("Test", std::array<std::size_t, 2>{32, 32}, std::array<std::size_t, 2>{640, 480});
+  opengl_window->set_resizable(true);
   engine.run();
 }

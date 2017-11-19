@@ -34,14 +34,16 @@ public:
   display_system& operator=(const display_system&  that) = default;
   display_system& operator=(      display_system&& temp) = default;
 
-  window*              create_window       (const std::string& name)
+  template<typename... argument_types>
+  window*              create_window       (argument_types&&... arguments)
   {
-    windows_.emplace_back(std::make_unique<window>(name));
+    windows_.emplace_back(std::make_unique<window>(arguments...));
     return windows_.back().get();
   }
-  opengl_window*       create_opengl_window(const std::string& name, const opengl_context_settings& context_settings = opengl_context_settings())
+  template<typename... argument_types>
+  opengl_window*       create_opengl_window(argument_types&&... arguments)
   {
-    windows_.emplace_back(std::make_unique<opengl_window>(name, context_settings));
+    windows_.emplace_back(std::make_unique<opengl_window>(arguments...));
     return static_cast<opengl_window*>(windows_.back().get());
   }
   void                 destroy_window      (window* window)
