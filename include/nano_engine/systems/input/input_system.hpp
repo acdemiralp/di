@@ -3,7 +3,6 @@
 
 #include <array>
 #include <bitset>
-#include <iostream>
 
 #include <boost/signals2.hpp>
 #include <SDL2/SDL.h>
