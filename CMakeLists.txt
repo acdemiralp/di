@@ -36,6 +36,7 @@ set(PROJECT_SOURCES
   include/nano_engine/systems/input/touch_device.hpp
   include/nano_engine/systems/renderer/render_pass.hpp
   include/nano_engine/systems/renderer/renderer.hpp
+  include/nano_engine/utility/bitset_enum.hpp
   include/nano_engine/utility/frame_timer.hpp
   include/nano_engine/engine.hpp
   include/nano_engine/system.hpp
