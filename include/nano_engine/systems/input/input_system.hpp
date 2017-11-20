@@ -8,6 +8,7 @@
 #include <boost/signals2.hpp>
 #include <SDL2/SDL.h>
 
+#include <nano_engine/systems/input/key.hpp>
 #include <nano_engine/engine.hpp>
 #include <nano_engine/system.hpp>
 
@@ -48,7 +49,12 @@ public:
     SDL_SetTextInputRect(&rectangle);
   }
   
-  boost::signals2::signal<void()> on_quit;
+  boost::signals2::signal<void(key)>                                   on_key_press        ;
+  boost::signals2::signal<void(key)>                                   on_key_release      ;
+  boost::signals2::signal<void(std::string, std::size_t, std::size_t)> on_text_edit        ;
+  boost::signals2::signal<void(std::string)>                           on_text_input       ;
+  boost::signals2::signal<void()>                                      on_key_layout_change;
+  boost::signals2::signal<void()>                                      on_quit             ;
 
 protected:
   void initialize() override
@@ -70,11 +76,11 @@ protected:
       {
         auto& event = events[i];
 
-        if      (event.type == SDL_KEYDOWN                 ) {}
-        else if (event.type == SDL_KEYUP                   ) {}
-        else if (event.type == SDL_TEXTEDITING             ) {}
-        else if (event.type == SDL_TEXTINPUT               ) {}
-        else if (event.type == SDL_KEYMAPCHANGED           ) {}
+        if      (event.type == SDL_KEYDOWN                 ) on_key_press        (key{static_cast<key_code>(event.key.keysym.sym), static_cast<key_modifier>(event.key.keysym.mod), static_cast<scan_code>(event.key.keysym.scancode)});
+        else if (event.type == SDL_KEYUP                   ) on_key_release      (key{static_cast<key_code>(event.key.keysym.sym), static_cast<key_modifier>(event.key.keysym.mod), static_cast<scan_code>(event.key.keysym.scancode)});
+        else if (event.type == SDL_TEXTEDITING             ) on_text_edit        (std::string(event.edit.text), static_cast<std::size_t>(event.edit.start), static_cast<std::size_t>(event.edit.length));
+        else if (event.type == SDL_TEXTINPUT               ) on_text_input       (std::string(event.text.text));
+        else if (event.type == SDL_KEYMAPCHANGED           ) on_key_layout_change();
         
         else if (event.type == SDL_MOUSEMOTION             ) {}
         else if (event.type == SDL_MOUSEBUTTONDOWN         ) {}
