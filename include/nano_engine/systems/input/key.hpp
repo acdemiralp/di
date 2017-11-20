@@ -13,17 +13,18 @@ namespace ne
 {
 struct key
 {
-  key_code    key_code() const
+  std::string name          () const
   {
-    return static_cast<ne::key_code>(SDL_GetKeyFromScancode(static_cast<SDL_Scancode>(scan_code)));
+    return std::string(SDL_GetKeyName(SDL_GetKeyFromScancode(static_cast<SDL_Scancode>(scan_code))));
   }
-  std::string name    () const
+  std::string scan_code_name() const
   {
     return std::string(SDL_GetScancodeName(static_cast<SDL_Scancode>(scan_code)));
   }
 
+  key_code     code     ;
+  key_modifier modifier ;
   scan_code    scan_code;
-  key_modifier modifiers;
 };
 }
 
