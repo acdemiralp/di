@@ -15,7 +15,7 @@ struct key
 {
   std::string name          () const
   {
-    return std::string(SDL_GetKeyName(SDL_GetKeyFromScancode(static_cast<SDL_Scancode>(scan_code))));
+    return std::string(SDL_GetKeyName     (static_cast<SDL_Keycode>(code      )));
   }
   std::string scan_code_name() const
   {
