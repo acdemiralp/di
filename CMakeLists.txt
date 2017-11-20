@@ -32,8 +32,11 @@ set(PROJECT_SOURCES
   include/nano_engine/systems/input/input_system.hpp
   include/nano_engine/systems/input/joystick.hpp
   include/nano_engine/systems/input/key.hpp
+  include/nano_engine/systems/input/key_code.hpp
+  include/nano_engine/systems/input/key_modifier.hpp
   include/nano_engine/systems/input/keyboard.hpp
   include/nano_engine/systems/input/mouse.hpp
+  include/nano_engine/systems/input/scan_code.hpp
   include/nano_engine/systems/input/touch_device.hpp
   include/nano_engine/systems/renderer/render_pass.hpp
   include/nano_engine/systems/renderer/renderer.hpp
