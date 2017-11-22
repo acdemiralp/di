@@ -71,6 +71,34 @@ public:
     return windows;
   }
   
+  window* window_with_input_grab    () const
+  {
+    auto native  = SDL_GetGrabbedWindow();
+    auto windows = this->windows();
+    for (auto& window : windows)
+      if (window->native() == native)
+        return window;
+    return nullptr;
+  }
+  window* window_with_keyboard_focus() const
+  {
+    auto native  = SDL_GetMouseFocus();
+    auto windows = this->windows();
+    for (auto& window : windows)
+      if (window->native() == native)
+        return window;
+    return nullptr;
+  }
+  window* window_with_mouse_focus   () const
+  {
+    auto native  = SDL_GetKeyboardFocus();
+    auto windows = this->windows();
+    for (auto& window : windows)
+      if (window->native() == native)
+        return window;
+    return nullptr;
+  }
+
   boost::signals2::signal<void()> on_render_targets_reset;
   boost::signals2::signal<void()> on_render_device_reset ;
 

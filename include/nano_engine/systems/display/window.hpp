@@ -40,27 +40,31 @@ public:
 
   virtual void update() { }
 
-  void set_focus       () const
+  void set_focus         () const
   {
     SDL_SetWindowInputFocus(native_);
   }
-  void bring_to_front  () const
+  void bring_to_front    () const
   {
     SDL_RaiseWindow(native_);
   }
-  void minimize        () const
+  void minimize          () const
   {
     SDL_MinimizeWindow(native_);
   }
-  void maximize        () const
+  void maximize          () const
   {
     SDL_MaximizeWindow(native_);
   }
-  void restore         () const
+  void restore           () const
   {
     SDL_RestoreWindow(native_);
   }
-  
+  void set_mouse_position(const std::array<std::size_t, 2>& position) const
+  {
+    SDL_WarpMouseInWindow(native_, static_cast<int>(position[0]), static_cast<int>(position[1]));
+  }
+
   void set_visible     (bool                                                 visible           )
   {
     visible ? SDL_ShowWindow(native_) : SDL_HideWindow(native_);
