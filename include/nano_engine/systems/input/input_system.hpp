@@ -8,6 +8,7 @@
 #include <SDL2/SDL.h>
 
 #include <nano_engine/systems/input/key.hpp>
+#include <nano_engine/systems/input/joystick.hpp>
 #include <nano_engine/engine.hpp>
 #include <nano_engine/system.hpp>
 
@@ -138,6 +139,8 @@ protected:
         else if (event.type == SDL_DROPCOMPLETE            ) {}
       }
     } 
+
+    joystick::update();
   }
 };
 }
