@@ -11,7 +11,13 @@ namespace clipboard
 {
 inline std::string get()
 {
-  return std::string(SDL_GetClipboardText());
+  std::string text;
+  if(!SDL_HasClipboardText())
+    return text;
+  auto text_native = SDL_GetClipboardText();
+  text = text_native;
+  SDL_free(text_native);
+  return text;
 }
 inline void        set(const std::string& text)
 {
