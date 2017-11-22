@@ -3,6 +3,7 @@
 
 #include <array>
 #include <cstddef>
+#include <string>
 #include <vector>
 
 #include <SDL2/SDL_mouse.h>
