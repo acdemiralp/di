@@ -18,8 +18,7 @@ enum class key_modifier
   right_gui   = 0x0800,
   num_lock    = 0x1000,
   caps_lock   = 0x2000,
-  mode        = 0x4000,
-  reserved    = 0x8000
+  mode        = 0x4000
 };
 
 template<>
