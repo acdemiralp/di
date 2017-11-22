@@ -30,6 +30,19 @@ public:
   input_system& operator=(const input_system&  that) = default;
   input_system& operator=(      input_system&& temp) = default;
 
+  static bool has_events  ()
+  {
+    return SDL_HasEvents(SDL_FIRSTEVENT, SDL_LASTEVENT);
+  }
+  static void flush_events()
+  {
+    SDL_FlushEvents(SDL_FIRSTEVENT, SDL_LASTEVENT);
+  }
+  static bool quit_pending()
+  {
+    return SDL_QuitRequested();
+  }
+
   static bool text_input_enabled    ()
   {
     return SDL_IsTextInputActive() != 0;
@@ -53,6 +66,11 @@ public:
   boost::signals2::signal<void(std::string, std::size_t, std::size_t)> on_text_edit        ;
   boost::signals2::signal<void(std::string)>                           on_text_input       ;
   boost::signals2::signal<void()>                                      on_key_layout_change;
+  boost::signals2::signal<void(std::array<std::size_t, 2>)>            on_mouse_move       ;
+  boost::signals2::signal<void(std::array<std::size_t, 2>)>            on_mouse_move_delta ;
+  boost::signals2::signal<void(std::size_t)>                           on_mouse_press      ;
+  boost::signals2::signal<void(std::size_t)>                           on_mouse_release    ;
+  boost::signals2::signal<void(std::array<std::size_t, 2>)>            on_mouse_wheel      ;
   boost::signals2::signal<void()>                                      on_quit             ;
 
 protected:
@@ -81,10 +99,14 @@ protected:
         else if (event.type == SDL_TEXTINPUT               ) on_text_input       (std::string(event.text.text));
         else if (event.type == SDL_KEYMAPCHANGED           ) on_key_layout_change();
         
-        else if (event.type == SDL_MOUSEMOTION             ) {}
-        else if (event.type == SDL_MOUSEBUTTONDOWN         ) {}
-        else if (event.type == SDL_MOUSEBUTTONUP           ) {}
-        else if (event.type == SDL_MOUSEWHEEL              ) {}
+        else if (event.type == SDL_MOUSEMOTION             )
+        {
+          on_mouse_move      ({static_cast<std::size_t>(event.motion.x   ), static_cast<std::size_t>(event.motion.y   )});
+          on_mouse_move_delta({static_cast<std::size_t>(event.motion.xrel), static_cast<std::size_t>(event.motion.yrel)});
+        }
+        else if (event.type == SDL_MOUSEBUTTONDOWN         ) on_mouse_press  ( static_cast<std::size_t>(event.button.button));
+        else if (event.type == SDL_MOUSEBUTTONUP           ) on_mouse_release( static_cast<std::size_t>(event.button.button));
+        else if (event.type == SDL_MOUSEWHEEL              ) on_mouse_wheel  ({static_cast<std::size_t>(event.wheel.x), static_cast<std::size_t>(event.wheel.y)});
         
         else if (event.type == SDL_JOYAXISMOTION           ) {}
         else if (event.type == SDL_JOYBALLMOTION           ) {}
