@@ -39,10 +39,10 @@ inline std::array<std::size_t, 2> absolute_position    ()
   return position;
 }
 
-inline std::array<std::size_t, 2> relative_position    (bool delta_only = false)
+inline std::array<std::size_t, 2> relative_position    (bool delta = false)
 {
   std::array<std::size_t, 2> position;
-  delta_only ? 
+  delta ?
     SDL_GetRelativeMouseState(reinterpret_cast<int*>(&position[0]), reinterpret_cast<int*>(&position[1])): 
     SDL_GetMouseState        (reinterpret_cast<int*>(&position[0]), reinterpret_cast<int*>(&position[1]));
   return position;
