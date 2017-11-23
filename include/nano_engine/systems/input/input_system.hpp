@@ -37,12 +37,12 @@ public:
   input_system& operator=(      input_system&& temp) = default;
 
   template<typename... argument_types>
-  joystick*                  create_joystick (argument_types&&... arguments)
+  joystick*              create_joystick       (argument_types&&... arguments)
   {
     joysticks_.emplace_back(std::make_unique<joystick>(arguments...));
     return joysticks_.back().get();
   }
-  void                       destroy_joystick(joystick*            joystick)
+  void                   destroy_joystick      (joystick*            joystick)
   {
     joysticks_.erase(std::remove_if(
       joysticks_.begin(),
@@ -53,7 +53,7 @@ public:
       }), 
       joysticks_.end  ());
   }
-  std::vector<joystick*>     joysticks       () const
+  std::vector<joystick*> joysticks             () const
   {
     std::vector<joystick*> joysticks(joysticks_.size());
     std::transform(
@@ -67,28 +67,28 @@ public:
     return joysticks;
   }
 
-  static bool has_events  ()
+  static bool            has_events            ()
   {
     return SDL_HasEvents(SDL_FIRSTEVENT, SDL_LASTEVENT);
   }
-  static void flush_events()
+  static void            flush_events          ()
   {
     SDL_FlushEvents(SDL_FIRSTEVENT, SDL_LASTEVENT);
   }
-  static bool quit_pending()
+  static bool            quit_pending          ()
   {
     return SDL_QuitRequested();
   }
 
-  static bool text_input_enabled    ()
+  static bool            text_input_enabled    ()
   {
     return SDL_IsTextInputActive() != 0;
   }
-  static void set_text_input_enabled(bool enabled)
+  static void            set_text_input_enabled(bool enabled)
   {
     enabled ? SDL_StartTextInput() : SDL_StopTextInput();
   }
-  static void set_text_input_area   (const std::array<std::size_t, 2>& position, const std::array<std::size_t, 2>& size)
+  static void            set_text_input_area   (const std::array<std::size_t, 2>& position, const std::array<std::size_t, 2>& size)
   {
     SDL_Rect rectangle {
       static_cast<int>(position[0]), 
