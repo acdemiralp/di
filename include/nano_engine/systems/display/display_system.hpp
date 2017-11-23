@@ -1,6 +1,7 @@
 #ifndef NANO_ENGINE_SYSTEMS_DISPLAY_DISPLAY_SYSTEM_HPP_
 #define NANO_ENGINE_SYSTEMS_DISPLAY_DISPLAY_SYSTEM_HPP_
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <memory>

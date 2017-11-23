@@ -3,7 +3,7 @@
 
 #include <array>
 #include <cstddef>
-#include <iostream>
+#include <stdexcept>
 #include <string>
 
 #include <boost/signals2.hpp>
