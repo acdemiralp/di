@@ -113,27 +113,27 @@ private:
       for (auto i = 0; i < count; ++i)
       {
         auto& event  = events[i];        
-        auto& window = *std::find_if(windows_.begin(), windows_.end(), [&event] (const std::unique_ptr<ne::window>& iteratee)
+        auto  window = std::find_if(windows_.begin(), windows_.end(), [&event] (const std::unique_ptr<ne::window>& iteratee)
         {
           return iteratee->native_id() == event.window.windowID;
         });
-        if(window.get() == nullptr) // An event from an SDL window which is not handled by the display system.
-          continue; 
+        if(window == windows_.end()) // An event from an SDL window which is not handled by the display system.
+          continue;
 
-        if      (event.window.event == SDL_WINDOWEVENT_SHOWN       ) window->on_visibility_change    (true );
-        else if (event.window.event == SDL_WINDOWEVENT_HIDDEN      ) window->on_visibility_change    (false);
-        else if (event.window.event == SDL_WINDOWEVENT_EXPOSED     ) window->on_expose               ();
-        else if (event.window.event == SDL_WINDOWEVENT_MOVED       ) window->on_move                 ({std::size_t(event.window.data1), std::size_t(event.window.data2)});
-        else if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) window->on_resize               ({std::size_t(event.window.data1), std::size_t(event.window.data2)});
-        else if (event.window.event == SDL_WINDOWEVENT_MINIMIZED   ) window->on_minimize             ();
-        else if (event.window.event == SDL_WINDOWEVENT_MAXIMIZED   ) window->on_maximize             ();
-        else if (event.window.event == SDL_WINDOWEVENT_RESTORED    ) window->on_restore              ();
-        else if (event.window.event == SDL_WINDOWEVENT_ENTER       ) window->on_mouse_focus_change   (true );
-        else if (event.window.event == SDL_WINDOWEVENT_LEAVE       ) window->on_mouse_focus_change   (false);
-        else if (event.window.event == SDL_WINDOWEVENT_FOCUS_GAINED) window->on_keyboard_focus_change(true );
-        else if (event.window.event == SDL_WINDOWEVENT_FOCUS_LOST  ) window->on_keyboard_focus_change(false);
-        else if (event.window.event == SDL_WINDOWEVENT_CLOSE       ) window->on_close                ();
-        else if (event.window.event == SDL_WINDOWEVENT_TAKE_FOCUS  ) window->set_focus               ();
+        if      (event.window.event == SDL_WINDOWEVENT_SHOWN       ) window->get()->on_visibility_change    (true );
+        else if (event.window.event == SDL_WINDOWEVENT_HIDDEN      ) window->get()->on_visibility_change    (false);
+        else if (event.window.event == SDL_WINDOWEVENT_EXPOSED     ) window->get()->on_expose               ();
+        else if (event.window.event == SDL_WINDOWEVENT_MOVED       ) window->get()->on_move                 ({std::size_t(event.window.data1), std::size_t(event.window.data2)});
+        else if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) window->get()->on_resize               ({std::size_t(event.window.data1), std::size_t(event.window.data2)});
+        else if (event.window.event == SDL_WINDOWEVENT_MINIMIZED   ) window->get()->on_minimize             ();
+        else if (event.window.event == SDL_WINDOWEVENT_MAXIMIZED   ) window->get()->on_maximize             ();
+        else if (event.window.event == SDL_WINDOWEVENT_RESTORED    ) window->get()->on_restore              ();
+        else if (event.window.event == SDL_WINDOWEVENT_ENTER       ) window->get()->on_mouse_focus_change   (true );
+        else if (event.window.event == SDL_WINDOWEVENT_LEAVE       ) window->get()->on_mouse_focus_change   (false);
+        else if (event.window.event == SDL_WINDOWEVENT_FOCUS_GAINED) window->get()->on_keyboard_focus_change(true );
+        else if (event.window.event == SDL_WINDOWEVENT_FOCUS_LOST  ) window->get()->on_keyboard_focus_change(false);
+        else if (event.window.event == SDL_WINDOWEVENT_CLOSE       ) window->get()->on_close                ();
+        else if (event.window.event == SDL_WINDOWEVENT_TAKE_FOCUS  ) window->get()->set_focus               ();
       }
     }
     while (SDL_PumpEvents(), count = SDL_PeepEvents(events.data(), static_cast<int>(events.size()), SDL_GETEVENT, SDL_RENDER_TARGETS_RESET, SDL_RENDER_DEVICE_RESET), count > 0)
