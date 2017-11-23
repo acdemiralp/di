@@ -98,17 +98,19 @@ public:
     SDL_SetTextInputRect(&rectangle);
   }
   
-  boost::signals2::signal<void(key)>                                   on_key_press        ;
-  boost::signals2::signal<void(key)>                                   on_key_release      ;
-  boost::signals2::signal<void(std::string, std::size_t, std::size_t)> on_text_edit        ;
-  boost::signals2::signal<void(std::string)>                           on_text_input       ;
-  boost::signals2::signal<void()>                                      on_key_layout_change;
-  boost::signals2::signal<void(std::array<std::size_t, 2>)>            on_mouse_move       ;
-  boost::signals2::signal<void(std::array<std::size_t, 2>)>            on_mouse_move_delta ;
-  boost::signals2::signal<void(std::size_t)>                           on_mouse_press      ;
-  boost::signals2::signal<void(std::size_t)>                           on_mouse_release    ;
-  boost::signals2::signal<void(std::array<std::size_t, 2>)>            on_mouse_wheel      ;
-  boost::signals2::signal<void()>                                      on_quit             ;
+  boost::signals2::signal<void(key)>                                   on_key_press          ;
+  boost::signals2::signal<void(key)>                                   on_key_release        ;
+  boost::signals2::signal<void(std::string, std::size_t, std::size_t)> on_text_edit          ;
+  boost::signals2::signal<void(std::string)>                           on_text_input         ;
+  boost::signals2::signal<void()>                                      on_key_layout_change  ;
+  boost::signals2::signal<void(std::array<std::size_t, 2>)>            on_mouse_move         ;
+  boost::signals2::signal<void(std::array<std::size_t, 2>)>            on_mouse_move_delta   ;
+  boost::signals2::signal<void(std::size_t)>                           on_mouse_press        ;
+  boost::signals2::signal<void(std::size_t)>                           on_mouse_release      ;
+  boost::signals2::signal<void(std::array<std::size_t, 2>)>            on_mouse_wheel        ;
+  boost::signals2::signal<void()>                                      on_joystick_connect   ;
+  boost::signals2::signal<void()>                                      on_joystick_disconnect;
+  boost::signals2::signal<void()>                                      on_quit               ;
 
 protected:
   void initialize() override
@@ -145,13 +147,38 @@ protected:
         else if (event.type == SDL_MOUSEBUTTONUP           ) on_mouse_release( static_cast<std::size_t>(event.button.button));
         else if (event.type == SDL_MOUSEWHEEL              ) on_mouse_wheel  ({static_cast<std::size_t>(event.wheel.x), static_cast<std::size_t>(event.wheel.y)});
         
-        else if (event.type == SDL_JOYAXISMOTION           ) {}
-        else if (event.type == SDL_JOYBALLMOTION           ) {}
-        else if (event.type == SDL_JOYHATMOTION            ) {}
-        else if (event.type == SDL_JOYBUTTONDOWN           ) {}
-        else if (event.type == SDL_JOYBUTTONUP             ) {}
-        else if (event.type == SDL_JOYDEVICEADDED          ) {}
-        else if (event.type == SDL_JOYDEVICEREMOVED        ) {}
+        else if (event.type == SDL_JOYAXISMOTION           )
+        {
+          auto joystick = std::find_if(joysticks_.begin(), joysticks_.end(), [&event](const std::unique_ptr<ne::joystick>& iteratee) { return iteratee->native_id() == event.jaxis.which; });
+          if (joystick == joysticks_.end()) continue;
+          joystick->get()->on_stick_motion(static_cast<std::size_t>(event.jaxis.axis), static_cast<float>(event.jaxis.value) / 32768.0F);
+        }
+        else if (event.type == SDL_JOYBALLMOTION           ) 
+        {
+          auto joystick = std::find_if(joysticks_.begin(), joysticks_.end(), [&event](const std::unique_ptr<ne::joystick>& iteratee) { return iteratee->native_id() == event.jball.which; });
+          if (joystick == joysticks_.end()) continue;
+          joystick->get()->on_trackball_motion(static_cast<std::size_t>(event.jball.ball), {static_cast<std::size_t>(event.jball.xrel), static_cast<std::size_t>(event.jball.yrel)});
+        }
+        else if (event.type == SDL_JOYHATMOTION            ) 
+        {
+          auto joystick = std::find_if(joysticks_.begin(), joysticks_.end(), [&event](const std::unique_ptr<ne::joystick>& iteratee) { return iteratee->native_id() == event.jhat.which; });
+          if (joystick == joysticks_.end()) continue;
+          joystick->get()->on_hat_motion(static_cast<std::size_t>(event.jhat.hat), static_cast<joystick_hat_state>(event.jhat.value));
+        }
+        else if (event.type == SDL_JOYBUTTONDOWN           ) 
+        {
+          auto joystick = std::find_if(joysticks_.begin(), joysticks_.end(), [&event](const std::unique_ptr<ne::joystick>& iteratee) { return iteratee->native_id() == event.jbutton.which; });
+          if (joystick == joysticks_.end()) continue;
+          joystick->get()->on_button_press(static_cast<std::size_t>(event.jbutton.button));
+        }
+        else if (event.type == SDL_JOYBUTTONUP             ) 
+        {
+          auto joystick = std::find_if(joysticks_.begin(), joysticks_.end(), [&event](const std::unique_ptr<ne::joystick>& iteratee) { return iteratee->native_id() == event.jbutton.which; });
+          if (joystick == joysticks_.end()) continue;
+          joystick->get()->on_button_press(static_cast<std::size_t>(event.jbutton.button));
+        }
+        else if (event.type == SDL_JOYDEVICEADDED          ) on_joystick_connect   ();
+        else if (event.type == SDL_JOYDEVICEREMOVED        ) on_joystick_disconnect();
         
         else if (event.type == SDL_CONTROLLERAXISMOTION    ) {}
         else if (event.type == SDL_CONTROLLERBUTTONDOWN    ) {}

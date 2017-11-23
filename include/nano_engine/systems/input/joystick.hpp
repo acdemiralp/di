@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 
+#include <boost/signals2.hpp>
 #include <SDL2/SDL_joystick.h>
 
 #include <nano_engine/systems/input/joystick_hat_state.hpp>
@@ -87,6 +88,12 @@ public:
   {
     return static_cast<std::uint32_t>(SDL_JoystickInstanceID(native_));
   }
+
+  boost::signals2::signal<void(std::size_t, float)>                      on_stick_motion    ;
+  boost::signals2::signal<void(std::size_t)>                             on_button_press    ;
+  boost::signals2::signal<void(std::size_t)>                             on_button_release  ;
+  boost::signals2::signal<void(std::size_t, joystick_hat_state)>         on_hat_motion      ;
+  boost::signals2::signal<void(std::size_t, std::array<std::size_t, 2>)> on_trackball_motion;
 
 private:
   SDL_Joystick* native_;
