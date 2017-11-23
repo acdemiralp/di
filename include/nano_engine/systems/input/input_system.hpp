@@ -1,8 +1,13 @@
 #ifndef NANO_ENGINE_SYSTEMS_INPUT_INPUT_HPP_
 #define NANO_ENGINE_SYSTEMS_INPUT_INPUT_HPP_
 
+#include <algorithm>
 #include <array>
-#include <bitset>
+#include <cstddef>
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 #include <boost/signals2.hpp>
 #include <SDL2/SDL.h>
@@ -30,6 +35,37 @@ public:
   }
   input_system& operator=(const input_system&  that) = default;
   input_system& operator=(      input_system&& temp) = default;
+
+  template<typename... argument_types>
+  joystick*                  create_joystick (argument_types&&... arguments)
+  {
+    joysticks_.emplace_back(std::make_unique<joystick>(arguments...));
+    return joysticks_.back().get();
+  }
+  void                       destroy_joystick(joystick*            joystick)
+  {
+    joysticks_.erase(std::remove_if(
+      joysticks_.begin(),
+      joysticks_.end  (),
+      [&joystick] (const std::unique_ptr<ne::joystick>& iteratee)
+      {
+        return iteratee.get() == joystick;
+      }), 
+      joysticks_.end  ());
+  }
+  std::vector<joystick*>     joysticks       () const
+  {
+    std::vector<joystick*> joysticks(joysticks_.size());
+    std::transform(
+      joysticks_.begin(),
+      joysticks_.end  (),
+      joysticks .begin(),
+      [ ] (const std::unique_ptr<joystick>& joystick)
+      {
+        return joystick.get();
+      });
+    return joysticks;
+  }
 
   static bool has_events  ()
   {
@@ -140,8 +176,10 @@ protected:
       }
     } 
 
-    joystick::update();
+    SDL_JoystickUpdate();
   }
+
+  std::vector<std::unique_ptr<joystick>> joysticks_;
 };
 }
 
