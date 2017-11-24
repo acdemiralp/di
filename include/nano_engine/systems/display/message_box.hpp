@@ -1,6 +1,7 @@
 #ifndef NANO_ENGINE_SYSTEMS_DISPLAY_MESSAGE_BOX_HPP_
 #define NANO_ENGINE_SYSTEMS_DISPLAY_MESSAGE_BOX_HPP_
 
+#include <cstdint>
 #include <string>
 #include <vector>
 

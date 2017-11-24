@@ -2,7 +2,7 @@
 #define NANO_ENGINE_SYSTEMS_DISPLAY_MESSAGE_BOX_COLOR_SCHEME_HPP_
 
 #include <array>
-#include <cstddef>
+#include <cstdint>
 
 #include <SDL2/SDL_messagebox.h>
 

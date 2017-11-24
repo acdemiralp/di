@@ -2,6 +2,7 @@
 #define NANO_ENGINE_SYSTEMS_DISPLAY_OPENGL_CONTEXT_SETTINGS_HPP_
 
 #include <cstddef>
+#include <cstdint>
 
 #include <SDL2/SDL_video.h>
 

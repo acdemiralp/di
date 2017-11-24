@@ -2,6 +2,7 @@
 #define NANO_ENGINE_SYSTEMS_DISPLAY_WINDOW_HPP_
 
 #include <array>
+#include <cstdint>
 #include <cstddef>
 #include <stdexcept>
 #include <string>
@@ -11,6 +12,7 @@
 #include <SDL2/SDL_syswm.h>
 
 #include <nano_engine/systems/display/display_info.hpp>
+#include <nano_engine/systems/display/window_flags.hpp>
 #include <nano_engine/systems/display/window_mode.hpp>
 
 namespace ne
@@ -18,13 +20,13 @@ namespace ne
 class window
 {
 public:
-  explicit window  (const std::string& title, std::uint32_t flags = 0u) 
+  explicit window  (const std::string& title, window_flags flags = window_flags::none)
   : window(title, {32, 32}, {800, 600}, flags)
   {
     set_fullscreen_windowed();
   }
-  window           (const std::string& title, const std::array<std::size_t, 2>& position, const std::array<std::size_t, 2>& size, std::uint32_t flags = 0u) 
-  : native_(SDL_CreateWindow(title.c_str(), static_cast<int>(position[0]), static_cast<int>(position[1]), static_cast<int>(size[0]), static_cast<int>(size[1]), flags |= SDL_WINDOW_ALLOW_HIGHDPI))
+  window           (const std::string& title, const std::array<std::size_t, 2>& position, const std::array<std::size_t, 2>& size, window_flags flags = window_flags::none) 
+  : native_(SDL_CreateWindow(title.c_str(), static_cast<int>(position[0]), static_cast<int>(position[1]), static_cast<int>(size[0]), static_cast<int>(size[1]), static_cast<Uint32>(flags)))
   {
     if (!native_)
       throw std::runtime_error("Failed to create SDL window. SDL Error: " + std::string(SDL_GetError()));
@@ -171,7 +173,7 @@ public:
   }
   bool                                          keyboard_visible() const
   {
-    return SDL_IsScreenKeyboardShown(native_);
+    return SDL_IsScreenKeyboardShown(native_) != 0;
   }
   float                                         opacity         () const
   {

@@ -17,14 +17,14 @@ namespace ne
 class opengl_window final : public window
 {
 public:
-  explicit opengl_window  (const std::string& title, const opengl_context_settings& settings = opengl_context_settings()) 
-  : window(title, settings.apply()), opengl_context_(SDL_GL_CreateContext(native_))
+  explicit opengl_window  (const std::string& title, const opengl_context_settings& settings = opengl_context_settings(), window_flags flags = window_flags::none)
+  : window(title, flags | static_cast<window_flags>(settings.apply())), opengl_context_(SDL_GL_CreateContext(native_))
   {
     if (!opengl_context_)
       throw std::runtime_error("Failed to create OpenGL context. SDL Error: " + std::string(SDL_GetError())); 
   }
-  opengl_window           (const std::string& title, const std::array<std::size_t, 2>& position, const std::array<std::size_t, 2>& size, const opengl_context_settings& settings = opengl_context_settings()) 
-  : window(title, position, size, settings.apply()), opengl_context_(SDL_GL_CreateContext(native_))
+  opengl_window           (const std::string& title, const std::array<std::size_t, 2>& position, const std::array<std::size_t, 2>& size, const opengl_context_settings& settings = opengl_context_settings(), window_flags flags = window_flags::none)
+  : window(title, position, size, flags | static_cast<window_flags>(settings.apply())), opengl_context_(SDL_GL_CreateContext(native_))
   {
     if (!opengl_context_)
       throw std::runtime_error("Failed to create OpenGL context. SDL Error: " + std::string(SDL_GetError()));
