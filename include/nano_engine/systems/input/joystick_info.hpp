@@ -7,13 +7,20 @@
 
 #include <SDL2/SDL_joystick.h>
 
+#include <nano_engine/systems/input/joystick_type.hpp>
+
 namespace ne
 {
 struct joystick_info
 {
-  std::size_t index;
-  std::string name ;
-  std::string guid ;
+  std::size_t   index          ;
+  joystick_type type           ;
+  std::string   name           ;
+  std::string   guid           ;
+  std::size_t   native_id      ;
+  std::size_t   product_id     ;
+  std::size_t   product_version;
+  std::size_t   vendor         ;
 };
 
 inline std::vector<joystick_info> joystick_infos()
@@ -22,8 +29,18 @@ inline std::vector<joystick_info> joystick_infos()
   for (auto i = 0; i < joystick_infos.size(); ++i)
   {
     char guid[128];
-    SDL_JoystickGetGUIDString(SDL_JoystickGetDeviceGUID(static_cast<int>(i)), guid, 128);
-    joystick_infos[i] = {i, std::string(SDL_JoystickNameForIndex(static_cast<int>(i))), std::string(guid)};
+    SDL_JoystickGetGUIDString(SDL_JoystickGetDeviceGUID(i), guid, 128);
+    joystick_infos[i] = 
+    {
+      static_cast<std::size_t>  (i), 
+      static_cast<joystick_type>(SDL_JoystickGetDeviceType          (i)),
+      std::string               (SDL_JoystickNameForIndex           (i)), 
+      std::string               (guid), 
+      static_cast<std::size_t>  (SDL_JoystickGetDeviceInstanceID    (i)),
+      static_cast<std::size_t>  (SDL_JoystickGetDeviceProduct       (i)),
+      static_cast<std::size_t>  (SDL_JoystickGetDeviceProductVersion(i)),
+      static_cast<std::size_t>  (SDL_JoystickGetDeviceVendor        (i))
+    };
   }
   return joystick_infos;
 }

@@ -39,6 +39,7 @@ set(PROJECT_SOURCES
   include/nano_engine/systems/input/joystick_hat_state.hpp
   include/nano_engine/systems/input/joystick_info.hpp
   include/nano_engine/systems/input/joystick_power_level.hpp
+  include/nano_engine/systems/input/joystick_type.hpp
   include/nano_engine/systems/input/key.hpp
   include/nano_engine/systems/input/key_code.hpp
   include/nano_engine/systems/input/key_modifier.hpp
