@@ -3,6 +3,7 @@
 
 #include <array>
 #include <cstddef>
+#include <cstdint>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -15,10 +16,12 @@
 
 namespace ne
 {
+class game_controller;
+
 class joystick
 {
 public:
-  explicit joystick  (const std::size_t& index) : native_(SDL_JoystickOpen(static_cast<int>(index)))
+  explicit joystick  (const std::size_t& index) : native_(SDL_JoystickOpen(static_cast<int>(index))), managed_(true)
   {
     if (!native_)
       throw std::runtime_error("Failed to create SDL joystick. SDL Error: " + std::string(SDL_GetError()));
@@ -27,7 +30,8 @@ public:
   joystick           (      joystick&& temp) = default;
   ~joystick          ()
   {
-    SDL_JoystickClose(native_);
+    if(managed_)
+      SDL_JoystickClose(native_);
   }
   joystick& operator=(const joystick&  that) = delete ;
   joystick& operator=(      joystick&& temp) = default;
@@ -44,7 +48,7 @@ public:
   }
   bool                                    attached      () const
   {
-    return static_cast<bool>(SDL_JoystickGetAttached(native_));
+    return SDL_JoystickGetAttached(native_) != 0;
   }
   joystick_power_level                    power_level   () const
   {
@@ -62,7 +66,7 @@ public:
   {
     std::vector<bool> buttons(SDL_JoystickNumButtons(native_));
     for(auto i = 0; i < buttons.size(); ++i)
-      buttons[i] = static_cast<bool>(SDL_JoystickGetButton(native_, static_cast<int>(i)));
+      buttons[i] = SDL_JoystickGetButton(native_, static_cast<int>(i)) != 0;
     return buttons;
   }
   std::vector<joystick_hat_state>         hats          () const
@@ -96,7 +100,15 @@ public:
   boost::signals2::signal<void(std::size_t, std::array<std::size_t, 2>)> on_trackball_motion;
 
 private:
-  SDL_Joystick* native_;
+  friend game_controller;
+
+  explicit joystick(SDL_Joystick* native) : native_(native), managed_(false)
+  {
+    
+  }
+
+  SDL_Joystick* native_ ;
+  bool          managed_;
 };
 }
 

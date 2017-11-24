@@ -20,12 +20,12 @@ enum class key_modifier
   caps_lock   = 0x2000,
   mode        = 0x4000
 };
+}
 
 template<>
-struct is_bitset_enum<key_modifier>
+struct is_bitset_enum<ne::key_modifier>
 {
   static const bool enable = true;
 };
-}
 
 #endif

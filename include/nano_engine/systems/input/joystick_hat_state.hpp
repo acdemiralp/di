@@ -1,7 +1,7 @@
 #ifndef NANO_ENGINE_SYSTEMS_INPUT_JOYSTICK_HAT_STATE_HPP_
 #define NANO_ENGINE_SYSTEMS_INPUT_JOYSTICK_HAT_STATE_HPP_
 
-#include <cstddef>
+#include <cstdint>
 
 #include <SDL2/SDL_joystick.h>
 

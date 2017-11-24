@@ -69,7 +69,7 @@ public:
 
   static bool            has_events            ()
   {
-    return SDL_HasEvents(SDL_FIRSTEVENT, SDL_LASTEVENT);
+    return SDL_HasEvents(SDL_FIRSTEVENT, SDL_LASTEVENT) != 0;
   }
   static void            flush_events          ()
   {
@@ -204,6 +204,7 @@ protected:
     } 
 
     SDL_JoystickUpdate();
+    SDL_GameControllerUpdate();
   }
 
   std::vector<std::unique_ptr<joystick>> joysticks_;
