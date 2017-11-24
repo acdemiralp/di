@@ -283,7 +283,7 @@ public:
   std::tuple<HWND, HDC, HINSTANCE> driver_data() const
   {
     auto data = driver_specific_data();
-    return {data.info.win.window, data.info.win.hdc, reinterpret_cast<HINSTANCE>(GetWindowLong(data.info.win.window, -6))}; // Reports C4312
+    return {data.info.win.window, data.info.win.hdc, data.info.win.hinstance};
   }
 #elif defined(SDL_VIDEO_DRIVER_X11)
   std::tuple<Display*, Window> driver_data() const
