@@ -13,6 +13,7 @@
 #include <SDL2/SDL.h>
 
 #include <nano_engine/systems/display/opengl_window.hpp>
+#include <nano_engine/systems/display/vulkan_window.hpp>
 #include <nano_engine/systems/display/window.hpp>
 #include <nano_engine/system.hpp>
 
@@ -46,6 +47,12 @@ public:
   {
     windows_.emplace_back(std::make_unique<opengl_window>(arguments...));
     return static_cast<opengl_window*>(windows_.back().get());
+  }
+  template<typename... argument_types>
+  vulkan_window*       create_vulkan_window(argument_types&&... arguments)
+  {
+    windows_.emplace_back(std::make_unique<vulkan_window>(arguments...));
+    return static_cast<vulkan_window*>(windows_.back().get());
   }
   void                 destroy_window      (window* window)
   {

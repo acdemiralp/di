@@ -25,6 +25,7 @@ set(PROJECT_SOURCES
   include/nano_engine/systems/display/opengl_window.hpp
   include/nano_engine/systems/display/screensaver.hpp
   include/nano_engine/systems/display/video_driver.hpp
+  include/nano_engine/systems/display/vulkan_window.hpp
   include/nano_engine/systems/display/window.hpp
   include/nano_engine/systems/display/window_flags.hpp
   include/nano_engine/systems/display/window_mode.hpp
