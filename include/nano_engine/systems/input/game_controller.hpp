@@ -30,28 +30,41 @@ public:
   game_controller& operator=(const game_controller&  that) = delete ;
   game_controller& operator=(      game_controller&& temp) = default;
   
-  std::string         name       () const
+  std::string         name           () const
   {
     return SDL_GameControllerName(native_);
   }
-  bool                attached   () const
+  bool                attached       () const
   {
     return static_cast<bool>(SDL_GameControllerGetAttached(native_));
   }
-  
-  float               axis       (game_controller_axis axis) const
+                                     
+  float               axis           (game_controller_axis axis) const
   {
     return static_cast<float>(SDL_GameControllerGetAxis(native_, static_cast<SDL_GameControllerAxis>(axis))) / 32768.0F;
   }
   
   // Mapping string keys: a, b, x, y, start, guide, back, up, left, down, right, left_shoulder, right_shoulder, left_stick, right_stick, left_x, left_y, right_x, right_y, left_trigger, right_trigger
   // Example mapping string: "a:b1,b:b2,y:b3,x:b0,start:b9,guide:b12,back:b8,dpup:h0.1,dpleft:h0.8,dpdown:h0.4,dpright:h0.2,leftshoulder:b4,rightshoulder:b5,leftstick:b10,rightstick:b11,leftx:a0,lefty:a1,rightx:a2,righty:a3,lefttrigger:b6,righttrigger:b7"
-  void                set_mapping(const std::string& name, const std::string mapping)
+  void                set_mapping    (const std::string& name, const std::string mapping)
   {
     SDL_GameControllerAddMapping(std::string(joystick(SDL_GameControllerGetJoystick(native_)).guid() + "," + name + "," + mapping).c_str());
   }
 
-  SDL_GameController* native     () const
+  std::size_t         product        () const
+  {
+    return static_cast<std::size_t>(SDL_GameControllerGetProduct(native_));
+  }
+  std::size_t         product_version() const
+  {
+    return static_cast<std::size_t>(SDL_GameControllerGetProductVersion(native_));
+  }
+  std::size_t         vendor         () const
+  {
+    return static_cast<std::size_t>(SDL_GameControllerGetVendor(native_));
+  }
+
+  SDL_GameController* native         () const
   {
     return native_;
   }

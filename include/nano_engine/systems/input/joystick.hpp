@@ -13,6 +13,7 @@
 
 #include <nano_engine/systems/input/joystick_hat_state.hpp>
 #include <nano_engine/systems/input/joystick_power_level.hpp>
+#include <nano_engine/systems/input/joystick_type.hpp>
 
 namespace ne
 {
@@ -36,47 +37,58 @@ public:
   joystick& operator=(const joystick&  that) = delete ;
   joystick& operator=(      joystick&& temp) = default;
 
-  std::string                             name          () const
+  std::string                             name           () const
   {
     return std::string(SDL_JoystickName(native_));
   }
-  std::string                             guid          () const
+  std::string                             guid           () const
   {
     char native_guid[128];
     SDL_JoystickGetGUIDString(SDL_JoystickGetGUID(native_), native_guid, 128);
     return std::string(native_guid);
   }
-  bool                                    attached      () const
+  bool                                    attached       () const
   {
     return SDL_JoystickGetAttached(native_) != 0;
   }
-  joystick_power_level                    power_level   () const
+  joystick_power_level                    power_level    () const
   {
     return static_cast<joystick_power_level>(SDL_JoystickCurrentPowerLevel(native_));
   }
   
-  std::vector<float>                      sticks        () const
+  std::vector<float>                      sticks         () const
   {
     std::vector<float> sticks(SDL_JoystickNumAxes(native_));
     for(auto i = 0; i < sticks.size(); ++i)
       sticks[i] = static_cast<float>(SDL_JoystickGetAxis(native_, static_cast<int>(i))) / 32768.0F;
     return sticks;
   }
-  std::vector<bool>                       buttons       () const
+  std::vector<float>                      sticks_initial () const
+  {
+    std::vector<float> sticks(SDL_JoystickNumAxes(native_));
+    for (auto i = 0; i < sticks.size(); ++i)
+    {
+      Sint16 state;
+      SDL_JoystickGetAxisInitialState(native_, static_cast<int>(i), &state);
+      sticks[i] = static_cast<float>(state) / 32768.0F;
+    }
+    return sticks;
+  }
+  std::vector<bool>                       buttons        () const
   {
     std::vector<bool> buttons(SDL_JoystickNumButtons(native_));
     for(auto i = 0; i < buttons.size(); ++i)
       buttons[i] = SDL_JoystickGetButton(native_, static_cast<int>(i)) != 0;
     return buttons;
   }
-  std::vector<joystick_hat_state>         hats          () const
+  std::vector<joystick_hat_state>         hats           () const
   {
     std::vector<joystick_hat_state> hats(SDL_JoystickNumHats(native_));
     for(auto i = 0; i < hats.size(); ++i)
       hats[i] = static_cast<joystick_hat_state>(SDL_JoystickGetHat(native_, static_cast<int>(i)));
     return hats;
   }
-  std::vector<std::array<std::size_t, 2>> trackballs    () const
+  std::vector<std::array<std::size_t, 2>> trackballs     () const
   {
     std::vector<std::array<std::size_t, 2>> trackballs(SDL_JoystickNumBalls(native_));
     for (auto i = 0; i < trackballs.size(); ++i)
@@ -84,11 +96,33 @@ public:
     return trackballs;
   }
   
-  SDL_Joystick*                           native        () const
+  joystick_type                           type           () const
+  {
+    return static_cast<joystick_type>(SDL_JoystickGetType(native_));
+  }
+  std::size_t                             product        () const
+  {
+    return static_cast<std::size_t>(SDL_JoystickGetProduct(native_));
+  }
+  std::size_t                             product_version() const
+  {
+    return static_cast<std::size_t>(SDL_JoystickGetProductVersion(native_));
+  }
+  std::size_t                             vendor         () const
+  {
+    return static_cast<std::size_t>(SDL_JoystickGetVendor(native_));
+  }
+
+  static void                             set_global_lock(bool lock)
+  {
+    lock ? SDL_LockJoysticks() : SDL_UnlockJoysticks();
+  }
+
+  SDL_Joystick*                           native         () const
   {
     return native_;
   }
-  std::uint32_t                           native_id     () const
+  std::uint32_t                           native_id      () const
   {
     return static_cast<std::uint32_t>(SDL_JoystickInstanceID(native_));
   }
