@@ -302,6 +302,10 @@ public:
   boost::signals2::signal<void()>                                  on_restore              ;
   boost::signals2::signal<void(bool)>                              on_mouse_focus_change   ;
   boost::signals2::signal<void(bool)>                              on_keyboard_focus_change;
+  boost::signals2::signal<void(std::string)>                       on_drop_file            ;
+  boost::signals2::signal<void(std::string)>                       on_drop_text            ;
+  boost::signals2::signal<void(std::string)>                       on_drop_start           ;
+  boost::signals2::signal<void(std::string)>                       on_drop_end             ;
   boost::signals2::signal<void()>                                  on_close                ;
 
 protected:

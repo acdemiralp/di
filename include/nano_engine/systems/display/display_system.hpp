@@ -124,7 +124,7 @@ private:
         {
           return iteratee->native_id() == event.window.windowID;
         });
-        if(window == windows_.end()) // An event from an SDL window which is not handled by the display system.
+        if (window == windows_.end()) // An event from an SDL window which is not handled by the display system.
           continue;
 
         if      (event.window.event == SDL_WINDOWEVENT_SHOWN       ) window->get()->on_visibility_change    (true );
@@ -141,6 +141,26 @@ private:
         else if (event.window.event == SDL_WINDOWEVENT_FOCUS_LOST  ) window->get()->on_keyboard_focus_change(false);
         else if (event.window.event == SDL_WINDOWEVENT_CLOSE       ) window->get()->on_close                ();
         else if (event.window.event == SDL_WINDOWEVENT_TAKE_FOCUS  ) window->get()->set_focus               ();
+      }
+    }
+    while (SDL_PumpEvents(), count = SDL_PeepEvents(events.data(), static_cast<int>(events.size()), SDL_GETEVENT, SDL_DROPFILE            , SDL_DROPCOMPLETE       ), count > 0)
+    {
+      for (auto i = 0; i < count; ++i)
+      {
+        auto& event  = events[i];        
+        auto  window = std::find_if(windows_.begin(), windows_.end(), [&event] (const std::unique_ptr<ne::window>& iteratee)
+        {
+          return iteratee->native_id() == event.drop.windowID;
+        });
+        if (window == windows_.end()) // An event from an SDL window which is not handled by the display system.
+          continue;
+
+        if      (event.type == SDL_DROPFILE    ) window->get()->on_drop_file (std::string(event.drop.file));
+        else if (event.type == SDL_DROPTEXT    ) window->get()->on_drop_text (std::string(event.drop.file));
+        else if (event.type == SDL_DROPBEGIN   ) window->get()->on_drop_start(std::string(event.drop.file));
+        else if (event.type == SDL_DROPCOMPLETE) window->get()->on_drop_end  (std::string(event.drop.file));
+
+        SDL_free(event.drop.file);
       }
     }
     while (SDL_PumpEvents(), count = SDL_PeepEvents(events.data(), static_cast<int>(events.size()), SDL_GETEVENT, SDL_RENDER_TARGETS_RESET, SDL_RENDER_DEVICE_RESET), count > 0)
