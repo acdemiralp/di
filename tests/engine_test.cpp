@@ -7,12 +7,10 @@
 #include <nano_engine/systems/renderer/renderer.hpp>
 #include <nano_engine/engine.hpp>
 
-#ifdef _WIN32
 extern "C"
 {
   _declspec(dllexport) unsigned int NvOptimusEnablement = 0x00000001;
 }
-#endif
 
 TEST_CASE("Engine is tested.", "[engine]") {
   ne::engine engine;
@@ -20,11 +18,11 @@ TEST_CASE("Engine is tested.", "[engine]") {
   auto input_system    = engine.add_system<ne::input_system>  ();
   auto renderer_system = engine.add_system<ne::renderer>      ();
   auto opengl_window   = display_system->create_opengl_window("Test", std::array<std::size_t, 2>{32, 32}, std::array<std::size_t, 2>{640, 480});
-  input_system->on_key_press       .connect([](ne::key     key )
+  input_system ->on_key_press       .connect([](ne::key     key )
   {
     std::cout << key.name();
   });
-  input_system->on_clipboard_change.connect([](std::string text)
+  input_system ->on_clipboard_change.connect([](std::string text)
   {
     std::cout << text;
   });
