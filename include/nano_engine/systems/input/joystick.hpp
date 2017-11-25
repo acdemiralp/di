@@ -51,21 +51,21 @@ public:
     SDL_JoystickGetGUIDString(SDL_JoystickGetGUID(native_), native_guid, 128);
     return std::string(native_guid);
   }
-  std::size_t                             product        () const
-  {
-    return static_cast<std::size_t>(SDL_JoystickGetProduct(native_));
-  }
-  std::size_t                             product_version() const
-  {
-    return static_cast<std::size_t>(SDL_JoystickGetProductVersion(native_));
-  }
-  std::size_t                             vendor         () const
-  {
-    return static_cast<std::size_t>(SDL_JoystickGetVendor(native_));
-  }
-  std::uint32_t                           native_id      () const
+  std::uint32_t                           instance_id    () const
   {
     return static_cast<std::uint32_t>(SDL_JoystickInstanceID(native_));
+  }
+  std::uint32_t                           product        () const
+  {
+    return static_cast<std::uint32_t>(SDL_JoystickGetProduct(native_));
+  }
+  std::uint32_t                           product_version() const
+  {
+    return static_cast<std::uint32_t>(SDL_JoystickGetProductVersion(native_));
+  }
+  std::uint32_t                           vendor         () const
+  {
+    return static_cast<std::uint32_t>(SDL_JoystickGetVendor(native_));
   }
 
   joystick_power_level                    power_level    () const

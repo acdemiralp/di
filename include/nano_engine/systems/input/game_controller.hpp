@@ -2,6 +2,7 @@
 #define NANO_ENGINE_SYSTEMS_INPUT_GAME_CONTROLLER_HPP_
 
 #include <cstddef>
+#include <cstdint>
 #include <map>
 #include <stdexcept>
 #include <string>
@@ -39,17 +40,17 @@ public:
     return static_cast<bool>(SDL_GameControllerGetAttached(native_));
   }
                   
-  std::size_t         product        () const
-  {
-    return static_cast<std::size_t>(SDL_GameControllerGetProduct(native_));
+  std::uint32_t       product        () const
+  {      
+    return static_cast<std::uint32_t>(SDL_GameControllerGetProduct(native_));
   }
-  std::size_t         product_version() const
+  std::uint32_t       product_version() const
   {
-    return static_cast<std::size_t>(SDL_GameControllerGetProductVersion(native_));
+    return static_cast<std::uint32_t>(SDL_GameControllerGetProductVersion(native_));
   }
-  std::size_t         vendor         () const
+  std::uint32_t       vendor         () const
   {
-    return static_cast<std::size_t>(SDL_GameControllerGetVendor(native_));
+    return static_cast<std::uint32_t>(SDL_GameControllerGetVendor(native_));
   }
                    
   float               axis           (game_controller_axis axis) const
