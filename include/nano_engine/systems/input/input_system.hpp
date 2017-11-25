@@ -12,7 +12,9 @@
 #include <boost/signals2.hpp>
 #include <SDL2/SDL.h>
 
+#include <nano_engine/systems/input/clipboard.hpp>
 #include <nano_engine/systems/input/key.hpp>
+#include <nano_engine/systems/input/game_controller.hpp>
 #include <nano_engine/systems/input/joystick.hpp>
 #include <nano_engine/engine.hpp>
 #include <nano_engine/system.hpp>
@@ -24,25 +26,25 @@ class input_system : public system
 public:
   input_system           ()
   {
-    if (SDL_InitSubSystem(SDL_INIT_EVENTS) != 0)
-      throw std::runtime_error("Failed to initialize SDL Events subsystem. Error: " + std::string(SDL_GetError()));
+    if (SDL_InitSubSystem(SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER | SDL_INIT_JOYSTICK) != 0)
+      throw std::runtime_error("Failed to initialize SDL Events / Game Controller / Joystick subsystems. Error: " + std::string(SDL_GetError()));
   }
   input_system           (const input_system&  that) = default;
   input_system           (      input_system&& temp) = default;
   virtual ~input_system  ()
   {
-    SDL_QuitSubSystem(SDL_INIT_EVENTS);
+    SDL_QuitSubSystem(SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER | SDL_INIT_JOYSTICK);
   }
   input_system& operator=(const input_system&  that) = default;
   input_system& operator=(      input_system&& temp) = default;
 
   template<typename... argument_types>
-  joystick*              create_joystick       (argument_types&&... arguments)
+  joystick*                     create_joystick        (argument_types&&... arguments)
   {
     joysticks_.emplace_back(std::make_unique<joystick>(arguments...));
     return joysticks_.back().get();
   }
-  void                   destroy_joystick      (joystick*            joystick)
+  void                          destroy_joystick       (joystick* joystick)
   {
     joysticks_.erase(std::remove_if(
       joysticks_.begin(),
@@ -53,7 +55,7 @@ public:
       }), 
       joysticks_.end  ());
   }
-  std::vector<joystick*> joysticks             () const
+  std::vector<joystick*>        joysticks              () const
   {
     std::vector<joystick*> joysticks(joysticks_.size());
     std::transform(
@@ -66,29 +68,60 @@ public:
       });
     return joysticks;
   }
+  
+  template<typename... argument_types>
+  game_controller*              create_game_controller (argument_types&&... arguments)
+  {
+    game_controllers_.emplace_back(std::make_unique<game_controller>(arguments...));
+    return game_controllers_.back().get();
+  }
+  void                          destroy_game_controller(game_controller* game_controller)
+  {
+    game_controllers_.erase(std::remove_if(
+      game_controllers_.begin(),
+      game_controllers_.end  (),
+      [&game_controller] (const std::unique_ptr<ne::game_controller>& iteratee)
+      {
+        return iteratee.get() == game_controller;
+      }), 
+      game_controllers_.end  ());
+  }
+  std::vector<game_controller*> game_controllers       () const
+  {
+    std::vector<game_controller*> game_controllers(game_controllers_.size());
+    std::transform(
+      game_controllers_.begin(),
+      game_controllers_.end  (),
+      game_controllers .begin(),
+      [ ] (const std::unique_ptr<game_controller>& game_controller)
+      {
+        return game_controller.get();
+      });
+    return game_controllers;
+  }
 
-  static bool            has_events            ()
+  static bool                   has_events             ()
   {
     return SDL_HasEvents(SDL_FIRSTEVENT, SDL_LASTEVENT) != 0;
   }
-  static void            flush_events          ()
+  static void                   flush_events           ()
   {
     SDL_FlushEvents(SDL_FIRSTEVENT, SDL_LASTEVENT);
   }
-  static bool            quit_pending          ()
+  static bool                   quit_pending           ()
   {
     return SDL_QuitRequested();
   }
-
-  static bool            text_input_enabled    ()
+                                                       
+  static bool                   text_input_enabled     ()
   {
     return SDL_IsTextInputActive() != 0;
   }
-  static void            set_text_input_enabled(bool enabled)
+  static void                   set_text_input_enabled (bool enabled)
   {
     enabled ? SDL_StartTextInput() : SDL_StopTextInput();
   }
-  static void            set_text_input_area   (const std::array<std::size_t, 2>& position, const std::array<std::size_t, 2>& size)
+  static void                   set_text_input_area    (const std::array<std::size_t, 2>& position, const std::array<std::size_t, 2>& size)
   {
     SDL_Rect rectangle {
       static_cast<int>(position[0]), 
@@ -110,6 +143,7 @@ public:
   boost::signals2::signal<void(std::array<std::size_t, 2>)>            on_mouse_wheel        ;
   boost::signals2::signal<void()>                                      on_joystick_connect   ;
   boost::signals2::signal<void()>                                      on_joystick_disconnect;
+  boost::signals2::signal<void(std::string)>                           on_clipboard_change   ;
   boost::signals2::signal<void()>                                      on_quit               ;
 
 protected:
@@ -194,20 +228,16 @@ protected:
         else if (event.type == SDL_DOLLARRECORD            ) {}
         else if (event.type == SDL_MULTIGESTURE            ) {}
         
-        else if (event.type == SDL_CLIPBOARDUPDATE         ) {}
-        
-        else if (event.type == SDL_DROPFILE                ) {}
-        else if (event.type == SDL_DROPTEXT                ) {}
-        else if (event.type == SDL_DROPBEGIN               ) {}
-        else if (event.type == SDL_DROPCOMPLETE            ) {}
+        else if (event.type == SDL_CLIPBOARDUPDATE         ) on_clipboard_change(clipboard::get());
       }
     } 
 
-    SDL_JoystickUpdate();
-    SDL_GameControllerUpdate();
+    joystick::       update_all();
+    game_controller::update_all();
   }
 
-  std::vector<std::unique_ptr<joystick>> joysticks_;
+  std::vector<std::unique_ptr<joystick>>        joysticks_;
+  std::vector<std::unique_ptr<game_controller>> game_controllers_;
 };
 }
 
