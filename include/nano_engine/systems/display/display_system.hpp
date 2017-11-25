@@ -10,7 +10,7 @@
 #include <vector>
 
 #include <boost/signals2.hpp>
-#include <SDL2/SDL.h>
+#include <SDL2/SDL_video.h>
 
 #include <nano_engine/systems/display/opengl_window.hpp>
 #include <nano_engine/systems/display/vulkan_window.hpp>
