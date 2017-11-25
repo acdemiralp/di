@@ -1,5 +1,7 @@
 #include "catch.hpp"
 
+#include <iostream>
+
 #include <nano_engine/systems/display/display_system.hpp>
 #include <nano_engine/systems/input/input_system.hpp>
 #include <nano_engine/systems/renderer/renderer.hpp>
@@ -18,6 +20,13 @@ TEST_CASE("Engine is tested.", "[engine]") {
   auto input_system    = engine.add_system<ne::input_system>  ();
   auto renderer_system = engine.add_system<ne::renderer>      ();
   auto opengl_window   = display_system->create_opengl_window("Test", std::array<std::size_t, 2>{32, 32}, std::array<std::size_t, 2>{640, 480});
-  opengl_window->set_resizable(true);
+  input_system->on_key_press       .connect([](ne::key     key )
+  {
+    std::cout << key.name();
+  });
+  input_system->on_clipboard_change.connect([](std::string text)
+  {
+    std::cout << text;
+  });
   engine.run();
 }
