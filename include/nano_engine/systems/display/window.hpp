@@ -4,6 +4,7 @@
 #include <array>
 #include <cstdint>
 #include <cstddef>
+#include <functional>
 #include <stdexcept>
 #include <string>
 
@@ -12,11 +13,14 @@
 #include <SDL2/SDL_syswm.h>
 
 #include <nano_engine/systems/display/display_info.hpp>
+#include <nano_engine/systems/display/hit_test_result.hpp>
 #include <nano_engine/systems/display/window_flags.hpp>
 #include <nano_engine/systems/display/window_mode.hpp>
 
 namespace ne
 {
+extern "C" inline SDL_HitTestResult hit_test_callback(SDL_Window* native, const SDL_Point* point, void* data);
+
 class window
 {
 public:
@@ -145,6 +149,11 @@ public:
       SDL_PIXELFORMAT_RGBA32);
     SDL_SetWindowIcon(native_, surface);
     SDL_FreeSurface(surface);
+  }
+  void set_hit_test    (const std::function<hit_test_result(std::array<std::size_t, 2>)>& callback)
+  {
+    hit_test_callback_ = callback;
+    SDL_SetWindowHitTest(native_, static_cast<SDL_HitTest>(hit_test_callback), reinterpret_cast<void*>(this));
   }
 
   bool                                          visible         () const
@@ -309,6 +318,8 @@ public:
   boost::signals2::signal<void()>                                  on_close                ;
 
 protected:
+  friend SDL_HitTestResult hit_test_callback(SDL_Window*, const SDL_Point*, void*);
+
   SDL_SysWMinfo driver_specific_data   () const
   {
     SDL_SysWMinfo sys_wm_info;
@@ -324,7 +335,15 @@ protected:
   }
   
   SDL_Window* native_ = nullptr;
+  std::function<hit_test_result(std::array<std::size_t, 2>)> hit_test_callback_ = nullptr;
 };
+
+extern "C" inline SDL_HitTestResult hit_test_callback(SDL_Window* native, const SDL_Point* point, void* data)
+{
+  auto window = reinterpret_cast<ne::window*>(data);
+  if  (window == nullptr || window->hit_test_callback_ == nullptr) return SDL_HITTEST_NORMAL;
+  return static_cast<SDL_HitTestResult>(window->hit_test_callback_({static_cast<std::size_t>(point->x), static_cast<std::size_t>(point->y)}));
+}
 }
 
 #endif

@@ -28,5 +28,9 @@ TEST_CASE("Engine is tested.", "[engine]") {
   {
     std::cout << text;
   });
+  opengl_window->set_hit_test([ ] (std::array<std::size_t, 2> position) -> ne::hit_test_result
+  {
+    return ne::hit_test_result::normal;
+  });
   engine.run();
 }
