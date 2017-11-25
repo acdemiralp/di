@@ -17,10 +17,10 @@ struct joystick_info
   joystick_type type           ;
   std::string   name           ;
   std::string   guid           ;
-  std::size_t   native_id      ;
   std::size_t   product_id     ;
   std::size_t   product_version;
   std::size_t   vendor         ;
+  std::size_t   native_id      ;
 };
 
 inline std::vector<joystick_info> joystick_infos()
@@ -36,10 +36,10 @@ inline std::vector<joystick_info> joystick_infos()
       static_cast<joystick_type>(SDL_JoystickGetDeviceType          (i)),
       std::string               (SDL_JoystickNameForIndex           (i)), 
       std::string               (guid), 
-      static_cast<std::size_t>  (SDL_JoystickGetDeviceInstanceID    (i)),
       static_cast<std::size_t>  (SDL_JoystickGetDeviceProduct       (i)),
       static_cast<std::size_t>  (SDL_JoystickGetDeviceProductVersion(i)),
-      static_cast<std::size_t>  (SDL_JoystickGetDeviceVendor        (i))
+      static_cast<std::size_t>  (SDL_JoystickGetDeviceVendor        (i)),
+      static_cast<std::size_t>  (SDL_JoystickGetDeviceInstanceID    (i))
     };
   }
   return joystick_infos;
