@@ -183,31 +183,31 @@ protected:
         
         else if (event.type == SDL_JOYAXISMOTION           )
         {
-          auto joystick = std::find_if(joysticks_.begin(), joysticks_.end(), [&event](const std::unique_ptr<ne::joystick>& iteratee) { return iteratee->native_id() == event.jaxis.which; });
+          auto joystick = std::find_if(joysticks_.begin(), joysticks_.end(), [&event](const std::unique_ptr<ne::joystick>& iteratee) { return iteratee->instance_id() == event.jaxis.which; });
           if (joystick == joysticks_.end()) continue;
           joystick->get()->on_stick_motion(static_cast<std::size_t>(event.jaxis.axis), static_cast<float>(event.jaxis.value) / 32768.0F);
         }
         else if (event.type == SDL_JOYBALLMOTION           ) 
         {
-          auto joystick = std::find_if(joysticks_.begin(), joysticks_.end(), [&event](const std::unique_ptr<ne::joystick>& iteratee) { return iteratee->native_id() == event.jball.which; });
+          auto joystick = std::find_if(joysticks_.begin(), joysticks_.end(), [&event](const std::unique_ptr<ne::joystick>& iteratee) { return iteratee->instance_id() == event.jball.which; });
           if (joystick == joysticks_.end()) continue;
           joystick->get()->on_trackball_motion(static_cast<std::size_t>(event.jball.ball), {static_cast<std::size_t>(event.jball.xrel), static_cast<std::size_t>(event.jball.yrel)});
         }
         else if (event.type == SDL_JOYHATMOTION            ) 
         {
-          auto joystick = std::find_if(joysticks_.begin(), joysticks_.end(), [&event](const std::unique_ptr<ne::joystick>& iteratee) { return iteratee->native_id() == event.jhat.which; });
+          auto joystick = std::find_if(joysticks_.begin(), joysticks_.end(), [&event](const std::unique_ptr<ne::joystick>& iteratee) { return iteratee->instance_id() == event.jhat.which; });
           if (joystick == joysticks_.end()) continue;
           joystick->get()->on_hat_motion(static_cast<std::size_t>(event.jhat.hat), static_cast<joystick_hat_state>(event.jhat.value));
         }
         else if (event.type == SDL_JOYBUTTONDOWN           ) 
         {
-          auto joystick = std::find_if(joysticks_.begin(), joysticks_.end(), [&event](const std::unique_ptr<ne::joystick>& iteratee) { return iteratee->native_id() == event.jbutton.which; });
+          auto joystick = std::find_if(joysticks_.begin(), joysticks_.end(), [&event](const std::unique_ptr<ne::joystick>& iteratee) { return iteratee->instance_id() == event.jbutton.which; });
           if (joystick == joysticks_.end()) continue;
           joystick->get()->on_button_press(static_cast<std::size_t>(event.jbutton.button));
         }
         else if (event.type == SDL_JOYBUTTONUP             ) 
         {
-          auto joystick = std::find_if(joysticks_.begin(), joysticks_.end(), [&event](const std::unique_ptr<ne::joystick>& iteratee) { return iteratee->native_id() == event.jbutton.which; });
+          auto joystick = std::find_if(joysticks_.begin(), joysticks_.end(), [&event](const std::unique_ptr<ne::joystick>& iteratee) { return iteratee->instance_id() == event.jbutton.which; });
           if (joystick == joysticks_.end()) continue;
           joystick->get()->on_button_press(static_cast<std::size_t>(event.jbutton.button));
         }

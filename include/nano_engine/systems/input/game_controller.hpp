@@ -17,7 +17,7 @@ namespace ne
 class game_controller
 {
 public:
-  explicit game_controller  (std::size_t index) : native_(SDL_GameControllerOpen(index))
+  explicit game_controller  (std::size_t index) : native_(SDL_GameControllerOpen(static_cast<int>(index)))
   {
     if(!native_)
       throw std::runtime_error("Failed to create SDL game controller. SDL Error: " + std::string(SDL_GetError()));
@@ -31,15 +31,13 @@ public:
   game_controller& operator=(const game_controller&  that) = delete ;
   game_controller& operator=(      game_controller&& temp) = default;
   
+  // type
   std::string         name           () const
   {
     return SDL_GameControllerName(native_);
-  }
-  bool                attached       () const
-  {
-    return static_cast<bool>(SDL_GameControllerGetAttached(native_));
-  }
-                  
+  }          
+  // guid
+  // instance_id
   std::uint32_t       product        () const
   {      
     return static_cast<std::uint32_t>(SDL_GameControllerGetProduct(native_));
@@ -52,7 +50,13 @@ public:
   {
     return static_cast<std::uint32_t>(SDL_GameControllerGetVendor(native_));
   }
-                   
+  
+  // power_level
+  bool                attached       () const
+  {
+    return SDL_GameControllerGetAttached(native_) != 0;
+  }
+   
   float               axis           (game_controller_axis axis) const
   {
     return static_cast<float>(SDL_GameControllerGetAxis(native_, static_cast<SDL_GameControllerAxis>(axis))) / 32768.0F;
