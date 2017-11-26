@@ -31,6 +31,7 @@ set(PROJECT_SOURCES
   include/nano_engine/systems/display/window_flags.hpp
   include/nano_engine/systems/display/window_mode.hpp
   include/nano_engine/systems/input/clipboard.hpp
+  include/nano_engine/systems/input/finger.hpp
   include/nano_engine/systems/input/game_controller.hpp
   include/nano_engine/systems/input/game_controller_axis.hpp
   include/nano_engine/systems/input/game_controller_button.hpp
