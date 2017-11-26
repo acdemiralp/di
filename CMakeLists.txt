@@ -37,6 +37,7 @@ set(PROJECT_SOURCES
   include/nano_engine/systems/input/game_controller_button.hpp
   include/nano_engine/systems/input/game_controller_default_mappings.hpp
   include/nano_engine/systems/input/game_controller_info.hpp
+  include/nano_engine/systems/input/gesture.hpp
   include/nano_engine/systems/input/input_system.hpp
   include/nano_engine/systems/input/joystick.hpp
   include/nano_engine/systems/input/joystick_hat_state.hpp
@@ -48,6 +49,7 @@ set(PROJECT_SOURCES
   include/nano_engine/systems/input/key_modifier.hpp
   include/nano_engine/systems/input/keyboard.hpp
   include/nano_engine/systems/input/mouse.hpp
+  include/nano_engine/systems/input/multi_gesture.hpp
   include/nano_engine/systems/input/os_cursor.hpp
   include/nano_engine/systems/input/scan_code.hpp
   include/nano_engine/systems/input/touch_device.hpp

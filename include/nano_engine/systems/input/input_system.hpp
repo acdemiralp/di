@@ -16,6 +16,7 @@
 #include <nano_engine/systems/input/key.hpp>
 #include <nano_engine/systems/input/game_controller.hpp>
 #include <nano_engine/systems/input/joystick.hpp>
+#include <nano_engine/systems/input/touch_device.hpp>
 #include <nano_engine/engine.hpp>
 #include <nano_engine/system.hpp>
 
@@ -28,6 +29,9 @@ public:
   {
     if (SDL_InitSubSystem(SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER | SDL_INIT_JOYSTICK) != 0)
       throw std::runtime_error("Failed to initialize SDL Events / Game Controller / Joystick subsystems. Error: " + std::string(SDL_GetError()));
+
+    for (auto i = 0; i < SDL_GetNumTouchDevices(); ++i)
+      touch_devices_.emplace_back(std::make_unique<touch_device>(SDL_GetTouchDevice(i)));
   }
   input_system           (const input_system&  that) = default;
   input_system           (      input_system&& temp) = default;
@@ -98,6 +102,20 @@ public:
         return game_controller.get();
       });
     return game_controllers;
+  }
+
+  std::vector<touch_device*>    touch_devices          () const
+  {
+    std::vector<touch_device*> touch_devices(touch_devices_.size());
+    std::transform(
+      touch_devices_.begin(),
+      touch_devices_.end  (),
+      touch_devices .begin(),
+      [ ] (const std::unique_ptr<touch_device>& touch_device)
+      {
+        return touch_device.get();
+      });
+    return touch_devices;
   }
 
   static bool                   has_events             ()
@@ -183,32 +201,32 @@ protected:
         
         else if (event.type == SDL_JOYAXISMOTION           )
         {
-          auto joystick = std::find_if(joysticks_.begin(), joysticks_.end(), [&event](const std::unique_ptr<ne::joystick>& iteratee) { return iteratee->instance_id() == event.jaxis.which; });
-          if (joystick == joysticks_.end()) continue;
+          auto joystick = std::find_if(joysticks_.begin(), joysticks_.end(), [&event] (const std::unique_ptr<ne::joystick>& iteratee) { return iteratee->instance_id() == event.jaxis.which; });
+          if  (joystick == joysticks_.end()) continue;
           joystick->get()->on_stick_motion(static_cast<std::size_t>(event.jaxis.axis), static_cast<float>(event.jaxis.value) / 32768.0F);
         }
         else if (event.type == SDL_JOYBALLMOTION           ) 
         {
-          auto joystick = std::find_if(joysticks_.begin(), joysticks_.end(), [&event](const std::unique_ptr<ne::joystick>& iteratee) { return iteratee->instance_id() == event.jball.which; });
-          if (joystick == joysticks_.end()) continue;
+          auto joystick = std::find_if(joysticks_.begin(), joysticks_.end(), [&event] (const std::unique_ptr<ne::joystick>& iteratee) { return iteratee->instance_id() == event.jball.which; });
+          if  (joystick == joysticks_.end()) continue;
           joystick->get()->on_trackball_motion(static_cast<std::size_t>(event.jball.ball), {static_cast<std::size_t>(event.jball.xrel), static_cast<std::size_t>(event.jball.yrel)});
         }
         else if (event.type == SDL_JOYHATMOTION            ) 
         {
-          auto joystick = std::find_if(joysticks_.begin(), joysticks_.end(), [&event](const std::unique_ptr<ne::joystick>& iteratee) { return iteratee->instance_id() == event.jhat.which; });
-          if (joystick == joysticks_.end()) continue;
+          auto joystick = std::find_if(joysticks_.begin(), joysticks_.end(), [&event] (const std::unique_ptr<ne::joystick>& iteratee) { return iteratee->instance_id() == event.jhat.which; });
+          if  (joystick == joysticks_.end()) continue;
           joystick->get()->on_hat_motion(static_cast<std::size_t>(event.jhat.hat), static_cast<joystick_hat_state>(event.jhat.value));
         }
         else if (event.type == SDL_JOYBUTTONDOWN           ) 
         {
-          auto joystick = std::find_if(joysticks_.begin(), joysticks_.end(), [&event](const std::unique_ptr<ne::joystick>& iteratee) { return iteratee->instance_id() == event.jbutton.which; });
-          if (joystick == joysticks_.end()) continue;
+          auto joystick = std::find_if(joysticks_.begin(), joysticks_.end(), [&event] (const std::unique_ptr<ne::joystick>& iteratee) { return iteratee->instance_id() == event.jbutton.which; });
+          if  (joystick == joysticks_.end()) continue;
           joystick->get()->on_button_press(static_cast<std::size_t>(event.jbutton.button));
         }
         else if (event.type == SDL_JOYBUTTONUP             ) 
         {
-          auto joystick = std::find_if(joysticks_.begin(), joysticks_.end(), [&event](const std::unique_ptr<ne::joystick>& iteratee) { return iteratee->instance_id() == event.jbutton.which; });
-          if (joystick == joysticks_.end()) continue;
+          auto joystick = std::find_if(joysticks_.begin(), joysticks_.end(), [&event] (const std::unique_ptr<ne::joystick>& iteratee) { return iteratee->instance_id() == event.jbutton.which; });
+          if  (joystick == joysticks_.end()) continue;
           joystick->get()->on_button_press(static_cast<std::size_t>(event.jbutton.button));
         }
         else if (event.type == SDL_JOYDEVICEADDED          ) on_joystick_connect   ();
@@ -221,12 +239,42 @@ protected:
         else if (event.type == SDL_CONTROLLERDEVICEREMOVED ) {}
         else if (event.type == SDL_CONTROLLERDEVICEREMAPPED) {}
         
-        else if (event.type == SDL_FINGERDOWN              ) {}
-        else if (event.type == SDL_FINGERUP                ) {}
-        else if (event.type == SDL_FINGERMOTION            ) {}
-        else if (event.type == SDL_DOLLARGESTURE           ) {}
-        else if (event.type == SDL_DOLLARRECORD            ) {}
-        else if (event.type == SDL_MULTIGESTURE            ) {}
+        else if (event.type == SDL_FINGERDOWN              )
+        {
+          auto touch_device = std::find_if(touch_devices_.begin(), touch_devices_.end(), [&event] (const std::unique_ptr<ne::touch_device>& iteratee) { return iteratee->id_ == event.tfinger.touchId; });
+          if  (touch_device == touch_devices_.end()) continue;
+          touch_device->get()->on_finger_press  (finger{static_cast<std::size_t>(event.tfinger.fingerId), {event.tfinger.x , event.tfinger.y }, event.tfinger.pressure});
+        }
+        else if (event.type == SDL_FINGERUP                )
+        {
+          auto touch_device = std::find_if(touch_devices_.begin(), touch_devices_.end(), [&event] (const std::unique_ptr<ne::touch_device>& iteratee) { return iteratee->id_ == event.tfinger.touchId; });
+          if  (touch_device == touch_devices_.end()) continue;
+          touch_device->get()->on_finger_release(finger{static_cast<std::size_t>(event.tfinger.fingerId), {event.tfinger.x , event.tfinger.y }, event.tfinger.pressure});
+        }
+        else if (event.type == SDL_FINGERMOTION            )
+        {
+          auto touch_device = std::find_if(touch_devices_.begin(), touch_devices_.end(), [&event] (const std::unique_ptr<ne::touch_device>& iteratee) { return iteratee->id_ == event.tfinger.touchId; });
+          if  (touch_device == touch_devices_.end()) continue;
+          touch_device->get()->on_finger_motion (finger{static_cast<std::size_t>(event.tfinger.fingerId), {event.tfinger.dx, event.tfinger.dy}, event.tfinger.pressure});
+        }
+        else if (event.type == SDL_DOLLARGESTURE           )
+        {
+          auto touch_device = std::find_if(touch_devices_.begin(), touch_devices_.end(), [&event] (const std::unique_ptr<ne::touch_device>& iteratee) { return iteratee->id_ == event.dgesture.touchId; });
+          if  (touch_device == touch_devices_.end()) continue;
+          touch_device->get()->on_gesture(gesture{event.dgesture.gestureId, {event.dgesture.x, event.dgesture.y}, event.dgesture.error, static_cast<std::size_t>(event.dgesture.numFingers)});
+        }
+        else if (event.type == SDL_DOLLARRECORD            )
+        {
+          auto touch_device = std::find_if(touch_devices_.begin(), touch_devices_.end(), [&event] (const std::unique_ptr<ne::touch_device>& iteratee) { return iteratee->id_ == event.dgesture.touchId; });
+          if  (touch_device == touch_devices_.end()) continue;
+          touch_device->get()->record_gesture_callback_(gesture{event.dgesture.gestureId});  
+        }
+        else if (event.type == SDL_MULTIGESTURE            )
+        {
+          auto touch_device = std::find_if(touch_devices_.begin(), touch_devices_.end(), [&event] (const std::unique_ptr<ne::touch_device>& iteratee) { return iteratee->id_ == event.mgesture.touchId; });
+          if  (touch_device == touch_devices_.end()) continue;
+          touch_device->get()->on_multi_gesture(multi_gesture{{event.mgesture.x, event.mgesture.y}, event.mgesture.dTheta, event.mgesture.dDist, event.mgesture.numFingers});  
+        }
         
         else if (event.type == SDL_CLIPBOARDUPDATE         ) on_clipboard_change(clipboard::get());
       }
@@ -236,8 +284,9 @@ protected:
     game_controller::update_all();
   }
 
-  std::vector<std::unique_ptr<joystick>>        joysticks_;
+  std::vector<std::unique_ptr<joystick>>        joysticks_       ;
   std::vector<std::unique_ptr<game_controller>> game_controllers_;
+  std::vector<std::unique_ptr<touch_device>>    touch_devices_   ;
 };
 }
 
