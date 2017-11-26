@@ -34,6 +34,7 @@ set(PROJECT_SOURCES
   include/nano_engine/systems/input/game_controller.hpp
   include/nano_engine/systems/input/game_controller_axis.hpp
   include/nano_engine/systems/input/game_controller_button.hpp
+  include/nano_engine/systems/input/game_controller_default_mappings.hpp
   include/nano_engine/systems/input/game_controller_info.hpp
   include/nano_engine/systems/input/input_system.hpp
   include/nano_engine/systems/input/joystick.hpp
