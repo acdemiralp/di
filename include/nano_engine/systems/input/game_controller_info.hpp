@@ -18,7 +18,7 @@ inline std::vector<game_controller_info> game_controller_infos()
   game_controller_infos.erase(std::remove_if(game_controller_infos.begin(), game_controller_infos.end(), 
   [ ] (const game_controller_info& game_controller_info)
   {
-    return !static_cast<bool>(SDL_IsGameController(game_controller_info.index));
+    return SDL_IsGameController(static_cast<int>(game_controller_info.index)) == 0;
   }), game_controller_infos.end());
   return game_controller_infos;
 }

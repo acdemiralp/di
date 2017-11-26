@@ -131,11 +131,12 @@ public:
     lock ? SDL_LockJoysticks() : SDL_UnlockJoysticks();
   }
 
-  boost::signals2::signal<void(std::size_t, float)>                      on_stick_motion    ;
+  boost::signals2::signal<void(std::size_t, float)>                      on_axis_motion     ;
   boost::signals2::signal<void(std::size_t)>                             on_button_press    ;
   boost::signals2::signal<void(std::size_t)>                             on_button_release  ;
   boost::signals2::signal<void(std::size_t, joystick_hat_state)>         on_hat_motion      ;
   boost::signals2::signal<void(std::size_t, std::array<std::size_t, 2>)> on_trackball_motion;
+  boost::signals2::signal<void()>                                        on_close           ;
 
 private:
   friend game_controller;

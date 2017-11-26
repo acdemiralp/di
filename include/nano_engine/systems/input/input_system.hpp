@@ -15,7 +15,9 @@
 #include <nano_engine/systems/input/clipboard.hpp>
 #include <nano_engine/systems/input/key.hpp>
 #include <nano_engine/systems/input/game_controller.hpp>
+#include <nano_engine/systems/input/game_controller_info.hpp>
 #include <nano_engine/systems/input/joystick.hpp>
+#include <nano_engine/systems/input/joystick_info.hpp>
 #include <nano_engine/systems/input/touch_device.hpp>
 #include <nano_engine/engine.hpp>
 #include <nano_engine/system.hpp>
@@ -29,6 +31,8 @@ public:
   {
     if (SDL_InitSubSystem(SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER | SDL_INIT_JOYSTICK) != 0)
       throw std::runtime_error("Failed to initialize SDL Events / Game Controller / Joystick subsystems. Error: " + std::string(SDL_GetError()));
+
+    game_controller::set_default_mappings();
 
     for (auto i = 0; i < SDL_GetNumTouchDevices(); ++i)
       touch_devices_.emplace_back(std::make_unique<touch_device>(SDL_GetTouchDevice(i)));
@@ -149,20 +153,20 @@ public:
     SDL_SetTextInputRect(&rectangle);
   }
   
-  boost::signals2::signal<void(key)>                                   on_key_press          ;
-  boost::signals2::signal<void(key)>                                   on_key_release        ;
-  boost::signals2::signal<void(std::string, std::size_t, std::size_t)> on_text_edit          ;
-  boost::signals2::signal<void(std::string)>                           on_text_input         ;
-  boost::signals2::signal<void()>                                      on_key_layout_change  ;
-  boost::signals2::signal<void(std::array<std::size_t, 2>)>            on_mouse_move         ;
-  boost::signals2::signal<void(std::array<std::size_t, 2>)>            on_mouse_move_delta   ;
-  boost::signals2::signal<void(std::size_t)>                           on_mouse_press        ;
-  boost::signals2::signal<void(std::size_t)>                           on_mouse_release      ;
-  boost::signals2::signal<void(std::array<std::size_t, 2>)>            on_mouse_wheel        ;
-  boost::signals2::signal<void()>                                      on_joystick_connect   ;
-  boost::signals2::signal<void()>                                      on_joystick_disconnect;
-  boost::signals2::signal<void(std::string)>                           on_clipboard_change   ;
-  boost::signals2::signal<void()>                                      on_quit               ;
+  boost::signals2::signal<void(key)>                                   on_key_press              ;
+  boost::signals2::signal<void(key)>                                   on_key_release            ;
+  boost::signals2::signal<void(std::string, std::size_t, std::size_t)> on_text_edit              ;
+  boost::signals2::signal<void(std::string)>                           on_text_input             ;
+  boost::signals2::signal<void()>                                      on_key_layout_change      ;
+  boost::signals2::signal<void(std::array<std::size_t, 2>)>            on_mouse_move             ;
+  boost::signals2::signal<void(std::array<std::size_t, 2>)>            on_mouse_move_delta       ;
+  boost::signals2::signal<void(std::size_t)>                           on_mouse_press            ;
+  boost::signals2::signal<void(std::size_t)>                           on_mouse_release          ;
+  boost::signals2::signal<void(std::array<std::size_t, 2>)>            on_mouse_wheel            ;
+  boost::signals2::signal<void(joystick_info)>                         on_joystick_connect       ;
+  boost::signals2::signal<void(game_controller_info)>                  on_game_controller_connect;
+  boost::signals2::signal<void(std::string)>                           on_clipboard_change       ;
+  boost::signals2::signal<void()>                                      on_quit                   ;
 
 protected:
   void initialize() override
@@ -203,7 +207,7 @@ protected:
         {
           auto joystick = std::find_if(joysticks_.begin(), joysticks_.end(), [&event] (const std::unique_ptr<ne::joystick>& iteratee) { return iteratee->instance_id() == event.jaxis.which; });
           if  (joystick == joysticks_.end()) continue;
-          joystick->get()->on_stick_motion(static_cast<std::size_t>(event.jaxis.axis), static_cast<float>(event.jaxis.value) / 32768.0F);
+          joystick->get()->on_axis_motion(static_cast<std::size_t>(event.jaxis.axis), static_cast<float>(event.jaxis.value) / 32768.0F);
         }
         else if (event.type == SDL_JOYBALLMOTION           ) 
         {
@@ -229,15 +233,45 @@ protected:
           if  (joystick == joysticks_.end()) continue;
           joystick->get()->on_button_press(static_cast<std::size_t>(event.jbutton.button));
         }
-        else if (event.type == SDL_JOYDEVICEADDED          ) on_joystick_connect   ();
-        else if (event.type == SDL_JOYDEVICEREMOVED        ) on_joystick_disconnect();
+        else if (event.type == SDL_JOYDEVICEADDED          ) on_joystick_connect(joystick_infos()[event.jdevice.which]);
+        else if (event.type == SDL_JOYDEVICEREMOVED        )
+        {
+          auto joystick = std::find_if(joysticks_.begin(), joysticks_.end(), [&event] (const std::unique_ptr<ne::joystick>& iteratee) { return iteratee->instance_id() == event.jdevice.which; });
+          if  (joystick == joysticks_.end()) continue;
+          joystick->get()->on_close();
+        }
         
-        else if (event.type == SDL_CONTROLLERAXISMOTION    ) {}
-        else if (event.type == SDL_CONTROLLERBUTTONDOWN    ) {}
-        else if (event.type == SDL_CONTROLLERBUTTONUP      ) {}
-        else if (event.type == SDL_CONTROLLERDEVICEADDED   ) {}
-        else if (event.type == SDL_CONTROLLERDEVICEREMOVED ) {}
-        else if (event.type == SDL_CONTROLLERDEVICEREMAPPED) {}
+        else if (event.type == SDL_CONTROLLERAXISMOTION    )
+        {
+          auto game_controller = std::find_if(game_controllers_.begin(), game_controllers_.end(), [&event] (const std::unique_ptr<ne::game_controller>& iteratee) { return iteratee->instance_id() == event.caxis.which; });
+          if  (game_controller == game_controllers_.end()) continue;
+          game_controller->get()->on_axis_motion(static_cast<game_controller_axis>(event.caxis.axis), static_cast<float>(event.caxis.value) / 32768.0F);
+        }
+        else if (event.type == SDL_CONTROLLERBUTTONDOWN    )
+        {
+          auto game_controller = std::find_if(game_controllers_.begin(), game_controllers_.end(), [&event] (const std::unique_ptr<ne::game_controller>& iteratee) { return iteratee->instance_id() == event.cbutton.which; });
+          if  (game_controller == game_controllers_.end()) continue;
+          game_controller->get()->on_button_press(static_cast<game_controller_button>(event.cbutton.button));
+        }
+        else if (event.type == SDL_CONTROLLERBUTTONUP      )
+        {
+          auto game_controller = std::find_if(game_controllers_.begin(), game_controllers_.end(), [&event] (const std::unique_ptr<ne::game_controller>& iteratee) { return iteratee->instance_id() == event.cbutton.which; });
+          if  (game_controller == game_controllers_.end()) continue;
+          game_controller->get()->on_button_press(static_cast<game_controller_button>(event.cbutton.button));
+        }
+        else if (event.type == SDL_CONTROLLERDEVICEADDED   ) on_game_controller_connect(game_controller_infos()[event.cdevice.which]);
+        else if (event.type == SDL_CONTROLLERDEVICEREMOVED )
+        {
+          auto game_controller = std::find_if(game_controllers_.begin(), game_controllers_.end(), [&event] (const std::unique_ptr<ne::game_controller>& iteratee) { return iteratee->instance_id() == event.cdevice.which; });
+          if  (game_controller == game_controllers_.end()) continue;
+          game_controller->get()->on_close();
+        }
+        else if (event.type == SDL_CONTROLLERDEVICEREMAPPED)
+        {
+          auto game_controller = std::find_if(game_controllers_.begin(), game_controllers_.end(), [&event] (const std::unique_ptr<ne::game_controller>& iteratee) { return iteratee->instance_id() == event.cdevice.which; });
+          if  (game_controller == game_controllers_.end()) continue;
+          game_controller->get()->on_remap();
+        }
         
         else if (event.type == SDL_FINGERDOWN              )
         {
