@@ -10,6 +10,7 @@
 #include <vector>
 
 #include <boost/signals2.hpp>
+#include <openvr.h>
 #include <SDL2/SDL_video.h>
 
 #include <nano_engine/systems/display/opengl_window.hpp>
@@ -26,6 +27,13 @@ public:
   {
     if (SDL_VideoInit(nullptr) != 0)
       throw std::runtime_error("Failed to initialize SDL Video subsystem. Error: " + std::string(SDL_GetError()));
+
+    auto error      = vr::VRInitError_None;
+    auto ivr_system = vr::VR_Init(&error, vr::VRApplication_Scene);
+    if (error)
+    {
+      // Unable to find HMD. Proceed without.
+    }
   }
   display_system           (const display_system&  that) = default;
   display_system           (      display_system&& temp) = default;
