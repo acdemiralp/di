@@ -13,13 +13,49 @@ set(PROJECT_SOURCES
   cmake/assign_source_group.cmake
   cmake/import_library.cmake
   
-  include/nano_engine/systems/display/display.hpp
-  include/nano_engine/systems/display/hmd.hpp
+  include/nano_engine/systems/display/display_info.hpp
+  include/nano_engine/systems/display/display_mode.hpp
+  include/nano_engine/systems/display/display_system.hpp
+  include/nano_engine/systems/display/hit_test_result.hpp
+  include/nano_engine/systems/display/message_box.hpp
+  include/nano_engine/systems/display/message_box_color_scheme.hpp
+  include/nano_engine/systems/display/message_box_level.hpp
+  include/nano_engine/systems/display/opengl_context_settings.hpp
+  include/nano_engine/systems/display/opengl_profile.hpp
+  include/nano_engine/systems/display/opengl_swap_mode.hpp
   include/nano_engine/systems/display/opengl_window.hpp
+  include/nano_engine/systems/display/screensaver.hpp
+  include/nano_engine/systems/display/video_driver.hpp
+  include/nano_engine/systems/display/vulkan_window.hpp
   include/nano_engine/systems/display/window.hpp
-  include/nano_engine/systems/input/input.hpp
+  include/nano_engine/systems/display/window_flags.hpp
+  include/nano_engine/systems/display/window_mode.hpp
+  include/nano_engine/systems/input/clipboard.hpp
+  include/nano_engine/systems/input/finger.hpp
+  include/nano_engine/systems/input/game_controller.hpp
+  include/nano_engine/systems/input/game_controller_axis.hpp
+  include/nano_engine/systems/input/game_controller_button.hpp
+  include/nano_engine/systems/input/game_controller_default_mappings.hpp
+  include/nano_engine/systems/input/game_controller_info.hpp
+  include/nano_engine/systems/input/gesture.hpp
+  include/nano_engine/systems/input/input_system.hpp
+  include/nano_engine/systems/input/joystick.hpp
+  include/nano_engine/systems/input/joystick_hat_state.hpp
+  include/nano_engine/systems/input/joystick_info.hpp
+  include/nano_engine/systems/input/joystick_power_level.hpp
+  include/nano_engine/systems/input/joystick_type.hpp
+  include/nano_engine/systems/input/key.hpp
+  include/nano_engine/systems/input/key_code.hpp
+  include/nano_engine/systems/input/key_modifier.hpp
+  include/nano_engine/systems/input/keyboard.hpp
+  include/nano_engine/systems/input/mouse.hpp
+  include/nano_engine/systems/input/multi_gesture.hpp
+  include/nano_engine/systems/input/os_cursor.hpp
+  include/nano_engine/systems/input/scan_code.hpp
+  include/nano_engine/systems/input/touch_device.hpp
   include/nano_engine/systems/renderer/render_pass.hpp
   include/nano_engine/systems/renderer/renderer.hpp
+  include/nano_engine/utility/bitset_enum.hpp
   include/nano_engine/utility/frame_timer.hpp
   include/nano_engine/engine.hpp
   include/nano_engine/system.hpp
@@ -30,11 +66,14 @@ assign_source_group(${PROJECT_SOURCES})
 ##################################################  Dependencies  ##################################################
 include(import_library)
 
-find_package    (Boost REQUIRED)
-import_library  (Boost_INCLUDE_DIRS)
+find_package  (Boost REQUIRED)
+import_library(Boost_INCLUDE_DIRS)
 
-find_package    (SDL2 REQUIRED)
-import_library  (SDL2_INCLUDE_DIR SDL2_LIBRARY)
+find_package  (OpenVR REQUIRED)
+import_library(OPENVR_INCLUDE_DIRS OPENVR_LIBRARY)
+
+find_package  (SDL2 REQUIRED)
+import_library(SDL2_INCLUDE_DIR SDL2_LIBRARY)
 if   (WIN32)
   list(APPEND PROJECT_LIBRARIES winmm.lib Imm32.lib)
 endif()

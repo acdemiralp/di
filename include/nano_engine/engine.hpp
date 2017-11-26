@@ -39,11 +39,7 @@ public:
 
   void run       ()
   {
-    if (is_running_)
-    {
-      std::cout << "Failed to run the engine: Already running." << std::endl;
-      return;
-    }
+    if (is_running_) return;
     is_running_ = true;
 
     for (auto& system : systems_)
@@ -54,7 +50,7 @@ public:
     {
       frame_timer_.tick();
       for(auto& system : systems_)
-        system->update();
+        system->tick();
     }
 
     for (auto& system : systems_)

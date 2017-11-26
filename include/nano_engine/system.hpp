@@ -11,7 +11,7 @@ public:
   virtual ~system() = default;
 
   virtual void initialize() { }
-  virtual void update    () { }
+  virtual void tick      () { }
   virtual void terminate () { }
 
 protected:

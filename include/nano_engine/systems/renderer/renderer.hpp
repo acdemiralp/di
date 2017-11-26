@@ -29,7 +29,7 @@ protected:
     for (auto& render_pass : render_passes_)
       render_pass.setup_();
   }
-  void update    () override
+  void tick      () override
   {
     for(auto& render_pass : render_passes_)
       render_pass.execute_();
