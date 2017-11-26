@@ -45,11 +45,11 @@ public:
   {
     return std::string(SDL_JoystickName(native_));
   }
-  std::string                             guid           () const
+  std::string                             uuid           () const
   {
-    char native_guid[128];
-    SDL_JoystickGetGUIDString(SDL_JoystickGetGUID(native_), native_guid, 128);
-    return std::string(native_guid);
+    char native_uuid[128];
+    SDL_JoystickGetGUIDString(SDL_JoystickGetGUID(native_), native_uuid, 128);
+    return std::string(native_uuid);
   }
   std::uint32_t                           instance_id    () const
   {
