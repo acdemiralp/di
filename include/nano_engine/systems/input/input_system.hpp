@@ -37,13 +37,13 @@ public:
     for (auto i = 0; i < SDL_GetNumTouchDevices(); ++i)
       touch_devices_.emplace_back(std::make_unique<touch_device>(SDL_GetTouchDevice(i)));
   }
-  input_system           (const input_system&  that) = default;
+  input_system           (const input_system&  that) = delete ;
   input_system           (      input_system&& temp) = default;
   virtual ~input_system  ()
   {
     SDL_QuitSubSystem(SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER | SDL_INIT_JOYSTICK);
   }
-  input_system& operator=(const input_system&  that) = default;
+  input_system& operator=(const input_system&  that) = delete ;
   input_system& operator=(      input_system&& temp) = default;
 
   template<typename... argument_types>
