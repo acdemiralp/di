@@ -49,8 +49,8 @@ public:
     std::array<std::array<float, 16>, 2> matrix;
     auto left_eye_matrix  = native_->GetProjectionMatrix(vr::EVREye::Eye_Left , z_near, z_far);
     auto right_eye_matrix = native_->GetProjectionMatrix(vr::EVREye::Eye_Right, z_near, z_far);
-    std::copy(&left_eye_matrix [0][0], &left_eye_matrix [0][0] + 16, &matrix[0]);
-    std::copy(&right_eye_matrix[0][0], &right_eye_matrix[0][0] + 16, &matrix[1]);
+    std::copy(&left_eye_matrix .m[0][0], &left_eye_matrix .m[0][0] + 16, &matrix[0]);
+    std::copy(&right_eye_matrix.m[0][0], &right_eye_matrix.m[0][0] + 16, &matrix[1]);
     return matrix;
   }
   std::array<std::array<float, 4>, 2> projection_parameters         () const
