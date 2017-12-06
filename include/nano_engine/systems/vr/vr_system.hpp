@@ -12,8 +12,15 @@
 #include <nano_engine/systems/vr/eye.hpp>
 #include <nano_engine/system.hpp>
 
+#ifdef _WIN32
+#include <winnt.h>
+#endif
+
 #undef near
 #undef far
+
+typedef struct VkInstance_T*       VkInstance      ;
+typedef struct VkPhysicalDevice_T* VkPhysicalDevice;
 
 namespace ne
 {
@@ -51,7 +58,7 @@ public:
   vr_system& operator=(      vr_system&& temp) = default;
 
   // IVR System - Display
-  std::array<std::size_t, 2>          recommended_render_target_size()                                        const
+  std::array<std::size_t, 2>          recommended_render_target_size ()                                           const
   {
     std::array<std::size_t, 2> size;
     native_->GetRecommendedRenderTargetSize(
@@ -59,20 +66,27 @@ public:
       reinterpret_cast<std::uint32_t*>(&size[1]));
     return size;
   }
-  std::array<float, 16>               projection_matrix             (eye eye, float near, float far)          const
+  std::array<float, 16>               projection_matrix              (eye eye, const float near, const float far) const
   {
     std::array<float, 16> matrix;
     auto native_matrix = native_->GetProjectionMatrix(static_cast<vr::EVREye>(eye), near, far);
     std::copy(&native_matrix.m[0][0], &native_matrix.m[0][0] + 16, matrix.data());
     return matrix;
   }
-  std::array<float, 4>                projection_parameters         (eye eye)                                 const
+  std::array<float, 4>                projection_parameters          (eye eye)                                    const
   {
     std::array<float, 4> parameters;
     native_->GetProjectionRaw(static_cast<vr::EVREye>(eye), &parameters[0], &parameters[1], &parameters[2], &parameters[3]);
     return parameters;
   }
-  std::array<std::array<float, 2>, 3> compute_distortion            (eye eye, const std::array<float, 2>& uv) const
+  std::array<float, 12>               eye_to_head_transform          (eye eye)                                    const
+  {
+    std::array<float, 12> matrix;
+    auto native_matrix = native_->GetEyeToHeadTransform(static_cast<vr::EVREye>(eye));
+    std::copy(&native_matrix.m[0][0], &native_matrix.m[0][0] + 12, matrix.data());
+    return matrix;
+  }
+  std::array<std::array<float, 2>, 3> compute_distortion             (eye eye, const std::array<float, 2>& uv)    const
   {
     std::array<std::array<float, 2>, 3> distortion;
     vr::DistortionCoordinates_t native_distortion;
@@ -82,22 +96,15 @@ public:
     distortion[2][0] = native_distortion.rfBlue [0]; distortion[2][1] = native_distortion.rfBlue [1];
     return distortion;
   }
-  std::array<float, 12>               eye_to_head_transform         (eye eye)                                 const
-  {
-    std::array<float, 12> matrix;
-    auto native_matrix = native_->GetEyeToHeadTransform(static_cast<vr::EVREye>(eye));
-    std::copy(&native_matrix.m[0][0], &native_matrix.m[0][0] + 12, matrix.data());
-    return matrix;
-  }
-
-  float                               time_since_last_vsync         ()                                        const
+                                                                     
+  float                               time_since_last_vsync          ()                                           const
   {
     float         time       ;
     std::uint64_t frame_count;
     native_->GetTimeSinceLastVsync(&time, &frame_count);
     return time;
   }
-  std::uint64_t                       frame_count                   ()                                        const
+  std::uint64_t                       frame_count                    ()                                           const
   {
     float         time       ;
     std::uint64_t frame_count;
@@ -105,35 +112,67 @@ public:
     return frame_count;
   }
 
-  std::int32_t                        d3d9_output_info              ()                                        const
+#ifdef _WIN32                                                             
+  std::uint32_t                       adapter_index_d3d9             ()                                           const
   {
-    return native_->GetD3D9AdapterIndex();
+    return static_cast<std::uint32_t>(native_->GetD3D9AdapterIndex());
   }
-  std::int32_t                        d3d11_output_info             ()                                        const
+  std::uint32_t                       adapter_index_d3d10_d3d11      ()                                           const
   {
     std::int32_t index;
     native_->GetDXGIOutputInfo(&index);
-    return index;
+    return static_cast<std::uint32_t>(index);
+  }
+  LUID                                output_device_d3d10_d3d11      ()                                           const
+  {
+    LUID   luid;
+    native_->GetOutputDevice(reinterpret_cast<std::uint64_t*>(&luid), vr::ETextureType::TextureType_DirectX);
+    return luid;
+  }
+  LUID                                output_device_d3d12            ()                                           const
+  {
+    LUID   luid;
+    native_->GetOutputDevice(reinterpret_cast<std::uint64_t*>(&luid), vr::ETextureType::TextureType_DirectX12);
+    return luid;
+  }
+#elif __APPLE__
+  std::uint64_t                       output_device_metal            ()                                           const
+  {
+    std::uint64_t id;
+    native_->GetOutputDevice(&id, vr::ETextureType::TextureType_IOSurface);
+    return        id;
+  }
+#endif
+  VkPhysicalDevice                    output_device_vulkan           (VkInstance instance)                        const
+  {
+    VkPhysicalDevice device;
+    native_->GetOutputDevice(reinterpret_cast<std::uint64_t*>(&device), vr::ETextureType::TextureType_Vulkan, instance);
+    return           device;
   }
 
-
   // IVR System - Display Mode
+  bool extended_display_mode    () const
+  {
+    return native_->IsDisplayOnDesktop();
+  }
+  void set_extended_display_mode(const bool mode)
+  {
+    native_->SetDisplayVisibility(mode);
+  }
 
-  // IVR System - Tracking
-
-  static bool                         available                     ()
+  static bool                         available                      ()
   {
     return hardware_present() && runtime_installed();
   }
-  static bool                         hardware_present              ()
+  static bool                         hardware_present               ()
   {
     return vr::VR_IsHmdPresent();
   }
-  static bool                         runtime_installed             ()
+  static bool                         runtime_installed              ()
   {
     return vr::VR_IsRuntimeInstalled();
   }
-  static std::string                  runtime_location              ()
+  static std::string                  runtime_location               ()
   {
     return std::string(vr::VR_RuntimePath());
   }
