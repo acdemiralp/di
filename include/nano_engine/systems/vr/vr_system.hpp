@@ -151,14 +151,17 @@ public:
   }
 
   // IVR System - Display Mode
-  bool extended_display_mode    () const
+  bool                                extended_display_mode          ()                                           const
   {
     return native_->IsDisplayOnDesktop();
   }
-  void set_extended_display_mode(const bool mode)
+  void                                set_extended_display_mode      (const bool mode)
   {
     native_->SetDisplayVisibility(mode);
   }
+  
+  // IVR System - Tracking
+
 
   static bool                         available                      ()
   {

@@ -7,8 +7,8 @@ namespace ne
 {
 enum class eye
 {
-  left  = vr::EVREye::Eye_Left,
-  right = vr::EVREye::Eye_Right
+  left  = vr::Eye_Left,
+  right = vr::Eye_Right
 };
 }
 
