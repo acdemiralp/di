@@ -115,30 +115,30 @@ public:
   }
 
 #ifdef _WIN32                                                             
-  std::uint32_t                       adapter_index_d3d9             ()                                           const
+  std::uint32_t                       adapter_index_d3d9               ()                                           const
   {
     return static_cast<std::uint32_t>(native_->GetD3D9AdapterIndex());
   }
-  std::uint32_t                       adapter_index_d3d10_d3d11      ()                                           const
+  std::uint32_t                       adapter_index_d3d10_d3d11        ()                                           const
   {
     std::int32_t index;
     native_->GetDXGIOutputInfo(&index);
     return static_cast<std::uint32_t>(index);
   }
-  LUID                                output_device_d3d10_d3d11      ()                                           const
+  LUID                                output_device_d3d10_d3d11        ()                                           const
   {
     LUID   luid;
     native_->GetOutputDevice(reinterpret_cast<std::uint64_t*>(&luid), vr::ETextureType::TextureType_DirectX);
     return luid;
   }
-  LUID                                output_device_d3d12            ()                                           const
+  LUID                                output_device_d3d12              ()                                           const
   {
     LUID   luid;
     native_->GetOutputDevice(reinterpret_cast<std::uint64_t*>(&luid), vr::ETextureType::TextureType_DirectX12);
     return luid;
   }                                                             
-#elif __APPLE__
-  std::uint64_t                       output_device_metal            ()                                           const
+#elif __APPLE__                                                        
+  std::uint64_t                       output_device_metal              ()                                           const
   {
     std::uint64_t id;
     native_->GetOutputDevice(&id, vr::ETextureType::TextureType_IOSurface);
@@ -151,7 +151,7 @@ public:
     native_->GetOutputDevice(reinterpret_cast<std::uint64_t*>(&device), vr::ETextureType::TextureType_Vulkan, instance);
     return           device;
   }
-                                                                       
+
   // IVR System - Display Mode                                         
   bool                                extended_display_mode            ()                                           const
   {
