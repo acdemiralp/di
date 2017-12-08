@@ -17,6 +17,7 @@ struct tracking_device_pose
   tracking_device_state state           ;
   bool                  valid           ;
   bool                  connected       ;
+
 };
 }
 
