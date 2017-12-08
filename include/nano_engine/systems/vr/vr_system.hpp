@@ -29,25 +29,12 @@ namespace ne
 class vr_system final : public system
 {
 public:
-  vr_system           () 
-  : native_          (VR_Init(&init_error_, vr::VRApplication_Scene))
-  , chaperone_       (vr::VRChaperone      ())
-  , chaperone_setup_ (vr::VRChaperoneSetup ())
-  , compositor_      (vr::VRCompositor     ())
-  , overlay_         (vr::VROverlay        ())
-  , screenshots_     (vr::VRScreenshots    ())
-  , render_models_   (vr::VRRenderModels   ())
-  , applications_    (vr::VRApplications   ())
-  , settings_        (vr::VRSettings       ())
-  , resources_       (vr::VRResources      ())
-  , extended_display_(vr::VRExtendedDisplay())
-  , tracked_camera_  (vr::VRTrackedCamera  ())
-  , driver_manager_  (vr::VRDriverManager  ())
-
+  vr_system           () : native_(VR_Init(&init_error_, vr::VRApplication_Scene))
   {
     if (init_error_ != vr::VRInitError_None)
       throw std::runtime_error("Failed to initialize OpenVR. Error " 
         + std::string(vr::VR_GetVRInitErrorAsSymbol            (init_error_))
+        + std::string(": ")
         + std::string(vr::VR_GetVRInitErrorAsEnglishDescription(init_error_)));
   }
   vr_system           (const vr_system&  that) = delete ;
@@ -259,20 +246,8 @@ private:
     }
   }
 
-  vr::EVRInitError        init_error_       = vr::VRInitError_None;
-  vr::IVRSystem*          native_           = nullptr;
-  vr::IVRChaperone*       chaperone_        = nullptr;
-  vr::IVRChaperoneSetup*  chaperone_setup_  = nullptr;
-  vr::IVRCompositor*      compositor_       = nullptr;
-  vr::IVROverlay*         overlay_          = nullptr;
-  vr::IVRScreenshots*     screenshots_      = nullptr;
-  vr::IVRRenderModels*    render_models_    = nullptr;
-  vr::IVRApplications*    applications_     = nullptr;
-  vr::IVRSettings*        settings_         = nullptr;
-  vr::IVRResources*       resources_        = nullptr;
-  vr::IVRExtendedDisplay* extended_display_ = nullptr;
-  vr::IVRTrackedCamera*   tracked_camera_   = nullptr;
-  vr::IVRDriverManager*   driver_manager_   = nullptr;
+  vr::EVRInitError init_error_ = vr::VRInitError_None;
+  vr::IVRSystem*   native_     = nullptr;
 };
 }
 

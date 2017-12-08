@@ -55,14 +55,17 @@ set(PROJECT_SOURCES
   include/nano_engine/systems/input/touch_device.hpp
   include/nano_engine/systems/renderer/render_pass.hpp
   include/nano_engine/systems/renderer/renderer.hpp
+  include/nano_engine/systems/vr/display_redirect.hpp
   include/nano_engine/systems/vr/eye.hpp
   include/nano_engine/systems/vr/hand.hpp
+  include/nano_engine/systems/vr/hmd.hpp
   include/nano_engine/systems/vr/tracking_device.hpp
   include/nano_engine/systems/vr/tracking_device_activity.hpp
   include/nano_engine/systems/vr/tracking_device_pose.hpp
   include/nano_engine/systems/vr/tracking_device_state.hpp
   include/nano_engine/systems/vr/tracking_device_type.hpp
   include/nano_engine/systems/vr/tracking_mode.hpp
+  include/nano_engine/systems/vr/tracking_reference.hpp
   include/nano_engine/systems/vr/vr_controller.hpp
   include/nano_engine/systems/vr/vr_controller_axis.hpp
   include/nano_engine/systems/vr/vr_controller_button.hpp
