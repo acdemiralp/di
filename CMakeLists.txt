@@ -59,10 +59,15 @@ set(PROJECT_SOURCES
   include/nano_engine/systems/vr/hand.hpp
   include/nano_engine/systems/vr/tracking_device.hpp
   include/nano_engine/systems/vr/tracking_device_activity.hpp
+  include/nano_engine/systems/vr/tracking_device_pose.hpp
   include/nano_engine/systems/vr/tracking_device_state.hpp
   include/nano_engine/systems/vr/tracking_device_type.hpp
   include/nano_engine/systems/vr/tracking_mode.hpp
-  include/nano_engine/systems/vr/tracking_device_pose.hpp
+  include/nano_engine/systems/vr/vr_controller.hpp
+  include/nano_engine/systems/vr/vr_controller_axis.hpp
+  include/nano_engine/systems/vr/vr_controller_axis_type.hpp
+  include/nano_engine/systems/vr/vr_controller_button.hpp
+  include/nano_engine/systems/vr/vr_controller_state.hpp
   include/nano_engine/systems/vr/vr_system.hpp
   include/nano_engine/utility/bitset_enum.hpp
   include/nano_engine/utility/frame_timer.hpp

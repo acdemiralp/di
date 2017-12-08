@@ -72,7 +72,7 @@ public:
   {
     std::array<float, 16> matrix;
     const auto native_matrix = native_->GetProjectionMatrix(static_cast<vr::EVREye>(eye), near, far);
-    std::copy(&native_matrix.m[0][0], &native_matrix.m[0][0] + 16, matrix.data());
+    std::copy(&native_matrix.m[0][0], &native_matrix.m[0][0] + 16, matrix.begin());
     return matrix;
   }
   std::array<float, 4>                projection_parameters            (eye eye)                                    const
@@ -85,7 +85,7 @@ public:
   {
     std::array<float, 12> matrix;
     const auto native_matrix = native_->GetEyeToHeadTransform(static_cast<vr::EVREye>(eye));
-    std::copy(&native_matrix.m[0][0], &native_matrix.m[0][0] + 12, matrix.data());
+    std::copy(&native_matrix.m[0][0], &native_matrix.m[0][0] + 12, matrix.begin());
     return matrix;
   }
   std::array<std::array<float, 2>, 3> compute_distortion               (eye eye, const std::array<float, 2>& uv)    const
@@ -171,14 +171,14 @@ public:
   {
     std::array<float, 12> matrix;
     const auto native_matrix = native_->GetSeatedZeroPoseToStandingAbsoluteTrackingPose();
-    std::copy(&native_matrix.m[0][0], &native_matrix.m[0][0] + 12, matrix.data());
+    std::copy(&native_matrix.m[0][0], &native_matrix.m[0][0] + 12, matrix.begin());
     return matrix;
   }
   std::array<float, 12>               raw_zero_pose_to_standing_pose   ()                                           const
   {
     std::array<float, 12> matrix;
     const auto native_matrix = native_->GetRawZeroPoseToStandingAbsoluteTrackingPose();
-    std::copy(&native_matrix.m[0][0], &native_matrix.m[0][0] + 12, matrix.data());
+    std::copy(&native_matrix.m[0][0], &native_matrix.m[0][0] + 12, matrix.begin());
     return matrix;
   }
 
@@ -187,21 +187,21 @@ public:
   {
     const auto hidden_area_mesh = native_->GetHiddenAreaMesh(static_cast<vr::EVREye>(eye), vr::k_eHiddenAreaMesh_Standard);
     std::vector<std::array<float, 2>> vertices(3 * hidden_area_mesh.unTriangleCount);
-    std::copy(&hidden_area_mesh.pVertexData->v[0], &hidden_area_mesh.pVertexData->v[0] + 2 * vertices.size(), vertices.data());
+    std::copy(&hidden_area_mesh.pVertexData->v[0], &hidden_area_mesh.pVertexData->v[0] + 2 * vertices.size(), &vertices[0][0]);
     return vertices;
   }
   std::vector<std::array<float, 2>>   hidden_area_mesh_inverse         (eye eye)                                    const
   {
     const auto hidden_area_mesh = native_->GetHiddenAreaMesh(static_cast<vr::EVREye>(eye), vr::k_eHiddenAreaMesh_Inverse);
     std::vector<std::array<float, 2>> vertices(3 * hidden_area_mesh.unTriangleCount);
-    std::copy(&hidden_area_mesh.pVertexData->v[0], &hidden_area_mesh.pVertexData->v[0] + 2 * vertices.size(), vertices.data());
+    std::copy(&hidden_area_mesh.pVertexData->v[0], &hidden_area_mesh.pVertexData->v[0] + 2 * vertices.size(), &vertices[0][0]);
     return vertices;
   }
   std::vector<std::array<float, 2>>   hidden_area_mesh_wireframe       (eye eye)                                    const
   {
     const auto hidden_area_mesh = native_->GetHiddenAreaMesh(static_cast<vr::EVREye>(eye), vr::k_eHiddenAreaMesh_LineLoop);
     std::vector<std::array<float, 2>> vertices(2 * hidden_area_mesh.unTriangleCount);
-    std::copy(&hidden_area_mesh.pVertexData->v[0], &hidden_area_mesh.pVertexData->v[0] + 2 * vertices.size(), vertices.data());
+    std::copy(&hidden_area_mesh.pVertexData->v[0], &hidden_area_mesh.pVertexData->v[0] + 2 * vertices.size(), &vertices[0][0]);
     return vertices;
   }
 
