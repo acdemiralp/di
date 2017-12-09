@@ -60,6 +60,8 @@ public:
 protected:
   std::uint32_t index_;
 };
+
+typedef tracking_device<tracking_device_type::generic> generic_tracking_device;
 }
 
 #endif
