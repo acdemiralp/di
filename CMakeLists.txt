@@ -51,6 +51,8 @@ set(PROJECT_SOURCES
   include/nano_engine/systems/input/mouse.hpp
   include/nano_engine/systems/input/multi_gesture.hpp
   include/nano_engine/systems/input/os_cursor.hpp
+  include/nano_engine/systems/input/power_info.hpp
+  include/nano_engine/systems/input/power_state.hpp
   include/nano_engine/systems/input/scan_code.hpp
   include/nano_engine/systems/input/touch_device.hpp
   include/nano_engine/systems/renderer/render_pass.hpp
