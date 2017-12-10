@@ -60,40 +60,40 @@ public:
   {
     std::vector<hmd> hmds;
     std::vector<std::uint32_t> indices(vr::k_unMaxTrackedDeviceCount);
-    auto count = vr::VRSystem()->GetSortedTrackedDeviceIndicesOfClass(static_cast<vr::ETrackedDeviceClass>(tracking_device_type::hmd)               , indices.data(), indices.size());
-    for (auto i = 0; i < count; i++) hmds.emplace_back(indices[i]);
+    auto count = vr::VRSystem()->GetSortedTrackedDeviceIndicesOfClass(static_cast<vr::ETrackedDeviceClass>(tracking_device_type::hmd)               , indices.data(), static_cast<std::uint32_t>(indices.size()));
+    for (auto i = 0u; i < count; i++) hmds.emplace_back(indices[i]);
     return hmds;
   }
   std::vector<vr_controller>           controllers             () const
   {
     std::vector<vr_controller> controllers;
     std::vector<std::uint32_t> indices(vr::k_unMaxTrackedDeviceCount);
-    auto count = vr::VRSystem()->GetSortedTrackedDeviceIndicesOfClass(static_cast<vr::ETrackedDeviceClass>(tracking_device_type::controller)        , indices.data(), indices.size());
-    for (auto i = 0; i < count; i++) controllers.emplace_back(indices[i]);
+    auto count = vr::VRSystem()->GetSortedTrackedDeviceIndicesOfClass(static_cast<vr::ETrackedDeviceClass>(tracking_device_type::controller)        , indices.data(), static_cast<std::uint32_t>(indices.size()));
+    for (auto i = 0u; i < count; i++) controllers.emplace_back(indices[i]);
     return controllers;
   }
   std::vector<tracking_reference>      tracking_references     () const
   {
     std::vector<tracking_reference> tracking_references;
     std::vector<std::uint32_t> indices(vr::k_unMaxTrackedDeviceCount);
-    auto count = vr::VRSystem()->GetSortedTrackedDeviceIndicesOfClass(static_cast<vr::ETrackedDeviceClass>(tracking_device_type::tracking_reference), indices.data(), indices.size());
-    for (auto i = 0; i < count; i++) tracking_references.emplace_back(indices[i]);
+    auto count = vr::VRSystem()->GetSortedTrackedDeviceIndicesOfClass(static_cast<vr::ETrackedDeviceClass>(tracking_device_type::tracking_reference), indices.data(), static_cast<std::uint32_t>(indices.size()));
+    for (auto i = 0u; i < count; i++) tracking_references.emplace_back(indices[i]);
     return tracking_references;
   }
   std::vector<display_redirect>        display_redirects       () const
   {
     std::vector<display_redirect> display_redirects;
     std::vector<std::uint32_t> indices(vr::k_unMaxTrackedDeviceCount);
-    auto count = vr::VRSystem()->GetSortedTrackedDeviceIndicesOfClass(static_cast<vr::ETrackedDeviceClass>(tracking_device_type::display_redirect)  , indices.data(), indices.size());
-    for (auto i = 0; i < count; i++) display_redirects.emplace_back(indices[i]);
+    auto count = vr::VRSystem()->GetSortedTrackedDeviceIndicesOfClass(static_cast<vr::ETrackedDeviceClass>(tracking_device_type::display_redirect)  , indices.data(), static_cast<std::uint32_t>(indices.size()));
+    for (auto i = 0u; i < count; i++) display_redirects.emplace_back(indices[i]);
     return display_redirects;
   }
   std::vector<generic_tracking_device> generic_tracking_devices() const
   {
     std::vector<generic_tracking_device> generic_tracking_devices;
     std::vector<std::uint32_t> indices(vr::k_unMaxTrackedDeviceCount);
-    auto count = vr::VRSystem()->GetSortedTrackedDeviceIndicesOfClass(static_cast<vr::ETrackedDeviceClass>(tracking_device_type::generic)           , indices.data(), indices.size());
-    for (auto i = 0; i < count; i++) generic_tracking_devices.emplace_back(indices[i]);
+    auto count = vr::VRSystem()->GetSortedTrackedDeviceIndicesOfClass(static_cast<vr::ETrackedDeviceClass>(tracking_device_type::generic)           , indices.data(), static_cast<std::uint32_t>(indices.size()));
+    for (auto i = 0u; i < count; i++) generic_tracking_devices.emplace_back(indices[i]);
     return generic_tracking_devices;
   }
                                                       

@@ -14,7 +14,10 @@ namespace ne
 class vr_controller : public tracking_device<tracking_device_type::controller>
 {
 public:
-  vr_controller           ()                           = default;
+  explicit vr_controller  (std::uint32_t index) : tracking_device<tracking_device_type::controller>(index)
+  {
+  
+  }
   vr_controller           (const vr_controller&  that) = default;
   vr_controller           (      vr_controller&& temp) = default;
   virtual ~vr_controller  ()                           = default;
