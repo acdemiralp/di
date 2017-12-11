@@ -26,7 +26,7 @@ public:
   explicit joystick  (const std::size_t& index) 
   : native_ (SDL_JoystickOpen(static_cast<int>(index)))
   , managed_(true)
-  , haptics_(SDL_JoystickIsHaptic(native_) ? std::make_unique<haptic_device>(SDL_HapticOpenFromJoystick(native_)) : nullptr)
+  , haptics_(native_ && SDL_JoystickIsHaptic(native_) ? std::make_unique<haptic_device>(SDL_HapticOpenFromJoystick(native_)) : nullptr)
   {
     if (!native_)
       throw std::runtime_error("Failed to create SDL joystick. SDL Error: " + std::string(SDL_GetError()));
@@ -153,9 +153,10 @@ private:
   explicit joystick(SDL_Joystick* native) 
   : native_ (native)
   , managed_(false)
-  , haptics_(SDL_JoystickIsHaptic(native_) ? std::make_unique<haptic_device>(SDL_HapticOpenFromJoystick(native_)) : nullptr)
+  , haptics_(native_ && SDL_JoystickIsHaptic(native_) ? std::make_unique<haptic_device>(SDL_HapticOpenFromJoystick(native_)) : nullptr)
   {
-    
+    if (!native_)
+      throw std::runtime_error("Failed to create SDL joystick. Invalid pointer.");
   }
 
   SDL_Joystick*                  native_ ;
