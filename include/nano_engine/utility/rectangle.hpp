@@ -3,10 +3,10 @@
 
 namespace ne
 {
-// I resisted creating this class to use standard library primitives
+// I resisted creating this struct to use standard library primitives
 // instead, but it has proven itself necessary for clarity.
 template <typename type>
-class rectangle
+struct rectangle
 {
   type left, right, top, bottom;
 };
