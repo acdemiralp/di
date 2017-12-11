@@ -161,7 +161,105 @@ public:
     std::copy(&native_matrix.m[0][0], &native_matrix.m[0][0] + 12, matrix.begin());
     return matrix;
   }
-                                                                                                                      
+  
+  // IVR System - Property
+  bool  reports_time_since_vsync     () const
+  {
+    return get_property_bool(vr::Prop_ReportsTimeSinceVSync_Bool);
+  }
+  float seconds_from_vsync_to_photons() const
+  {
+    return get_property_float(vr::Prop_SecondsFromVsyncToPhotons_Float);
+  }
+  float display_frequency            () const
+  {
+    return get_property_float(vr::Prop_DisplayFrequency_Float);
+  }
+  float user_ipd_meters              () const
+  {
+    return get_property_float(vr::Prop_UserIpdMeters_Float);
+  }
+  std::uint64_t current_universe_id() const
+  {
+    
+  }
+  std::uint64_t previous_universe_id() const
+  {
+    
+  }
+  std::uint64_t display_firmware_version() const
+  {
+    
+  }
+  bool is_on_desktop() const
+  {
+    
+  }
+  int mc_type() const
+  {
+    
+  }
+  float mc_offset() const
+  {
+    
+  }
+  float mc_scale() const
+  {
+    
+  }
+  int edid_vendor_id() const
+  {
+    
+  }
+  std::string mc_image_left() const
+  {
+    
+  }
+  std::string mc_image_right() const
+  {
+    
+  }
+  float gc_black_clamp() const
+  {
+    
+  }
+  int edid_product_id() const
+  {
+    
+  }
+  std::array<float, 12> camera_to_head_transform() const
+  {
+    
+  }
+  int gc_type() const
+  {
+    
+  }
+  float gc_offset() const
+  {
+    
+  }
+  float gc_scale() const
+  {
+    
+  }
+  float gc_prescale() const
+  {
+    
+  }
+  std::string gc_image() const
+  {
+    
+  }
+  float lens_center_left_u() const
+  {
+    
+  }
+  float lens_center_right_u() const
+  {
+    
+  }
+
   // IVR System - Rendering                                                                                           
   std::vector<std::array<float, 2>>   hidden_area_mesh                    (eye eye)                                      const
   {
