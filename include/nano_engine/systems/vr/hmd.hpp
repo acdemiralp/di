@@ -11,8 +11,7 @@
 
 #include <nano_engine/systems/vr/eye.hpp>
 #include <nano_engine/systems/vr/tracking_device.hpp>
-#include <nano_engine/systems/vr/tracking_device_pose.hpp>
-#include <nano_engine/systems/vr/tracking_mode.hpp>
+#include <nano_engine/utility/rectangle.hpp>
 
 #ifdef _WIN32
 #include <winnt.h>
@@ -55,10 +54,10 @@ public:
     std::copy(&native_matrix.m[0][0], &native_matrix.m[0][0] + 16, matrix.begin());
     return matrix;
   }
-  std::array<float, 4>                projection_parameters               (eye eye)                                      const
+  rectangle<float>                    projection_parameters               (eye eye)                                      const
   {
-    std::array<float, 4> parameters;
-    vr::VRSystem()->GetProjectionRaw(static_cast<vr::EVREye>(eye), &parameters[0], &parameters[1], &parameters[2], &parameters[3]);
+    rectangle<float> parameters;
+    vr::VRSystem()->GetProjectionRaw(static_cast<vr::EVREye>(eye), &parameters.left, &parameters.right, &parameters.top, &parameters.bottom);
     return parameters;
   }
   std::array<float, 12>               eye_to_head_transform               (eye eye)                                      const

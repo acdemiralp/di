@@ -16,6 +16,7 @@
 #include <nano_engine/systems/display/hit_test_result.hpp>
 #include <nano_engine/systems/display/window_flags.hpp>
 #include <nano_engine/systems/display/window_mode.hpp>
+#include <nano_engine/utility/rectangle.hpp>
 
 namespace ne
 {
@@ -222,10 +223,10 @@ public:
     SDL_GetWindowMaximumSize(native_, reinterpret_cast<int*>(&maximum_size[0]), reinterpret_cast<int*>(&maximum_size[1]));
     return maximum_size;
   }
-  std::array<std::size_t, 4>                    border_size     () const // top, left, bottom, right
+  rectangle<std::size_t>                        border_size     () const
   {
-    std::array<std::size_t, 4> border_size;
-    SDL_GetWindowBordersSize(native_, reinterpret_cast<int*>(&border_size[0]), reinterpret_cast<int*>(&border_size[1]), reinterpret_cast<int*>(&border_size[2]), reinterpret_cast<int*>(&border_size[3]));
+    rectangle<std::size_t> border_size;
+    SDL_GetWindowBordersSize(native_, reinterpret_cast<int*>(&border_size.top), reinterpret_cast<int*>(&border_size.left), reinterpret_cast<int*>(&border_size.bottom), reinterpret_cast<int*>(&border_size.right));
     return border_size;
   }
   std::array<std::array<std::uint16_t, 256>, 3> gamma_ramp      () const
