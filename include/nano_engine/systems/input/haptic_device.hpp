@@ -9,10 +9,10 @@
 
 #include <SDL2/SDL_haptic.h>
 
+#include <nano_engine/systems/input/haptic_effect.hpp>
+
 namespace ne
 {
-class haptic_effect;
-
 class haptic_device
 {
 public:
@@ -20,14 +20,14 @@ public:
   {
     if(!native_)
       throw std::runtime_error("Failed to create SDL haptic device. SDL Error: " + std::string(SDL_GetError()));
-    if(SDL_HapticRumbleSupported(native_))
+    if(SDL_HapticRumbleSupported(native_) != 0)
       SDL_HapticRumbleInit(native_);
   }
   explicit haptic_device  (SDL_Haptic*        native) : native_(native)
   {
     if (!native_)
       throw std::runtime_error("Failed to create SDL haptic device. SDL Error: " + std::string(SDL_GetError()));
-    if (SDL_HapticRumbleSupported(native_))
+    if (SDL_HapticRumbleSupported(native_) != 0)
       SDL_HapticRumbleInit(native_);
   }  
   haptic_device           (const haptic_device&  that) = delete ;
@@ -137,11 +137,10 @@ public:
   {
     SDL_HapticRumbleStop(native_);
   }
-                
-  template<typename... argument_types>
-  haptic_effect*              create_haptic_effect        (argument_types&&... arguments)
+  
+  haptic_effect*              create_haptic_effect        (const haptic_effect_description& description)
   {
-    effects_.emplace_back(std::make_unique<haptic_effect>(arguments...));
+    effects_.emplace_back(std::make_unique<haptic_effect>(native(), description));
     return effects_.back().get();
   }
   void                        destroy_haptic_effect       (haptic_effect* effect)
@@ -183,52 +182,6 @@ protected:
   SDL_Haptic*                                 native_ ;
   std::vector<std::unique_ptr<haptic_effect>> effects_;
 };
-  
-class haptic_effect
-{
-public:
-  haptic_effect           (haptic_device* owner, const std::size_t index) : owner_(owner), index_(index)
-  {
-    
-  }
-  haptic_effect           (const haptic_effect&  that) = default;
-  haptic_effect           (      haptic_effect&& temp) = default;
-  ~haptic_effect          ()
-  {
-    SDL_HapticDestroyEffect(owner_->native(), static_cast<int>(index_));
-  }
-  haptic_effect& operator=(const haptic_effect&  that) = default;
-  haptic_effect& operator=(      haptic_effect&& temp) = default;
-  
-  bool is_running()                             const
-  {
-    return SDL_HapticGetEffectStatus(owner_->native(), static_cast<int>(index_)) == 1;
-  }
-  void run       (const std::size_t repeat = 1) const
-  {
-    SDL_HapticRunEffect(owner_->native(), static_cast<int>(index_), static_cast<unsigned>(repeat));
-  }
-  void stop      ()                             const
-  {
-    SDL_HapticStopEffect(owner_->native(), static_cast<int>(index_));
-  }
-
-protected:
-  haptic_device* owner_ = nullptr;
-  std::size_t    index_ = 0;
-};
-
-class haptic_effect_description
-{
-  
-};
-class constant_haptic_effect_description : public haptic_effect_description
-{
-  std::array<std::size_t, 2> direction;
-  std::size_t length;
-  std::size_t delay ;
-};
-
 }
 
 #endif

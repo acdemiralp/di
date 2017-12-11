@@ -40,6 +40,8 @@ set(PROJECT_SOURCES
   include/nano_engine/systems/input/gesture.hpp
   include/nano_engine/systems/input/haptic_device.hpp
   include/nano_engine/systems/input/haptic_device_info.hpp
+  include/nano_engine/systems/input/haptic_effect.hpp
+  include/nano_engine/systems/input/haptic_effect_description.hpp
   include/nano_engine/systems/input/input_system.hpp
   include/nano_engine/systems/input/joystick.hpp
   include/nano_engine/systems/input/joystick_hat_state.hpp
