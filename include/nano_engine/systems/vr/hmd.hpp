@@ -10,7 +10,6 @@
 #include <openvr.h>
 
 #include <nano_engine/systems/vr/eye.hpp>
-#include <nano_engine/systems/vr/hand.hpp>
 #include <nano_engine/systems/vr/tracking_device.hpp>
 #include <nano_engine/systems/vr/tracking_device_pose.hpp>
 #include <nano_engine/systems/vr/tracking_mode.hpp>
