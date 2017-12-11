@@ -10,6 +10,7 @@
 #include <openvr.h>
 
 #include <nano_engine/systems/vr/eye.hpp>
+#include <nano_engine/systems/vr/hand.hpp>
 #include <nano_engine/systems/vr/tracking_device.hpp>
 #include <nano_engine/systems/vr/tracking_device_pose.hpp>
 #include <nano_engine/systems/vr/tracking_mode.hpp>
@@ -163,101 +164,203 @@ public:
   }
   
   // IVR System - Property
-  bool  reports_time_since_vsync     () const
+  std::array<float, 12>               camera_to_head_transform            ()                                             const
   {
-    return get_property_bool(vr::Prop_ReportsTimeSinceVSync_Bool);
-  }
-  float seconds_from_vsync_to_photons() const
+    return get_property_matrix34(vr::Prop_CameraToHeadTransform_Matrix34);
+  } 
+  std::array<float, 2>                lens_center_uv                      (eye eye)                                      const
   {
-    return get_property_float(vr::Prop_SecondsFromVsyncToPhotons_Float);
+    return eye == eye::left ? 
+      std::array<float, 2>{get_property_float(vr::Prop_LensCenterLeftU_Float ), get_property_float(vr::Prop_LensCenterLeftV_Float )} :
+      std::array<float, 2>{get_property_float(vr::Prop_LensCenterRightU_Float), get_property_float(vr::Prop_LensCenterRightV_Float)} ;
   }
-  float display_frequency            () const
+  std::array<float, 2>                screenshot_field_of_view            ()                                             const
   {
-    return get_property_float(vr::Prop_DisplayFrequency_Float);
+    return 
+    {
+      get_property_float(vr::Prop_ScreenshotHorizontalFieldOfViewDegrees_Float),
+      get_property_float(vr::Prop_ScreenshotVerticalFieldOfViewDegrees_Float  )
+    };
   }
-  float user_ipd_meters              () const
+  
+  float                               head_to_eye_depth_distance          ()                                             const
+  {
+    return get_property_float(vr::Prop_UserHeadToEyeDepthMeters_Float);
+  }
+  float                               interpupillary_distance             ()                                             const
   {
     return get_property_float(vr::Prop_UserIpdMeters_Float);
   }
-  std::uint64_t current_universe_id() const
+
+  float                               seconds_from_vsync_to_photons       ()                                             const
   {
-    
+    return get_property_float(vr::Prop_SecondsFromVsyncToPhotons_Float);
   }
-  std::uint64_t previous_universe_id() const
+  float                               seconds_from_photons_to_vblank      ()                                             const
   {
-    
+    return get_property_float(vr::Prop_SecondsFromPhotonsToVblank_Float);
   }
-  std::uint64_t display_firmware_version() const
+  float                               display_frequency                   ()                                             const
   {
-    
+    return get_property_float(vr::Prop_DisplayFrequency_Float);
   }
-  bool is_on_desktop() const
+  
+  bool                                direct_mode_sends_vsync_events      ()                                             const
   {
-    
+    return get_property_bool(vr::Prop_DriverDirectModeSendsVsyncEvents_Bool);
   }
-  int mc_type() const
+  bool                                reports_time_since_vsync            ()                                             const
   {
-    
+    return get_property_bool(vr::Prop_ReportsTimeSinceVSync_Bool);
   }
-  float mc_offset() const
+  bool                                on_desktop                          ()                                             const
   {
-    
+    return get_property_bool(vr::Prop_IsOnDesktop_Bool);
   }
-  float mc_scale() const
+  bool                                prediction                          ()                                             const
   {
-    
+    return !get_property_bool(vr::Prop_DoNotApplyPrediction_Bool);
   }
-  int edid_vendor_id() const
+  bool                                suppressed                          ()                                             const
   {
-    
+    return get_property_bool(vr::Prop_DisplaySuppressed_Bool);
   }
-  std::string mc_image_left() const
+  bool                                night_mode_support                  ()                                             const
   {
-    
+    return get_property_bool(vr::Prop_DisplayAllowNightMode_Bool);
   }
-  std::string mc_image_right() const
+  bool                                debug                               ()                                             const
   {
-    
+    return get_property_bool(vr::Prop_DisplayDebugMode_Bool);
   }
-  float gc_black_clamp() const
+  
+  std::size_t                         expected_controller_count           ()                                             const
   {
-    
+    return static_cast<std::size_t>(get_property_int(vr::Prop_ExpectedControllerCount_Int32));
   }
-  int edid_product_id() const
+  std::size_t                         expected_tracking_reference_count   ()                                             const
   {
-    
+    return static_cast<std::size_t>(get_property_int(vr::Prop_ExpectedTrackingReferenceCount_Int32));
   }
-  std::array<float, 12> camera_to_head_transform() const
+
+  std::uint64_t                       current_universe_id                 ()                                             const
   {
-    
+    return get_property_uint64(vr::Prop_CurrentUniverseId_Uint64);
   }
-  int gc_type() const
+  std::uint64_t                       previous_universe_id                ()                                             const
   {
-    
+    return get_property_uint64(vr::Prop_PreviousUniverseId_Uint64);
   }
-  float gc_offset() const
+  
+  int                                 mc_type                             ()                                             const
   {
-    
+    return get_property_int(vr::Prop_DisplayMCType_Int32);
   }
-  float gc_scale() const
+  float                               mc_offset                           ()                                             const
   {
-    
+    return get_property_float(vr::Prop_DisplayMCOffset_Float);
   }
-  float gc_prescale() const
+  float                               mc_scale                            ()                                             const
   {
-    
+    return get_property_float(vr::Prop_DisplayMCScale_Float);
   }
-  std::string gc_image() const
+  std::array<std::size_t, 2>          mc_image_size                       ()                                             const
   {
-    
+    return 
+    {
+      static_cast<std::size_t>(get_property_int(vr::Prop_DisplayMCImageWidth_Int32 )), 
+      static_cast<std::size_t>(get_property_int(vr::Prop_DisplayMCImageHeight_Int32))
+    };
   }
-  float lens_center_left_u() const
+  std::size_t                         mc_image_num_channels               ()                                             const
   {
-    
+    return static_cast<std::size_t>(get_property_int(vr::Prop_DisplayMCImageNumChannels_Int32));
   }
-  float lens_center_right_u() const
+  std::string                         mc_image_path                       (eye eye)                                      const
   {
-    
+    return get_property_string(eye == eye::left ? vr::Prop_DisplayMCImageLeft_String : vr::Prop_DisplayMCImageRight_String);
+  }
+  void*                               mc_image                            ()                                             const
+  {
+    return reinterpret_cast<void*>(get_property_uint64(vr::Prop_DisplayMCImageData_Binary));
+  }
+
+  int                                 gc_type                             ()                                             const
+  {
+    return get_property_int(vr::Prop_DisplayGCType_Int32);
+  }
+  float                               gc_offset                           ()                                             const
+  {
+    return get_property_float(vr::Prop_DisplayGCOffset_Float);
+  }
+  float                               gc_scale                            ()                                             const
+  {
+    return get_property_float(vr::Prop_DisplayGCScale_Float);
+  }
+  float                               gc_prescale                         ()                                             const
+  {
+    return get_property_float(vr::Prop_DisplayGCPrescale_Float);
+  }
+  std::string                         gc_image_path                       ()                                             const
+  {
+    return get_property_string(vr::Prop_DisplayGCImage_String);
+  }
+  float                               gc_black_clamp                      ()                                             const
+  {
+    return get_property_float(vr::Prop_DisplayGCBlackClamp_Float);
+  }
+  
+  int                                 edid_vendor_id                      ()                                             const
+  {
+    return get_property_int(vr::Prop_EdidVendorID_Int32);
+  }
+  int                                 edid_product_id                     ()                                             const
+  {
+    return get_property_int(vr::Prop_EdidProductID_Int32);
+  }
+  
+  std::uint64_t                       audio_firmware_version              ()                                             const
+  {
+    return get_property_uint64(vr::Prop_AudioFirmwareVersion_Uint64);
+  }
+  std::uint64_t                       camera_firmware_version             ()                                             const
+  {
+    return get_property_uint64(vr::Prop_CameraFirmwareVersion_Uint64);
+  }
+  std::string                         camera_firmware_description         ()                                             const
+  {
+    return get_property_string(vr::Prop_CameraFirmwareDescription_String);
+  }
+  int                                 camera_compatibility_mode           ()                                             const
+  {
+    return get_property_int(vr::Prop_CameraCompatibilityMode_Int32);
+  }
+  std::uint64_t                       display_firmware_version            ()                                             const
+  {
+    return get_property_uint64(vr::Prop_DisplayFirmwareVersion_Uint64);
+  }
+  
+  std::uint64_t                       fpga_version                        ()                                             const
+  {
+    return get_property_uint64(vr::Prop_DisplayFPGAVersion_Uint64);
+  }
+  std::uint64_t                       bootloader_version                  ()                                             const
+  {
+    return get_property_uint64(vr::Prop_DisplayBootloaderVersion_Uint64);
+  }
+  std::uint64_t                       hardware_version                    ()                                             const
+  {
+    return get_property_uint64(vr::Prop_DisplayHardwareVersion_Uint64);
+  }
+  
+  std::uint64_t                       graphics_adapter_luid               ()                                             const
+  {
+    return get_property_uint64(vr::Prop_GraphicsAdapterLuid_Uint64);
+  }
+
+  std::string                         chaperone_path                      ()                                             const
+  {
+    return get_property_string(vr::Prop_DriverProvidedChaperonePath_String);
   }
 
   // IVR System - Rendering                                                                                           
