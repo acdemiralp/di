@@ -5,10 +5,12 @@
 #include <cstdint>
 #include <string>
 
+#include <boost/optional.hpp>
 #include <openvr.h>
 
 #include <nano_engine/systems/vr/hand.hpp>
 #include <nano_engine/systems/vr/tracking_device_activity.hpp>
+#include <nano_engine/systems/vr/tracking_device_pose.hpp>
 #include <nano_engine/systems/vr/tracking_device_type.hpp>
 
 namespace ne
@@ -18,7 +20,7 @@ template <tracking_device_type type>
 class tracking_device
 {
 public:
-  explicit tracking_device  (const std::uint32_t& index) : index_(index)
+  explicit tracking_device  (const std::uint32_t& index) : index_(index), pose_(boost::none)
   {
     
   }
@@ -27,7 +29,7 @@ public:
   virtual ~tracking_device  ()                             = default;
   tracking_device& operator=(const tracking_device&  that) = default;
   tracking_device& operator=(      tracking_device&& temp) = default;
-
+  
   // IVR System - Tracking
   tracking_device_activity activity                        () const
   {
@@ -212,7 +214,16 @@ public:
   {
     vr::VRSystem()->PerformFirmwareUpdate(index_);
   }
-                                                           
+  
+  std::uint32_t            index                           () const
+  {
+    return index_;
+  }
+  tracking_device_pose*    pose                            ()
+  {
+    return pose_.is_initialized() ? pose_.get_ptr() : nullptr;
+  }
+
 protected:                                                 
   // IVR System - Property                                 
   bool                     get_property_bool               (const vr::ETrackedDeviceProperty native_property) const
@@ -250,7 +261,8 @@ protected:
     return std::string(native_string);
   }
 
-  std::uint32_t index_;
+  std::uint32_t                         index_;
+  boost::optional<tracking_device_pose> pose_ ;
 };
 
 typedef tracking_device<tracking_device_type::generic> generic_tracking_device;
