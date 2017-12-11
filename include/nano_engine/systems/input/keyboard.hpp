@@ -24,8 +24,8 @@ inline std::map<key, bool> key_states             ()
 {
   std::map<key, bool> states;
   int  key_states_size;
-  auto key_states_native = SDL_GetKeyboardState(&key_states_size);
-  auto modifier          = modifier_state();
+  const auto key_states_native = SDL_GetKeyboardState(&key_states_size);
+  const auto modifier          = modifier_state();
   for(auto i = 0; i < key_states_size; i++)
     states[key{static_cast<key_code>(SDL_GetKeyFromScancode(static_cast<SDL_Scancode>(i))), modifier, static_cast<scan_code>(i)}] = static_cast<bool>(key_states_native[i]);
   return states;

@@ -14,7 +14,7 @@ namespace ne
 class vr_controller : public tracking_device<tracking_device_type::controller>
 {
 public:
-  explicit vr_controller  (std::uint32_t index) : tracking_device<tracking_device_type::controller>(index)
+  explicit vr_controller  (const std::uint32_t& index) : tracking_device<tracking_device_type::controller>(index)
   {
   
   }
@@ -37,7 +37,7 @@ public:
       &controller_pose                              );
     return vr_controller_state(controller_pose, controller_state);
   }
-  void                haptic_pulse(std::size_t axis = 0, std::size_t milliseconds = 1000) const
+  void                haptic_pulse(const std::size_t axis = 0, const std::size_t milliseconds = 1000) const
   {
     vr::VRSystem()->TriggerHapticPulse(index_, static_cast<std::uint32_t>(axis), static_cast<unsigned short>(1000 * milliseconds));
   }

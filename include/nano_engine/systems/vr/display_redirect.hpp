@@ -8,7 +8,7 @@ namespace ne
 class display_redirect : public tracking_device<tracking_device_type::display_redirect>
 {
 public:
-  explicit display_redirect  (const std::uint32_t index) : tracking_device<tracking_device_type::display_redirect>(index)
+  explicit display_redirect  (const std::uint32_t& index) : tracking_device<tracking_device_type::display_redirect>(index)
   {
   
   }

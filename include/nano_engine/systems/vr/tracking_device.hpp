@@ -18,7 +18,7 @@ template <tracking_device_type type>
 class tracking_device
 {
 public:
-  explicit tracking_device  (const std::uint32_t index) : index_(index)
+  explicit tracking_device  (const std::uint32_t& index) : index_(index)
   {
     
   }
@@ -206,34 +206,34 @@ public:
                                                            
 protected:                                                 
   // IVR System - Property                                 
-  bool                     get_property_bool               (vr::ETrackedDeviceProperty native_property) const
+  bool                     get_property_bool               (const vr::ETrackedDeviceProperty native_property) const
   {
     auto error = vr::TrackedProp_Success;
     return vr::VRSystem()->GetBoolTrackedDeviceProperty  (index_, native_property, &error);
   }
-  float                    get_property_float              (vr::ETrackedDeviceProperty native_property) const
+  float                    get_property_float              (const vr::ETrackedDeviceProperty native_property) const
   {
     auto error = vr::TrackedProp_Success;
     return vr::VRSystem()->GetFloatTrackedDeviceProperty (index_, native_property, &error);
   }
-  int                      get_property_int                (vr::ETrackedDeviceProperty native_property) const
+  int                      get_property_int                (const vr::ETrackedDeviceProperty native_property) const
   {
     auto error = vr::TrackedProp_Success;
     return vr::VRSystem()->GetInt32TrackedDeviceProperty (index_, native_property, &error);
   }
-  std::uint64_t            get_property_uint64             (vr::ETrackedDeviceProperty native_property) const
+  std::uint64_t            get_property_uint64             (const vr::ETrackedDeviceProperty native_property) const
   {
     auto error = vr::TrackedProp_Success;
     return vr::VRSystem()->GetUint64TrackedDeviceProperty(index_, native_property, &error);
   }
-  std::array<float, 12>    get_property_matrix34           (vr::ETrackedDeviceProperty native_property) const
+  std::array<float, 12>    get_property_matrix34           (const vr::ETrackedDeviceProperty native_property) const
   {
     auto error = vr::TrackedProp_Success;
-    auto native_matrix = vr::VRSystem()->GetMatrix34TrackedDeviceProperty(index_, native_property, &error);
+    const auto native_matrix = vr::VRSystem()->GetMatrix34TrackedDeviceProperty(index_, native_property, &error);
     std::array<float, 12> matrix; std::copy(&native_matrix.m[0][0], &native_matrix.m[0][0] + 12, matrix.begin());
     return matrix;
   }
-  std::string              get_property_string             (vr::ETrackedDeviceProperty native_property) const
+  std::string              get_property_string             (const vr::ETrackedDeviceProperty native_property) const
   {
     auto error = vr::TrackedProp_Success;
     char native_string[vr::k_unMaxPropertyStringSize];

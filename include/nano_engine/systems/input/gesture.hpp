@@ -16,7 +16,7 @@ struct gesture
   void save(const std::string& filename) const
   {
     if (filename.empty()) return;
-    auto stream = SDL_RWFromFile(filename.c_str(), "wb");
+    const auto stream = SDL_RWFromFile(filename.c_str(), "wb");
     SDL_SaveDollarTemplate(id, stream);
     SDL_FreeRW(stream);
   }

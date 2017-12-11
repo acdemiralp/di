@@ -24,7 +24,7 @@ extern "C" inline SDL_HitTestResult hit_test_callback(SDL_Window* native, const 
 class window
 {
 public:
-  explicit window  (const std::string& title, window_flags flags = window_flags::none)
+  explicit window  (const std::string& title, const window_flags flags = window_flags::none)
   : window(title, {32, 32}, {800, 600}, flags)
   {
     set_fullscreen_windowed();
@@ -140,7 +140,7 @@ public:
   }
   void set_icon        (const std::array<std::size_t, 2>& dimensions, const std::vector<std::uint8_t>& pixels)
   {
-    auto surface = SDL_CreateRGBSurfaceWithFormatFrom(
+    const auto surface = SDL_CreateRGBSurfaceWithFormatFrom(
       const_cast<void*>(reinterpret_cast<const void*>(pixels.data())), 
       static_cast<int>(dimensions[0]), 
       static_cast<int>(dimensions[1]), 
@@ -340,7 +340,7 @@ protected:
 
 extern "C" inline SDL_HitTestResult hit_test_callback(SDL_Window* native, const SDL_Point* point, void* data)
 {
-  auto window = reinterpret_cast<ne::window*>(data);
+  const auto window = reinterpret_cast<ne::window*>(data);
   if  (window == nullptr || window->hit_test_callback_ == nullptr) return SDL_HITTEST_NORMAL;
   return static_cast<SDL_HitTestResult>(window->hit_test_callback_({static_cast<std::size_t>(point->x), static_cast<std::size_t>(point->y)}));
 }

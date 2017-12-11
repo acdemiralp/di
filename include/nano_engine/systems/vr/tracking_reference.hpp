@@ -8,7 +8,7 @@ namespace ne
 class tracking_reference : public tracking_device<tracking_device_type::tracking_reference>
 {
 public:
-  explicit tracking_reference  (const std::uint32_t index) : tracking_device<tracking_device_type::tracking_reference>(index)
+  explicit tracking_reference  (const std::uint32_t& index) : tracking_device<tracking_device_type::tracking_reference>(index)
   {
   
   }

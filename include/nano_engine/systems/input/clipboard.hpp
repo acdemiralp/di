@@ -14,7 +14,7 @@ inline std::string get()
   std::string text;
   if(!SDL_HasClipboardText())
     return text;
-  auto text_native = SDL_GetClipboardText();
+  const auto text_native = SDL_GetClipboardText();
   text = text_native;
   SDL_free(text_native);
   return text;

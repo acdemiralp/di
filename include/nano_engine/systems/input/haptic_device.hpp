@@ -2,6 +2,7 @@
 #define NANO_ENGINE_SYSTEMS_INPUT_HAPTIC_DEVICE_HPP_
 
 #include <cstddef>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -15,14 +16,14 @@ class haptic_effect;
 class haptic_device
 {
 public:
-  explicit haptic_device  (std::size_t index ) : native_(SDL_HapticOpen(static_cast<int>(index)))
+  explicit haptic_device  (const std::size_t& index ) : native_(SDL_HapticOpen(static_cast<int>(index)))
   {
     if(!native_)
       throw std::runtime_error("Failed to create SDL haptic device. SDL Error: " + std::string(SDL_GetError()));
     if(SDL_HapticRumbleSupported(native_))
       SDL_HapticRumbleInit(native_);
   }
-  explicit haptic_device  (SDL_Haptic* native) : native_(native)
+  explicit haptic_device  (SDL_Haptic*        native) : native_(native)
   {
     if (!native_)
       throw std::runtime_error("Failed to create SDL haptic device. SDL Error: " + std::string(SDL_GetError()));
@@ -115,20 +116,20 @@ public:
     return (SDL_HapticQuery(native_) & SDL_HAPTIC_STATUS) != 0;
   }
   
-  void                        set_enabled                 (bool        enabled   )
+  void                        set_enabled                 (const bool        enabled   )
   {
     enabled ? SDL_HapticUnpause(native_) : SDL_HapticPause(native_);
   }
-  void                        set_gain                    (std::size_t gain      )
+  void                        set_gain                    (const std::size_t gain      )
   {
     SDL_HapticSetGain      (native_, static_cast<int>(gain));
   }
-  void                        set_autocenter              (std::size_t autocenter)
+  void                        set_autocenter              (const std::size_t autocenter)
   {
     SDL_HapticSetAutocenter(native_, static_cast<int>(autocenter));
   }
                                                           
-  void                        play_rumble                 (float strength, std::size_t milliseconds) const
+  void                        play_rumble                 (const float strength, const std::size_t milliseconds) const
   {
     SDL_HapticRumblePlay(native_, strength, static_cast<unsigned>(milliseconds));
   }
@@ -137,10 +138,10 @@ public:
     SDL_HapticRumbleStop(native_);
   }
                 
-  template<typename effect_type, typename... argument_types>
-  effect_type*                create_haptic_effect        (argument_types&&... arguments)
+  template<typename... argument_types>
+  haptic_effect*              create_haptic_effect        (argument_types&&... arguments)
   {
-    effects_.emplace_back(std::make_unique<effect_type>(arguments...));
+    effects_.emplace_back(std::make_unique<haptic_effect>(arguments...));
     return effects_.back().get();
   }
   void                        destroy_haptic_effect       (haptic_effect* effect)
@@ -186,49 +187,47 @@ protected:
 class haptic_effect
 {
 public:
-  haptic_effect           ()                           = default;
+  haptic_effect           (haptic_device* owner, const std::size_t index) : owner_(owner), index_(index)
+  {
+    
+  }
   haptic_effect           (const haptic_effect&  that) = default;
   haptic_effect           (      haptic_effect&& temp) = default;
-  virtual ~haptic_effect  ()
+  ~haptic_effect          ()
   {
-    SDL_HapticDestroyEffect(device_->native(), static_cast<int>(index_));
+    SDL_HapticDestroyEffect(owner_->native(), static_cast<int>(index_));
   }
   haptic_effect& operator=(const haptic_effect&  that) = default;
   haptic_effect& operator=(      haptic_effect&& temp) = default;
-
-  bool is_running()                       const
+  
+  bool is_running()                             const
   {
-    return SDL_HapticGetEffectStatus(device_->native(), static_cast<int>(index_)) == 1;
+    return SDL_HapticGetEffectStatus(owner_->native(), static_cast<int>(index_)) == 1;
   }
-  void run       (std::size_t repeat = 1) const
+  void run       (const std::size_t repeat = 1) const
   {
-    SDL_HapticRunEffect(device_->native(), static_cast<int>(index_), static_cast<unsigned>(repeat));
+    SDL_HapticRunEffect(owner_->native(), static_cast<int>(index_), static_cast<unsigned>(repeat));
   }
-  void stop      ()                       const
+  void stop      ()                             const
   {
-    SDL_HapticStopEffect(device_->native(), static_cast<int>(index_));
+    SDL_HapticStopEffect(owner_->native(), static_cast<int>(index_));
   }
 
 protected:
-  friend haptic_device;
-
-  void set_metadata(haptic_device* device, std::size_t index)
-  {
-    device_ = device;
-    index_  = index ;
-  }
-
-  haptic_device* device_ = nullptr;
-  std::size_t    index_  = 0;
+  haptic_device* owner_ = nullptr;
+  std::size_t    index_ = 0;
 };
 
-class constant_haptic_effect : public haptic_effect
+class haptic_effect_description
+{
+  
+};
+class constant_haptic_effect_description : public haptic_effect_description
 {
   std::array<std::size_t, 2> direction;
   std::size_t length;
   std::size_t delay ;
 };
-
 
 }
 

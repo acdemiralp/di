@@ -81,7 +81,7 @@ public:
   
   window* window_with_input_grab    () const
   {
-    auto native  = SDL_GetGrabbedWindow();
+    const auto native = SDL_GetGrabbedWindow();
     auto windows = this->windows();
     for (auto& window : windows)
       if (window->native() == native)
@@ -90,7 +90,7 @@ public:
   }
   window* window_with_keyboard_focus() const
   {
-    auto native  = SDL_GetMouseFocus();
+    const auto native = SDL_GetMouseFocus();
     auto windows = this->windows();
     for (auto& window : windows)
       if (window->native() == native)
@@ -99,7 +99,7 @@ public:
   }
   window* window_with_mouse_focus   () const
   {
-    auto native  = SDL_GetKeyboardFocus();
+    const auto native = SDL_GetKeyboardFocus();
     auto windows = this->windows();
     for (auto& window : windows)
       if (window->native() == native)

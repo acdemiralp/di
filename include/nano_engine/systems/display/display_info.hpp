@@ -37,7 +37,7 @@ inline std::vector<display_info> displays()
   std::vector<display_info> displays;
   for(auto i = 0; i < SDL_GetNumVideoDisplays(); ++i)
   {
-    auto name = std::string(SDL_GetDisplayName(i));
+    const auto name = std::string(SDL_GetDisplayName(i));
 
     SDL_Rect bounds, usable_bounds;
     SDL_GetDisplayBounds      (i, &bounds       );

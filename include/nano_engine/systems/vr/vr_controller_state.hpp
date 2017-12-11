@@ -16,15 +16,15 @@ struct vr_controller_state : tracking_device_pose
   vr_controller_state           (const vr::TrackedDevicePose_t& native_pose, const vr::VRControllerState_t& native_state) 
   : tracking_device_pose(native_pose)
   {
-    auto native_axes = native_state.rAxis;
+    const auto native_axes = native_state.rAxis;
     for (auto i = 0; i < axes.size(); ++i)
       axes[i] = {native_axes[i].x, native_axes[i].y};
 
-    auto pressed = native_state.ulButtonPressed;
-    auto touched = native_state.ulButtonTouched;
+    const auto pressed = native_state.ulButtonPressed;
+    const auto touched = native_state.ulButtonTouched;
     for(auto& button : vr_controller_buttons)
     {
-      auto mask = vr::ButtonMaskFromId(static_cast<vr::EVRButtonId>(button));
+      const auto mask = vr::ButtonMaskFromId(static_cast<vr::EVRButtonId>(button));
       buttons[button] = 
         pressed & mask ? vr_controller_button_state::pressed : 
         touched & mask ? vr_controller_button_state::touched : 

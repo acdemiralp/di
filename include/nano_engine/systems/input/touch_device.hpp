@@ -39,7 +39,7 @@ public:
     std::vector<finger> fingers(static_cast<std::size_t>(SDL_GetNumTouchFingers(id_)));
     for(auto i = 0; i < fingers.size(); ++i)
     {
-      auto native_finger = SDL_GetTouchFinger(id_, i);
+      const auto native_finger = SDL_GetTouchFinger(id_, i);
       fingers[i] = {static_cast<std::size_t>(native_finger->id), {native_finger->x, native_finger->y}, native_finger->pressure};
     }
     return fingers;
@@ -51,13 +51,13 @@ public:
   }
   static void         load_gestures (const std::string& filename)
   {
-    auto stream = SDL_RWFromFile(filename.c_str(), "rb");
+    const auto stream = SDL_RWFromFile(filename.c_str(), "rb");
     SDL_LoadDollarTemplates(-1, stream);
     SDL_FreeRW(stream);
   }
   static void         save_gestures (const std::string& filename)
   {
-    auto stream = SDL_RWFromFile(filename.c_str(), "wb");
+    const auto stream = SDL_RWFromFile(filename.c_str(), "wb");
     SDL_SaveAllDollarTemplates(stream);
     SDL_FreeRW(stream);
   }

@@ -29,7 +29,7 @@ namespace ne
 class hmd : public tracking_device<tracking_device_type::hmd>
 {
 public:
-  explicit hmd  (const std::uint32_t index) : tracking_device<tracking_device_type::hmd>(index)
+  explicit hmd  (const std::uint32_t& index) : tracking_device<tracking_device_type::hmd>(index)
   {
   
   }

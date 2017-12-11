@@ -18,11 +18,11 @@ namespace ne
 {
 namespace mouse
 {
-inline void                           set_visible          (bool visible )
+inline void                           set_visible          (const bool visible )
 {
   SDL_ShowCursor(static_cast<int>(visible));
 }
-inline void                           set_captured         (bool captured)
+inline void                           set_captured         (bool       captured)
 {
   SDL_CaptureMouse(static_cast<SDL_bool>(captured));
 }
@@ -67,7 +67,7 @@ inline void                           redraw               ()
 }
 inline void                           set_cursor_default   ()
 {
-  auto current_cursor  = SDL_GetCursor       ();
+  const auto current_cursor  = SDL_GetCursor       ();
   if  (current_cursor != SDL_GetDefaultCursor())
     SDL_FreeCursor(current_cursor);
   SDL_SetCursor(SDL_GetDefaultCursor());
@@ -107,7 +107,7 @@ inline void                           set_cursor           (std::string pixels, 
     "00000111111111111111111111100000"
     "00000000000000000000000000000000"
     "00000000000000000000000000000000" */
-  auto squared_size = static_cast<std::size_t>(sqrt(pixels.size()));
+  const auto squared_size = static_cast<std::size_t>(sqrt(pixels.size()));
   std::vector<std::uint8_t> data(pixels.size() / 8);
   std::vector<std::uint8_t> mask(pixels.size() / 8);
   for(auto i = 0, j = -1; i < pixels.size(); ++i)
@@ -134,14 +134,14 @@ inline void                           set_cursor           (std::string pixels, 
       mask[j] |= 0x01;
     }
   }
-  auto current_cursor  = SDL_GetCursor       ();
+  const auto current_cursor  = SDL_GetCursor       ();
   if  (current_cursor != SDL_GetDefaultCursor())
     SDL_FreeCursor(current_cursor);
   SDL_SetCursor(SDL_CreateCursor(data.data(), mask.data(), static_cast<int>(squared_size), static_cast<int>(squared_size), static_cast<int>(hotspot[0]), static_cast<int>(hotspot[1])));
 }
 inline void                           set_cursor           (os_cursor os_cursor)
 {
-  auto current_cursor  = SDL_GetCursor       ();
+  const auto current_cursor  = SDL_GetCursor       ();
   if  (current_cursor != SDL_GetDefaultCursor())
     SDL_FreeCursor(current_cursor);
   SDL_SetCursor(SDL_CreateSystemCursor(static_cast<SDL_SystemCursor>(os_cursor)));

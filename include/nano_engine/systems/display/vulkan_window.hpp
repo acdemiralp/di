@@ -9,13 +9,13 @@ namespace ne
 class vulkan_window final : public window
 {
 public:
-  explicit vulkan_window  (VkInstance instance, const std::string& title, window_flags flags = window_flags::none) 
+  explicit vulkan_window  (const VkInstance instance, const std::string& title, const window_flags flags = window_flags::none) 
   : window(title, flags), instance_(instance)
   {
     if(!SDL_Vulkan_CreateSurface(native_, instance_, &surface_))
       throw std::runtime_error("Failed to create Vulkan surface. SDL Error: " + std::string(SDL_GetError()));
   }
-  vulkan_window           (VkInstance instance, const std::string& title, const std::array<std::size_t, 2>& position, const std::array<std::size_t, 2>& size, window_flags flags = window_flags::none)
+  vulkan_window           (const VkInstance instance, const std::string& title, const std::array<std::size_t, 2>& position, const std::array<std::size_t, 2>& size, const window_flags flags = window_flags::none)
   : window(title, position, size, flags), instance_(instance)
   {
     if (!SDL_Vulkan_CreateSurface(native_, instance_, &surface_))

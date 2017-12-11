@@ -19,7 +19,7 @@ namespace ne
 class game_controller
 {
 public:
-  explicit game_controller  (std::size_t index) : native_(SDL_GameControllerOpen(static_cast<int>(index))), underlying_(SDL_GameControllerGetJoystick(native_))
+  explicit game_controller  (const std::size_t& index) : native_(SDL_GameControllerOpen(static_cast<int>(index))), underlying_(SDL_GameControllerGetJoystick(native_))
   {
     if(!native_)
       throw std::runtime_error("Failed to create SDL game controller. SDL Error: " + std::string(SDL_GetError()));
@@ -78,7 +78,7 @@ public:
 
   std::string          mapping             () const
   {
-    auto mapping_native = SDL_GameControllerMapping(native_);
+    const auto mapping_native = SDL_GameControllerMapping(native_);
     std::string mapping(mapping_native);
     SDL_free(mapping_native);
     return mapping;
