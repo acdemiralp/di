@@ -16,6 +16,7 @@
 #include <nano_engine/systems/input/key.hpp>
 #include <nano_engine/systems/input/game_controller.hpp>
 #include <nano_engine/systems/input/game_controller_info.hpp>
+#include <nano_engine/systems/input/haptic_device.hpp>
 #include <nano_engine/systems/input/joystick.hpp>
 #include <nano_engine/systems/input/joystick_info.hpp>
 #include <nano_engine/systems/input/touch_device.hpp>
@@ -29,7 +30,7 @@ class input_system : public system
 public:
   input_system           ()
   {
-    if (SDL_InitSubSystem(SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER | SDL_INIT_JOYSTICK) != 0)
+    if (SDL_InitSubSystem(SDL_INIT_EVENTS | SDL_INIT_HAPTIC | SDL_INIT_GAMECONTROLLER | SDL_INIT_JOYSTICK) != 0)
       throw std::runtime_error("Failed to initialize SDL Events / Game Controller / Joystick subsystems. Error: " + std::string(SDL_GetError()));
 
     game_controller::set_default_mappings();
@@ -41,7 +42,7 @@ public:
   input_system           (      input_system&& temp) = default;
   virtual ~input_system  ()
   {
-    SDL_QuitSubSystem(SDL_INIT_EVENTS | SDL_INIT_GAMECONTROLLER | SDL_INIT_JOYSTICK);
+    SDL_QuitSubSystem(SDL_INIT_EVENTS | SDL_INIT_HAPTIC | SDL_INIT_GAMECONTROLLER | SDL_INIT_JOYSTICK);
   }
   input_system& operator=(const input_system&  that) = delete ;
   input_system& operator=(      input_system&& temp) = default;
@@ -106,6 +107,37 @@ public:
         return game_controller.get();
       });
     return game_controllers;
+  }
+  
+  template<typename... argument_types>
+  haptic_device*                create_haptic_device   (argument_types&&... arguments)
+  {
+    haptic_devices_.emplace_back(std::make_unique<haptic_device>(arguments...));
+    return haptic_devices_.back().get();
+  }
+  void                          destroy_haptic_device  (haptic_device* haptic_device)
+  {
+    haptic_devices_.erase(std::remove_if(
+      haptic_devices_.begin(),
+      haptic_devices_.end  (),
+      [&haptic_device] (const std::unique_ptr<ne::haptic_device>& iteratee)
+      {
+        return iteratee.get() == haptic_device;
+      }), 
+      haptic_devices_.end  ());
+  }
+  std::vector<haptic_device*>   haptic_devices         () const
+  {
+    std::vector<haptic_device*> haptic_devices(haptic_devices_.size());
+    std::transform(
+      haptic_devices_.begin(),
+      haptic_devices_.end  (),
+      haptic_devices .begin(),
+      [ ] (const std::unique_ptr<haptic_device>& haptic_device)
+      {
+        return haptic_device.get();
+      });
+    return haptic_devices;
   }
 
   std::vector<touch_device*>    touch_devices          () const
@@ -320,6 +352,7 @@ protected:
 
   std::vector<std::unique_ptr<joystick>>        joysticks_       ;
   std::vector<std::unique_ptr<game_controller>> game_controllers_;
+  std::vector<std::unique_ptr<haptic_device>>   haptic_devices_  ;
   std::vector<std::unique_ptr<touch_device>>    touch_devices_   ;
 };
 }

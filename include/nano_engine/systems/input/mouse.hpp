@@ -4,47 +4,50 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <vector>
 
+#include <SDL2/SDL_haptic.h>
 #include <SDL2/SDL_mouse.h>
 
+#include <nano_engine/systems/input/haptic_device.hpp>
 #include <nano_engine/systems/input/os_cursor.hpp>
 
 namespace ne
 {
 namespace mouse
 {
-inline void                       set_visible          (bool visible )
+inline void                           set_visible          (bool visible )
 {
   SDL_ShowCursor(static_cast<int>(visible));
 }
-inline void                       set_captured         (bool captured)
+inline void                           set_captured         (bool captured)
 {
   SDL_CaptureMouse(static_cast<SDL_bool>(captured));
 }
 
-inline void                       set_relative         (bool relative)
+inline void                           set_relative         (bool relative)
 {
   SDL_SetRelativeMouseMode(static_cast<SDL_bool>(relative));
 }
-inline bool                       relative             ()
+inline bool                           relative             ()
 {
   return static_cast<bool>(SDL_GetRelativeMouseMode());
 }
 
-inline void                       set_absolute_position(const std::array<std::size_t, 2>& position)
+inline void                           set_absolute_position(const std::array<std::size_t, 2>& position)
 {
   SDL_WarpMouseGlobal(static_cast<int>(position[0]), static_cast<int>(position[1]));
 }
-inline std::array<std::size_t, 2> absolute_position    ()
+inline std::array<std::size_t, 2>     absolute_position    ()
 {
   std::array<std::size_t, 2> position;
   SDL_GetGlobalMouseState(reinterpret_cast<int*>(&position[0]), reinterpret_cast<int*>(&position[1]));
   return position;
 }
 
-inline std::array<std::size_t, 2> relative_position    (bool delta = false)
+inline std::array<std::size_t, 2>     relative_position    (bool delta = false)
 {
   std::array<std::size_t, 2> position;
   delta ?
@@ -53,23 +56,23 @@ inline std::array<std::size_t, 2> relative_position    (bool delta = false)
   return position;
 }
 
-inline bool                       is_button_pressed    (std::size_t button)
+inline bool                           is_button_pressed    (std::size_t button)
 {
   return SDL_GetGlobalMouseState(nullptr, nullptr) & static_cast<Uint32>(button);
 }
 
-inline void                       redraw               ()
+inline void                           redraw               ()
 {
   SDL_SetCursor(nullptr);
 }
-inline void                       set_cursor_default   ()
+inline void                           set_cursor_default   ()
 {
   auto current_cursor  = SDL_GetCursor       ();
   if  (current_cursor != SDL_GetDefaultCursor())
     SDL_FreeCursor(current_cursor);
   SDL_SetCursor(SDL_GetDefaultCursor());
 }
-inline void                       set_cursor           (std::string pixels, std::array<std::size_t, 2> hotspot = {0, 0})
+inline void                           set_cursor           (std::string pixels, std::array<std::size_t, 2> hotspot = {0, 0})
 {
   /* Pixels have to form a square and each dimension must be a multiple of 8. Example:
     "00000000000000000000000000000000"
@@ -136,12 +139,21 @@ inline void                       set_cursor           (std::string pixels, std:
     SDL_FreeCursor(current_cursor);
   SDL_SetCursor(SDL_CreateCursor(data.data(), mask.data(), static_cast<int>(squared_size), static_cast<int>(squared_size), static_cast<int>(hotspot[0]), static_cast<int>(hotspot[1])));
 }
-inline void                       set_cursor           (os_cursor os_cursor)
+inline void                           set_cursor           (os_cursor os_cursor)
 {
   auto current_cursor  = SDL_GetCursor       ();
   if  (current_cursor != SDL_GetDefaultCursor())
     SDL_FreeCursor(current_cursor);
   SDL_SetCursor(SDL_CreateSystemCursor(static_cast<SDL_SystemCursor>(os_cursor)));
+}
+
+inline bool                           haptic_support       ()
+{
+  return SDL_MouseIsHaptic() != 0;
+}
+inline std::unique_ptr<haptic_device> haptics              ()
+{
+  return haptic_support() ? std::make_unique<haptic_device>(SDL_HapticOpenFromMouse()) : nullptr;
 }
 }
 }

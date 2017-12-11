@@ -11,6 +11,7 @@
 #include <boost/signals2.hpp>
 #include <SDL2/SDL_joystick.h>
 
+#include <nano_engine/systems/input/haptic_device.hpp>
 #include <nano_engine/systems/input/joystick_hat_state.hpp>
 #include <nano_engine/systems/input/joystick_power_level.hpp>
 #include <nano_engine/systems/input/joystick_type.hpp>
@@ -22,7 +23,10 @@ class game_controller;
 class joystick
 {
 public:
-  explicit joystick  (const std::size_t& index) : native_(SDL_JoystickOpen(static_cast<int>(index))), managed_(true)
+  explicit joystick  (const std::size_t& index) 
+  : native_ (SDL_JoystickOpen(static_cast<int>(index)))
+  , managed_(true)
+  , haptics_(SDL_JoystickIsHaptic(native_) ? std::make_unique<haptic_device>(SDL_HapticOpenFromJoystick(native_)) : nullptr)
   {
     if (!native_)
       throw std::runtime_error("Failed to create SDL joystick. SDL Error: " + std::string(SDL_GetError()));
@@ -117,6 +121,11 @@ public:
     return trackballs;
   }
   
+  haptic_device*                          haptics        () const
+  {
+    return haptics_.get();
+  }
+
   SDL_Joystick*                           native         () const
   {
     return native_;
@@ -141,13 +150,17 @@ public:
 private:
   friend game_controller;
 
-  explicit joystick(SDL_Joystick* native) : native_(native), managed_(false)
+  explicit joystick(SDL_Joystick* native) 
+  : native_ (native)
+  , managed_(false)
+  , haptics_(SDL_JoystickIsHaptic(native_) ? std::make_unique<haptic_device>(SDL_HapticOpenFromJoystick(native_)) : nullptr)
   {
     
   }
 
-  SDL_Joystick* native_ ;
-  bool          managed_;
+  SDL_Joystick*                  native_ ;
+  bool                           managed_;
+  std::unique_ptr<haptic_device> haptics_;
 };
 }
 
