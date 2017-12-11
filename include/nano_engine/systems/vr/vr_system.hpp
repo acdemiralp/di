@@ -1,6 +1,7 @@
 #ifndef NANO_ENGINE_SYSTEMS_VR_VR_SYSTEM_HPP_
 #define NANO_ENGINE_SYSTEMS_VR_VR_SYSTEM_HPP_
 
+#include <algorithm>
 #include <memory>
 #include <stdexcept>
 #include <string>
