@@ -58,19 +58,19 @@ public:
   vr_system& operator=(const vr_system&  that) = delete ;
   vr_system& operator=(      vr_system&& temp) = default;
   
-  static bool                          available               ()
+  static bool                          available                ()
   {
     return hardware_present() && runtime_installed();
   }
-  static bool                          hardware_present        ()
+  static bool                          hardware_present         ()
   {
     return vr::VR_IsHmdPresent();
   }
-  static bool                          runtime_installed       ()
+  static bool                          runtime_installed        ()
   {
     return vr::VR_IsRuntimeInstalled();
   }
-  static std::string                   runtime_location        ()
+  static std::string                   runtime_location         ()
   {
     return std::string(vr::VR_RuntimePath());
   }
@@ -143,22 +143,22 @@ public:
   }
 
   // IVR System - Controller                                   
-  void                                 set_input_focus         (const bool enabled)
+  void                                 set_input_focus          (const bool enabled)
   {
     enabled ? vr::VRSystem()->CaptureInputFocus() : vr::VRSystem()->ReleaseInputFocus();
   }
                                                                
   // IVR System - Application Life Cycle                       
-  void                                 acknowledge_exit        () const
+  void                                 acknowledge_exit         () const
   {
     vr::VRSystem()->AcknowledgeQuit_Exiting();
   }
-  void                                 acknowledge_user_prompt () const
+  void                                 acknowledge_user_prompt  () const
   {
     vr::VRSystem()->AcknowledgeQuit_UserPrompt();
   }
-  
-  void                                 set_tracking_mode       (tracking_mode tracking_mode)
+                                                                
+  void                                 set_tracking_mode        (tracking_mode tracking_mode)
   {
     tracking_mode_ = tracking_mode;
   }
@@ -167,7 +167,12 @@ private:
   void tick() override
   {
     vr::TrackedDevicePose_t poses[vr::k_unMaxTrackedDeviceCount];
-    vr::VRSystem()->GetDeviceToAbsoluteTrackingPose(static_cast<vr::ETrackingUniverseOrigin>(tracking_mode_), hmds_()[0].seconds_to_photons(), poses, vr::k_unMaxTrackedDeviceCount);
+    vr::VRSystem()->GetDeviceToAbsoluteTrackingPose(static_cast<vr::ETrackingUniverseOrigin>(tracking_mode_), hmds_.size() > 0 ? hmds()[0]->seconds_to_photons() : 0.016F, poses, vr::k_unMaxTrackedDeviceCount);
+    for (auto& hmd                     : hmds_                    ) hmd                    ->pose_ = poses[hmd                    ->index()];
+    for (auto& controller              : controllers_             ) controller             ->pose_ = poses[controller             ->index()];
+    for (auto& tracking_reference      : tracking_references_     ) tracking_reference     ->pose_ = poses[tracking_reference     ->index()];
+    for (auto& display_redirect        : display_redirects_       ) display_redirect       ->pose_ = poses[display_redirect       ->index()];
+    for (auto& generic_tracking_device : generic_tracking_devices_) generic_tracking_device->pose_ = poses[generic_tracking_device->index()];
 
     vr::VREvent_t event;
     while (vr::VRSystem()->PollNextEvent(&event, sizeof event))

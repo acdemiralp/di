@@ -15,6 +15,8 @@
 
 namespace ne
 {
+class vr_system;
+
 // Important Note: Accesses globals of OpenVR. Do not instantiate until vr::VR_Init has been called.
 template <tracking_device_type type>
 class tracking_device
@@ -224,7 +226,9 @@ public:
     return pose_.is_initialized() ? pose_.get_ptr() : nullptr;
   }
 
-protected:                                                 
+protected:
+  friend vr_system;
+
   // IVR System - Property                                 
   bool                     get_property_bool               (const vr::ETrackedDeviceProperty native_property) const
   {
