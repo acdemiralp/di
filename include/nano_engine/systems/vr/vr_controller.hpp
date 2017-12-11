@@ -30,7 +30,7 @@ public:
   vr_controller& operator=(      vr_controller&& temp) = default;
 
   // IVR System - Controller
-  vr_controller_state state             (tracking_mode mode)                                                const
+  vr_controller_state state                 (tracking_mode mode)                                                const
   {
     vr::VRControllerState_t controller_state;
     vr::TrackedDevicePose_t controller_pose ;
@@ -42,21 +42,21 @@ public:
       &controller_pose                              );
     return vr_controller_state(controller_pose, controller_state, axis_types());
   }
-  void                haptic_pulse      (const std::size_t axis = 0, const std::size_t milliseconds = 1000) const
+  void                haptic_pulse          (const std::size_t axis = 0, const std::size_t milliseconds = 1000) const
   {
     vr::VRSystem()->TriggerHapticPulse(index_, static_cast<std::uint32_t>(axis), static_cast<unsigned short>(1000 * milliseconds));
   }
                                                                    
   // IVR System - Property                                         
-  std::string         attached_device_id() const
+  std::string         attached_device_id    () const
   {
     return get_property_string(vr::Prop_AttachedDeviceId_String);
   }
-  std::size_t         supported_buttons () const
+  std::size_t         supported_button_count() const
   {
     return static_cast<std::size_t>(get_property_uint64(vr::Prop_SupportedButtons_Uint64));
   }
-  ne::hand            hand_hint         () const
+  ne::hand            hand_hint             () const
   {
     return static_cast<ne::hand>(get_property_int(vr::Prop_ControllerRoleHint_Int32));
   }
