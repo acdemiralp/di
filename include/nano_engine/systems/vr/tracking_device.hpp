@@ -189,6 +189,15 @@ public:
   {
     return get_property_uint64(vr::Prop_RadioVersion_Uint64);
   }
+
+  std::string              registered_device_type          () const
+  {
+    return get_property_string(vr::Prop_RegisteredDeviceType_String);
+  }
+  std::string              input_profile_name              () const
+  {
+    return get_property_string(vr::Prop_InputProfileName_String);
+  }
   
   // IVR System - Debug                                                                      
   std::string              send_driver_request             (const std::string& request) const
