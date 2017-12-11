@@ -265,7 +265,13 @@ protected:
           if  (joystick == joysticks_.end()) continue;
           joystick->get()->on_button_press(static_cast<std::size_t>(event.jbutton.button));
         }
-        else if (event.type == SDL_JOYDEVICEADDED          ) on_joystick_connect(joystick_infos()[event.jdevice.which]);
+        else if (event.type == SDL_JOYDEVICEADDED          )
+        {
+          auto joysticks = joystick_infos();
+          for (auto& joystick : joysticks)
+            if (joystick.index == event.cdevice.which)
+              on_joystick_connect(joystick);
+        }
         else if (event.type == SDL_JOYDEVICEREMOVED        )
         {
           auto joystick = std::find_if(joysticks_.begin(), joysticks_.end(), [&event] (const std::unique_ptr<ne::joystick>& iteratee) { return iteratee->instance_id() == event.jdevice.which; });
@@ -291,7 +297,13 @@ protected:
           if  (game_controller == game_controllers_.end()) continue;
           game_controller->get()->on_button_press(static_cast<game_controller_button>(event.cbutton.button));
         }
-        else if (event.type == SDL_CONTROLLERDEVICEADDED   ) on_game_controller_connect(game_controller_infos()[event.cdevice.which]);
+        else if (event.type == SDL_CONTROLLERDEVICEADDED   )
+        {
+          auto game_controllers = game_controller_infos();
+          for (auto& game_controller : game_controllers)
+            if (game_controller.index == event.cdevice.which)
+              on_game_controller_connect(game_controller);
+        }
         else if (event.type == SDL_CONTROLLERDEVICEREMOVED )
         {
           auto game_controller = std::find_if(game_controllers_.begin(), game_controllers_.end(), [&event] (const std::unique_ptr<ne::game_controller>& iteratee) { return iteratee->instance_id() == event.cdevice.which; });

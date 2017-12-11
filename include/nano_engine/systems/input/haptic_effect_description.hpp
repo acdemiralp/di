@@ -11,8 +11,8 @@ namespace ne
 {
 struct haptic_effect_description
 {
-  virtual ~haptic_effect_description() = default;
-  virtual SDL_HapticEffect native   () = 0;
+  virtual ~haptic_effect_description()       = default;
+  virtual SDL_HapticEffect native   () const = 0;
 };
 
 struct haptic_effect_description_condition : haptic_effect_description
@@ -25,7 +25,7 @@ struct haptic_effect_description_condition : haptic_effect_description
     friction = SDL_HAPTIC_FRICTION
   };
 
-  SDL_HapticEffect native() override
+  SDL_HapticEffect native() const override
   {
     SDL_HapticEffect native;
     native.condition.type           = static_cast<unsigned short>(type                 );
@@ -68,7 +68,7 @@ struct haptic_effect_description_condition : haptic_effect_description
 };
 struct haptic_effect_description_constant : haptic_effect_description
 {
-  SDL_HapticEffect native() override
+  SDL_HapticEffect native() const override
   {
     SDL_HapticEffect native;
     native.constant.type             = SDL_HAPTIC_CONSTANT;
@@ -101,26 +101,26 @@ struct haptic_effect_description_constant : haptic_effect_description
 };
 struct haptic_effect_description_custom : haptic_effect_description
 {
-  SDL_HapticEffect native() override
+  SDL_HapticEffect native() const override
   {
     SDL_HapticEffect native;
     native.custom.type           = SDL_HAPTIC_CUSTOM;
     native.custom.direction.type = SDL_HAPTIC_CARTESIAN;
-    native.custom.direction.dir[0] = static_cast<int>           (direction[0]   );
-    native.custom.direction.dir[1] = static_cast<int>           (direction[1]   );
-    native.custom.direction.dir[2] = static_cast<int>           (direction[2]   );
-    native.custom.length           = static_cast<unsigned int>  (length         );
-    native.custom.delay            = static_cast<unsigned short>(delay          );
-    native.custom.button           = static_cast<unsigned short>(button         );
-    native.custom.interval         = static_cast<unsigned short>(button_interval);
-    native.custom.channels         = 3u;
-    native.custom.period           = static_cast<unsigned short>(period         );
-    native.custom.samples          = static_cast<unsigned short>(samples.size() );
-    native.custom.data             = samples.data()[0].data();
-    native.custom.attack_length    = static_cast<unsigned short>(attack_length  );
-    native.custom.attack_level     = static_cast<unsigned short>(attack_level   );
-    native.custom.fade_length      = static_cast<unsigned short>(fade_length    );
-    native.custom.fade_level       = static_cast<unsigned short>(fade_level     );
+    native.custom.direction.dir[0] = static_cast<int>            (direction[0]            );
+    native.custom.direction.dir[1] = static_cast<int>            (direction[1]            );
+    native.custom.direction.dir[2] = static_cast<int>            (direction[2]            );
+    native.custom.length           = static_cast<unsigned int>   (length                  );
+    native.custom.delay            = static_cast<unsigned short> (delay                   );
+    native.custom.button           = static_cast<unsigned short> (button                  );
+    native.custom.interval         = static_cast<unsigned short> (button_interval         );
+    native.custom.channels         = 3u;                         
+    native.custom.period           = static_cast<unsigned short> (period                  );
+    native.custom.samples          = static_cast<unsigned short> (samples.size()          );
+    native.custom.data             = const_cast <unsigned short*>(samples.data()[0].data());
+    native.custom.attack_length    = static_cast<unsigned short> (attack_length           );
+    native.custom.attack_level     = static_cast<unsigned short> (attack_level            );
+    native.custom.fade_length      = static_cast<unsigned short> (fade_length             );
+    native.custom.fade_level       = static_cast<unsigned short> (fade_level              );
     return native;
   }
   
@@ -138,7 +138,7 @@ struct haptic_effect_description_custom : haptic_effect_description
 };
 struct haptic_effect_description_left_right : haptic_effect_description
 {
-  SDL_HapticEffect native() override
+  SDL_HapticEffect native() const override
   {
     SDL_HapticEffect native;
     native.leftright.type            = SDL_HAPTIC_LEFTRIGHT;
@@ -162,7 +162,7 @@ struct haptic_effect_description_periodic : haptic_effect_description
     sawtooth_down = SDL_HAPTIC_SAWTOOTHDOWN
   };
 
-  SDL_HapticEffect native() override
+  SDL_HapticEffect native() const override
   {
     SDL_HapticEffect native;
     native.periodic.type             = static_cast<unsigned short>(type           );
@@ -202,7 +202,7 @@ struct haptic_effect_description_periodic : haptic_effect_description
 };
 struct haptic_effect_description_ramp : haptic_effect_description
 {
-  SDL_HapticEffect native() override
+  SDL_HapticEffect native() const override
   {
     SDL_HapticEffect native;
     native.ramp.type             = SDL_HAPTIC_RAMP;
