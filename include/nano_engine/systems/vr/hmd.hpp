@@ -38,6 +38,11 @@ public:
   hmd& operator=(const hmd&  that) = default;
   hmd& operator=(      hmd&& temp) = default;
   
+  float seconds_to_photons() const
+  {
+    return 1.0F / display_frequency() - time_since_last_vsync() + seconds_from_vsync_to_photons();
+  }
+
   // IVR System - Display
   std::array<std::size_t, 2>          recommended_render_target_size      ()                                             const
   {
