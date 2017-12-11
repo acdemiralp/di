@@ -124,17 +124,17 @@ struct haptic_effect_description_custom : haptic_effect_description
     return native;
   }
   
-  std::array<std::size_t, 3>                 direction      ;
-  std::size_t                                length         ;
-  std::size_t                                delay          ;
-  std::size_t                                button         ;
-  std::size_t                                button_interval;
-  std::size_t                                period         ;
-  std::vector<std::array<unsigned short, 3>> samples        ;
-  std::size_t                                attack_length  ;
-  std::size_t                                attack_level   ;
-  std::size_t                                fade_length    ;
-  std::size_t                                fade_level     ;
+  std::array<std::size_t, 3>                 direction       = {0, 1, 0};
+  std::size_t                                length          = 1000;
+  std::size_t                                delay           = 0   ;
+  std::size_t                                button          = 0   ;
+  std::size_t                                button_interval = 0   ;
+  std::size_t                                period          = 1000;
+  std::vector<std::array<unsigned short, 3>> samples         = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
+  std::size_t                                attack_length   = 0   ;
+  std::size_t                                attack_level    = 1000;
+  std::size_t                                fade_length     = 0   ;
+  std::size_t                                fade_level      = 1000;
 };
 struct haptic_effect_description_left_right : haptic_effect_description
 {
