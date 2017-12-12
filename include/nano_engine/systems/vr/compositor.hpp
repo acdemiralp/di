@@ -27,16 +27,7 @@ public:
   {
     native_->SuspendRendering(pause);
   }
-
-  void                 set_mirror_window_visible   (const bool visible)
-  {
-    visible ? native_->ShowMirrorWindow() : native_->HideMirrorWindow();
-  }
-  bool                 mirror_window_visible       ()                                                                                        const
-  {
-    return native_->IsMirrorWindowVisible();
-  }
-                                                                                                                                             
+                                                                                                                       
   void                 set_tracking_mode           (tracking_mode mode)
   {
     native_->SetTrackingSpace(static_cast<vr::ETrackingUniverseOrigin>(mode));
@@ -45,7 +36,43 @@ public:
   {
     return static_cast<ne::tracking_mode>(native_->GetTrackingSpace());
   }
-                                                                                                                                             
+                        
+  void                 set_mirror_window_visible   (const bool visible)
+  {
+    visible ? native_->ShowMirrorWindow() : native_->HideMirrorWindow();
+  }
+  bool                 mirror_window_visible       ()                                                                                        const
+  {
+    return native_->IsMirrorWindowVisible();
+  }
+  
+  void                 clear                       () const
+  {
+    native_->ClearLastSubmittedFrame();
+  }
+  
+  void                 fade_to_color               (std::array<float, 4> color  , const float seconds = 1.0F, const bool background = false) const
+  {                                                
+    native_->FadeToColor(seconds, color[0], color[1], color[2], color[3], background);
+  }                                                
+  std::array<float, 4> fade_color                  (                                                          const bool background = false) const
+  {                                                
+    const auto native_color = native_->GetCurrentFadeColor(background);
+    return {native_color.r, native_color.g, native_color.b, native_color.a};
+  }
+  void                 fade_grid                   (const bool           fade_in, const float seconds = 1.0F)                                const
+  {                                                
+    native_->FadeGrid(seconds, fade_in);
+  }                                                
+  float                fade_grid_alpha             ()                                                                                        const
+  {                                                                                                                                        
+    return native_->GetCurrentGridAlpha();                                                                                                 
+  }                                                                                                                                        
+  void                 clear_skybox                () const
+  {
+    native_->ClearSkyboxOverride();
+  }
+
   bool                 is_fullscreen               ()                                                                                        const
   {
     return native_->IsFullscreen();
@@ -76,25 +103,7 @@ public:
   {
     native_->PostPresentHandoff();
   }
-               
-  void                 fade_to_color               (std::array<float, 4> color  , const float seconds = 1.0F, const bool background = false) const
-  {                                                
-    native_->FadeToColor(seconds, color[0], color[1], color[2], color[3], background);
-  }                                                
-  std::array<float, 4> fade_color                  (                                                          const bool background = false) const
-  {                                                
-    const auto native_color = native_->GetCurrentFadeColor(background);
-    return {native_color.r, native_color.g, native_color.b, native_color.a};
-  }
-  void                 fade_grid                   (const bool           fade_in, const float seconds = 1.0F)                                const
-  {                                                
-    native_->FadeGrid(seconds, fade_in);
-  }                                                
-  float                fade_grid_alpha             ()                                                                                        const
-  {                                                                                                                                        
-    return native_->GetCurrentGridAlpha();                                                                                                 
-  }                                                                                                                                        
-
+  
   std::uint32_t        process_id                  ()                                                                                        const
   {
     return native_->GetCurrentSceneFocusProcess();
