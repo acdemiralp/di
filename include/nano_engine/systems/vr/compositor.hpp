@@ -72,7 +72,6 @@ public:
     native_->CompositorDumpImages();
   }
                                                                                                                                              
-                                                                                                                                             
   void                 unblock                     ()                                                                                        const
   {
     native_->PostPresentHandoff();
