@@ -13,9 +13,12 @@ namespace ne
 class compositor
 {
 public:
-  compositor           () : native_(vr::VRCompositor())
+  explicit compositor  (const tracking_mode mode) : native_(vr::VRCompositor())
   {
-    
+    if(!native_)
+      throw std::runtime_error("Failed to retrieve the OpenVR compositor. Ensure that OpenVR is initialized.");
+
+    set_tracking_mode(mode);
   }
   compositor           (const compositor&  that) = default;
   compositor           (      compositor&& temp) = default;

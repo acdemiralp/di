@@ -9,6 +9,7 @@
 
 #include <openvr.h>
 
+#include <nano_engine/systems/vr/compositor.hpp>
 #include <nano_engine/systems/vr/display_redirect.hpp>
 #include <nano_engine/systems/vr/hmd.hpp>
 #include <nano_engine/systems/vr/tracking_device.hpp>
@@ -31,6 +32,10 @@ public:
         + std::string(vr::VR_GetVRInitErrorAsSymbol            (error))
         + std::string(": ")
         + std::string(vr::VR_GetVRInitErrorAsEnglishDescription(error)));
+
+    compositor_ = std::make_unique<ne::compositor>(tracking_mode_);
+    if (!compositor_)
+      throw std::runtime_error("Failed to retrieve the OpenVR compositor.");
 
     std::vector<std::uint32_t> indices(vr::k_unMaxTrackedDeviceCount);
     auto count  = vr::VRSystem()->GetSortedTrackedDeviceIndicesOfClass(vr::TrackedDeviceClass_HMD        , indices.data(), static_cast<std::uint32_t>(indices.size())); 
@@ -158,21 +163,20 @@ public:
     vr::VRSystem()->AcknowledgeQuit_UserPrompt();
   }
                                                                 
-  void                                 set_tracking_mode        (tracking_mode tracking_mode)
+  void                                 set_tracking_mode        (const tracking_mode tracking_mode)
   {
     tracking_mode_ = tracking_mode;
+  }
+
+  compositor*                          compositor               () const
+  {
+    return compositor_.get();
   }
 
 private:
   void tick() override
   {
-    vr::TrackedDevicePose_t poses[vr::k_unMaxTrackedDeviceCount];
-    vr::VRSystem()->GetDeviceToAbsoluteTrackingPose(static_cast<vr::ETrackingUniverseOrigin>(tracking_mode_), hmds_.size() > 0 ? hmds()[0]->seconds_to_photons() : 0.016F, poses, vr::k_unMaxTrackedDeviceCount);
-    for (auto& hmd                     : hmds_                    ) hmd                    ->pose_ = tracking_device_pose(poses[hmd                    ->index()]);
-    for (auto& controller              : controllers_             ) controller             ->pose_ = tracking_device_pose(poses[controller             ->index()]);
-    for (auto& tracking_reference      : tracking_references_     ) tracking_reference     ->pose_ = tracking_device_pose(poses[tracking_reference     ->index()]);
-    for (auto& display_redirect        : display_redirects_       ) display_redirect       ->pose_ = tracking_device_pose(poses[display_redirect       ->index()]);
-    for (auto& generic_tracking_device : generic_tracking_devices_) generic_tracking_device->pose_ = tracking_device_pose(poses[generic_tracking_device->index()]);
+    predict_poses();
 
     vr::VREvent_t event;
     while (vr::VRSystem()->PollNextEvent(&event, sizeof event))
@@ -192,7 +196,32 @@ private:
     }
   }
 
+  // Shallow pass: Low accuracy pose predictions of the tracking devices.
+  void predict_poses () const
+  {
+    vr::TrackedDevicePose_t poses[vr::k_unMaxTrackedDeviceCount];
+    vr::VRSystem()->GetDeviceToAbsoluteTrackingPose(static_cast<vr::ETrackingUniverseOrigin>(tracking_mode_), hmds_.size() > 0 ? hmds()[0]->seconds_to_photons() : 0.016F, poses, vr::k_unMaxTrackedDeviceCount);
+    for (auto& hmd                     : hmds_                    ) hmd                    ->pose_ = tracking_device_pose(poses[hmd                    ->index()]);
+    for (auto& controller              : controllers_             ) controller             ->pose_ = tracking_device_pose(poses[controller             ->index()]);
+    for (auto& tracking_reference      : tracking_references_     ) tracking_reference     ->pose_ = tracking_device_pose(poses[tracking_reference     ->index()]);
+    for (auto& display_redirect        : display_redirects_       ) display_redirect       ->pose_ = tracking_device_pose(poses[display_redirect       ->index()]);
+    for (auto& generic_tracking_device : generic_tracking_devices_) generic_tracking_device->pose_ = tracking_device_pose(poses[generic_tracking_device->index()]);
+  }
+  // Deep pass: High accuracy poses of the tracking devices.
+  // Freezes the thread. Call just prior to rendering in order to correct the eye transforms.
+  void retrieve_poses() const
+  {
+    vr::TrackedDevicePose_t poses[vr::k_unMaxTrackedDeviceCount];
+    vr::VRCompositor()->WaitGetPoses(poses, vr::k_unMaxTrackedDeviceCount, nullptr, 0);
+    for (auto& hmd                     : hmds_                    ) hmd                    ->pose_ = tracking_device_pose(poses[hmd                    ->index()]);
+    for (auto& controller              : controllers_             ) controller             ->pose_ = tracking_device_pose(poses[controller             ->index()]);
+    for (auto& tracking_reference      : tracking_references_     ) tracking_reference     ->pose_ = tracking_device_pose(poses[tracking_reference     ->index()]);
+    for (auto& display_redirect        : display_redirects_       ) display_redirect       ->pose_ = tracking_device_pose(poses[display_redirect       ->index()]);
+    for (auto& generic_tracking_device : generic_tracking_devices_) generic_tracking_device->pose_ = tracking_device_pose(poses[generic_tracking_device->index()]);
+  }
+
   tracking_mode                                         tracking_mode_           ;
+  std::unique_ptr<ne::compositor>                       compositor_              ;
   std::vector<std::unique_ptr<hmd>>                     hmds_                    ;
   std::vector<std::unique_ptr<vr_controller>>           controllers_             ;
   std::vector<std::unique_ptr<tracking_reference>>      tracking_references_     ;
