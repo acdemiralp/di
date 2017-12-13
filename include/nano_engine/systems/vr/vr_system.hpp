@@ -22,7 +22,7 @@ namespace ne
 class vr_system final : public system
 {
 public:
-  vr_system           (tracking_mode tracking_mode) : tracking_mode_(tracking_mode)
+  explicit vr_system  (const tracking_mode tracking_mode) : tracking_mode_(tracking_mode)
   {
     auto error = vr::VRInitError_None;
     VR_Init(&error, vr::VRApplication_Scene);
