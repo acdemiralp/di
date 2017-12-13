@@ -11,7 +11,9 @@ public:
   virtual ~system() = default;
 
   virtual void initialize() { }
+  virtual void pre_tick  () { }
   virtual void tick      () { }
+  virtual void post_tick () { }
   virtual void terminate () { }
 
 protected:

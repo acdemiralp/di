@@ -49,8 +49,12 @@ public:
     while (is_running_)
     {
       frame_timer_.tick();
+      for (auto& system : systems_)
+        system->pre_tick ();
       for(auto& system : systems_)
-        system->tick();
+        system->tick     ();
+      for (auto& system : systems_)
+        system->post_tick();
     }
 
     for (auto& system : systems_)
