@@ -1,6 +1,7 @@
 #ifndef NANO_ENGINE_SYSTEMS_INPUT_HAPTIC_DEVICE_HPP_
 #define NANO_ENGINE_SYSTEMS_INPUT_HAPTIC_DEVICE_HPP_
 
+#include <chrono>
 #include <cstddef>
 #include <memory>
 #include <stdexcept>
@@ -129,9 +130,9 @@ public:
     SDL_HapticSetAutocenter(native_, static_cast<int>(autocenter));
   }
                                                           
-  void                        play_rumble                 (const float strength, const std::size_t milliseconds) const
+  void                        play_rumble                 (const float strength, std::chrono::milliseconds duration) const
   {
-    SDL_HapticRumblePlay(native_, strength, static_cast<unsigned>(milliseconds));
+    SDL_HapticRumblePlay(native_, strength, static_cast<unsigned>(duration.count()));
   }
   void                        stop_rumble                 () const
   {

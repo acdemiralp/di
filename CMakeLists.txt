@@ -61,11 +61,15 @@ set(PROJECT_SOURCES
   include/nano_engine/systems/input/touch_device.hpp
   include/nano_engine/systems/renderer/render_pass.hpp
   include/nano_engine/systems/renderer/renderer.hpp
-  include/nano_engine/systems/vr/compositor.hpp
+  include/nano_engine/systems/vr/color_space.hpp
   include/nano_engine/systems/vr/display_redirect.hpp
   include/nano_engine/systems/vr/eye.hpp
   include/nano_engine/systems/vr/hand.hpp
   include/nano_engine/systems/vr/hmd.hpp
+  include/nano_engine/systems/vr/mirror_texture_d3d11.hpp
+  include/nano_engine/systems/vr/mirror_texture_opengl.hpp
+  include/nano_engine/systems/vr/submit_flags.hpp
+  include/nano_engine/systems/vr/timing_mode.hpp
   include/nano_engine/systems/vr/tracking_device.hpp
   include/nano_engine/systems/vr/tracking_device_activity.hpp
   include/nano_engine/systems/vr/tracking_device_pose.hpp
