@@ -18,6 +18,8 @@
 #include <nano_engine/systems/vr/mirror_texture_d3d11.hpp>
 #include <nano_engine/systems/vr/mirror_texture_opengl.hpp>
 #include <nano_engine/systems/vr/submit_flags.hpp>
+#include <nano_engine/systems/vr/texture_data_d3d12.hpp>
+#include <nano_engine/systems/vr/texture_data_vulkan.hpp>
 #include <nano_engine/systems/vr/timing_mode.hpp>
 #include <nano_engine/systems/vr/tracking_device.hpp>
 #include <nano_engine/systems/vr/tracking_mode.hpp>
@@ -32,6 +34,8 @@
 
 typedef struct VkInstance_T*       VkInstance      ;
 typedef struct VkPhysicalDevice_T* VkPhysicalDevice;
+
+class ID3D11Texture2D;
 
 namespace ne
 {
@@ -400,14 +404,46 @@ public:
   }
                                          
   // IVR Compositor                      
-  void                                   set_paused                          (const bool pause  )
+  void                                   set_paused                          (const bool pause)
   {
     vr::VRCompositor()->SuspendRendering(pause);
   }
-           
-  void                                   submit_opengl                       (eye eye, color_space color_space = color_space::automatic, boost::optional<rectangle<float>> rectangle = boost::none, submit_flags flags = submit_flags::none) const
+  
+  void                                   submit_d3d11                        (eye eye, ID3D11Texture2D*    texture_ptr   , color_space color_space = color_space::automatic, boost::optional<rectangle<float>> rectangle = boost::none, submit_flags flags = submit_flags::none) const
   {
-    vr::Texture_t         texture {nullptr, vr::TextureType_OpenGL, static_cast<vr::EColorSpace>(color_space)}; // TODO
+    vr::Texture_t         texture {texture_ptr, vr::TextureType_DirectX, static_cast<vr::EColorSpace>(color_space)};
+    vr::VRTextureBounds_t bounds;
+    if (rectangle != boost::none)
+      bounds = {rectangle->left, rectangle->bottom, rectangle->right, rectangle->top};
+    vr::VRCompositor()->Submit(static_cast<vr::EVREye>(eye), &texture, rectangle != boost::none ? &bounds : nullptr, static_cast<vr::EVRSubmitFlags>(flags));
+  }
+  void                                   submit_d3d12                        (eye eye, texture_data_d3d12  texture_data  , color_space color_space = color_space::automatic, boost::optional<rectangle<float>> rectangle = boost::none, submit_flags flags = submit_flags::none) const
+  {
+    vr::Texture_t         texture {&texture_data, vr::TextureType_DirectX12, static_cast<vr::EColorSpace>(color_space)};
+    vr::VRTextureBounds_t bounds;
+    if (rectangle != boost::none)
+      bounds = {rectangle->left, rectangle->bottom, rectangle->right, rectangle->top};
+    vr::VRCompositor()->Submit(static_cast<vr::EVREye>(eye), &texture, rectangle != boost::none ? &bounds : nullptr, static_cast<vr::EVRSubmitFlags>(flags));
+  }
+  void                                   submit_metal                        (eye eye, void*               io_surface_ref, color_space color_space = color_space::automatic, boost::optional<rectangle<float>> rectangle = boost::none, submit_flags flags = submit_flags::none) const
+  {
+    vr::Texture_t         texture {&io_surface_ref, vr::TextureType_IOSurface, static_cast<vr::EColorSpace>(color_space)};
+    vr::VRTextureBounds_t bounds;
+    if (rectangle != boost::none)
+      bounds = {rectangle->left, rectangle->bottom, rectangle->right, rectangle->top};
+    vr::VRCompositor()->Submit(static_cast<vr::EVREye>(eye), &texture, rectangle != boost::none ? &bounds : nullptr, static_cast<vr::EVRSubmitFlags>(flags));
+  }
+  void                                   submit_opengl                       (eye eye, std::uint32_t       texture_id    , color_space color_space = color_space::automatic, boost::optional<rectangle<float>> rectangle = boost::none, submit_flags flags = submit_flags::none) const
+  {
+    vr::Texture_t         texture {&texture_id, vr::TextureType_OpenGL, static_cast<vr::EColorSpace>(color_space)};
+    vr::VRTextureBounds_t bounds;
+    if (rectangle != boost::none)
+      bounds = {rectangle->left, rectangle->bottom, rectangle->right, rectangle->top};
+    vr::VRCompositor()->Submit(static_cast<vr::EVREye>(eye), &texture, rectangle != boost::none ? &bounds : nullptr, static_cast<vr::EVRSubmitFlags>(flags));
+  }
+  void                                   submit_vulkan                       (eye eye, texture_data_vulkan texture_data  , color_space color_space = color_space::automatic, boost::optional<rectangle<float>> rectangle = boost::none, submit_flags flags = submit_flags::none) const
+  {
+    vr::Texture_t         texture {&texture_data, vr::TextureType_Vulkan, static_cast<vr::EColorSpace>(color_space)};
     vr::VRTextureBounds_t bounds;
     if (rectangle != boost::none)
       bounds = {rectangle->left, rectangle->bottom, rectangle->right, rectangle->top};
@@ -529,19 +565,18 @@ public:
     return extensions;
   }
 
-  void                                   force_interleaved_projection        (const bool enabled)
+  void                                   force_interleaved_projection        (const bool enabled)                         const
   {
     vr::VRCompositor()->ForceInterleavedReprojectionOn(enabled);
-  }
-  void                                   force_reconnect_to_process          ()
+  }               
+  void                                   force_reconnect_to_process          ()                                           const
   {
     vr::VRCompositor()->ForceReconnectProcess();
-  }
-  void                                   force_quit                          ()
+  }                                 
+  void                                   force_quit                          ()                                           const
   {
     return vr::VRCompositor()->CompositorQuit();
   }
-
 };
 }
 
