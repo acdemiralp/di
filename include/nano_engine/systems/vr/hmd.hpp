@@ -409,23 +409,23 @@ public:
     vr::VRCompositor()->SuspendRendering(pause);
   }
   
-  void                                   submit_d3d11                        (eye eye, ID3D11Texture2D*    texture_ptr   , color_space color_space = color_space::automatic, boost::optional<rectangle<float>> rectangle = boost::none, submit_flags flags = submit_flags::none) const
+  void                                   submit                              (eye eye, ID3D11Texture2D*    texture_ptr   , color_space color_space = color_space::automatic, boost::optional<rectangle<float>> rectangle = boost::none, submit_flags flags = submit_flags::none) const
   {
-    vr::Texture_t         texture {texture_ptr, vr::TextureType_DirectX, static_cast<vr::EColorSpace>(color_space)};
+    vr::Texture_t         texture {reinterpret_cast<void*>(texture_ptr), vr::TextureType_DirectX, static_cast<vr::EColorSpace>(color_space)};
     vr::VRTextureBounds_t bounds;
     if (rectangle != boost::none)
       bounds = {rectangle->left, rectangle->bottom, rectangle->right, rectangle->top};
     vr::VRCompositor()->Submit(static_cast<vr::EVREye>(eye), &texture, rectangle != boost::none ? &bounds : nullptr, static_cast<vr::EVRSubmitFlags>(flags));
   }
-  void                                   submit_d3d12                        (eye eye, texture_data_d3d12  texture_data  , color_space color_space = color_space::automatic, boost::optional<rectangle<float>> rectangle = boost::none, submit_flags flags = submit_flags::none) const
+  void                                   submit                              (eye eye, texture_data_d3d12  texture_data  , color_space color_space = color_space::automatic, boost::optional<rectangle<float>> rectangle = boost::none, submit_flags flags = submit_flags::none) const
   {
-    vr::Texture_t         texture {&texture_data, vr::TextureType_DirectX12, static_cast<vr::EColorSpace>(color_space)};
+    vr::Texture_t         texture {reinterpret_cast<void*>(&texture_data), vr::TextureType_DirectX12, static_cast<vr::EColorSpace>(color_space)};
     vr::VRTextureBounds_t bounds;
     if (rectangle != boost::none)
       bounds = {rectangle->left, rectangle->bottom, rectangle->right, rectangle->top};
     vr::VRCompositor()->Submit(static_cast<vr::EVREye>(eye), &texture, rectangle != boost::none ? &bounds : nullptr, static_cast<vr::EVRSubmitFlags>(flags));
   }
-  void                                   submit_metal                        (eye eye, void*               io_surface_ref, color_space color_space = color_space::automatic, boost::optional<rectangle<float>> rectangle = boost::none, submit_flags flags = submit_flags::none) const
+  void                                   submit                              (eye eye, void*               io_surface_ref, color_space color_space = color_space::automatic, boost::optional<rectangle<float>> rectangle = boost::none, submit_flags flags = submit_flags::none) const
   {
     vr::Texture_t         texture {&io_surface_ref, vr::TextureType_IOSurface, static_cast<vr::EColorSpace>(color_space)};
     vr::VRTextureBounds_t bounds;
@@ -433,23 +433,22 @@ public:
       bounds = {rectangle->left, rectangle->bottom, rectangle->right, rectangle->top};
     vr::VRCompositor()->Submit(static_cast<vr::EVREye>(eye), &texture, rectangle != boost::none ? &bounds : nullptr, static_cast<vr::EVRSubmitFlags>(flags));
   }
-  void                                   submit_opengl                       (eye eye, std::uint32_t       texture_id    , color_space color_space = color_space::automatic, boost::optional<rectangle<float>> rectangle = boost::none, submit_flags flags = submit_flags::none) const
+  void                                   submit                              (eye eye, std::uint32_t       texture_id    , color_space color_space = color_space::automatic, boost::optional<rectangle<float>> rectangle = boost::none, submit_flags flags = submit_flags::none) const
   {
-    vr::Texture_t         texture {&texture_id, vr::TextureType_OpenGL, static_cast<vr::EColorSpace>(color_space)};
+    vr::Texture_t         texture {reinterpret_cast<void*>(static_cast<std::uintptr_t>(texture_id)), vr::TextureType_OpenGL, static_cast<vr::EColorSpace>(color_space)};
     vr::VRTextureBounds_t bounds;
     if (rectangle != boost::none)
       bounds = {rectangle->left, rectangle->bottom, rectangle->right, rectangle->top};
     vr::VRCompositor()->Submit(static_cast<vr::EVREye>(eye), &texture, rectangle != boost::none ? &bounds : nullptr, static_cast<vr::EVRSubmitFlags>(flags));
   }
-  void                                   submit_vulkan                       (eye eye, texture_data_vulkan texture_data  , color_space color_space = color_space::automatic, boost::optional<rectangle<float>> rectangle = boost::none, submit_flags flags = submit_flags::none) const
+  void                                   submit                              (eye eye, texture_data_vulkan texture_data  , color_space color_space = color_space::automatic, boost::optional<rectangle<float>> rectangle = boost::none, submit_flags flags = submit_flags::none) const
   {
-    vr::Texture_t         texture {&texture_data, vr::TextureType_Vulkan, static_cast<vr::EColorSpace>(color_space)};
+    vr::Texture_t         texture {reinterpret_cast<void*>(&texture_data), vr::TextureType_Vulkan, static_cast<vr::EColorSpace>(color_space)};
     vr::VRTextureBounds_t bounds;
     if (rectangle != boost::none)
       bounds = {rectangle->left, rectangle->bottom, rectangle->right, rectangle->top};
     vr::VRCompositor()->Submit(static_cast<vr::EVREye>(eye), &texture, rectangle != boost::none ? &bounds : nullptr, static_cast<vr::EVRSubmitFlags>(flags));
-  }
-  
+  } 
   void                                   clear                               ()                                           const
   {
     vr::VRCompositor()->ClearLastSubmittedFrame();
@@ -459,6 +458,15 @@ public:
   {
     return std::chrono::duration<float>(vr::VRCompositor()->GetFrameTimeRemaining());
   }
+  void                                   frame_time_data                     ()                                           const
+  {
+    vr::Compositor_FrameTiming frame_time_data;
+  }
+  void                                   cumulative_statistics               ()                                           const 
+  {
+    vr::Compositor_CumulativeStats stats;
+  }
+
 
   void                                   set_timing_mode                     (timing_mode timing_mode)
   {
@@ -481,7 +489,6 @@ public:
   {
     return vr::VRCompositor()->IsMirrorWindowVisible();
   }
-                  
   std::unique_ptr<mirror_texture_d3d11>  mirror_texture_d3d11                (eye eye)                                    const
   {
     return std::make_unique<ne::mirror_texture_d3d11>(eye);
@@ -508,24 +515,127 @@ public:
   {                                                                                                                                        
     return vr::VRCompositor()->GetCurrentGridAlpha();                                                                                                 
   }                                                                                                                                        
+   
+  void                                   set_skybox                          (ID3D11Texture2D*                   texture_ptr    , color_space color_space = color_space::automatic)
+  {
+    vr::Texture_t texture {reinterpret_cast<void*>(texture_ptr), vr::TextureType_DirectX, static_cast<vr::EColorSpace>(color_space)};
+    vr::VRCompositor()->SetSkyboxOverride(&texture, 1);
+  }
+  void                                   set_skybox                          (texture_data_d3d12                 texture_data   , color_space color_space = color_space::automatic)
+  {
+    vr::Texture_t texture {reinterpret_cast<void*>(&texture_data), vr::TextureType_DirectX12, static_cast<vr::EColorSpace>(color_space)};
+    vr::VRCompositor()->SetSkyboxOverride(&texture, 1);
+  }
+  void                                   set_skybox                          (void*                              io_surface_ref , color_space color_space = color_space::automatic)
+  {
+    vr::Texture_t texture {io_surface_ref, vr::TextureType_IOSurface, static_cast<vr::EColorSpace>(color_space)};
+    vr::VRCompositor()->SetSkyboxOverride(&texture, 1);
+  }
+  void                                   set_skybox                          (std::uint32_t                      texture_id     , color_space color_space = color_space::automatic)
+  {
+    vr::Texture_t texture {reinterpret_cast<void*>(static_cast<std::uintptr_t>(texture_id)), vr::TextureType_OpenGL, static_cast<vr::EColorSpace>(color_space)};
+    vr::VRCompositor()->SetSkyboxOverride(&texture, 1);
+  }
+  void                                   set_skybox                          (texture_data_vulkan                texture_data   , color_space color_space = color_space::automatic)
+  {
+    vr::Texture_t texture {reinterpret_cast<void*>(&texture_data), vr::TextureType_OpenGL, static_cast<vr::EColorSpace>(color_space)};
+    vr::VRCompositor()->SetSkyboxOverride(&texture, 1);
+  }
+  void                                   set_skybox                          (std::array<ID3D11Texture2D*   , 2> texture_ptrs   , color_space color_space = color_space::automatic)
+  {
+    std::array<vr::Texture_t, 2> textures;
+    std::transform(texture_ptrs.begin(), texture_ptrs.end(), textures.begin(), [&color_space] (ID3D11Texture2D* iteratee)
+    {
+      return vr::Texture_t{reinterpret_cast<void*>(iteratee), vr::TextureType_DirectX, static_cast<vr::EColorSpace>(color_space)};
+    });
+    vr::VRCompositor()->SetSkyboxOverride(textures.data(), static_cast<std::uint32_t>(textures.size()));
+  }
+  void                                   set_skybox                          (std::array<texture_data_d3d12 , 2> texture_data   , color_space color_space = color_space::automatic)
+  {
+    std::array<vr::Texture_t, 2> textures;
+    std::transform(texture_data.begin(), texture_data.end(), textures.begin(), [&color_space] (texture_data_d3d12& iteratee)
+    {
+      return vr::Texture_t{reinterpret_cast<void*>(&iteratee), vr::TextureType_DirectX12, static_cast<vr::EColorSpace>(color_space)};
+    });
+    vr::VRCompositor()->SetSkyboxOverride(textures.data(), static_cast<std::uint32_t>(textures.size()));
+  }
+  void                                   set_skybox                          (std::array<void*              , 2> io_surface_refs, color_space color_space = color_space::automatic)
+  {
+    std::array<vr::Texture_t, 2> textures;
+    std::transform(io_surface_refs.begin(), io_surface_refs.end(), textures.begin(), [&color_space] (void* iteratee)
+    {
+      return vr::Texture_t{iteratee, vr::TextureType_IOSurface, static_cast<vr::EColorSpace>(color_space)};
+    });
+    vr::VRCompositor()->SetSkyboxOverride(textures.data(), static_cast<std::uint32_t>(textures.size()));
+  }
+  void                                   set_skybox                          (std::array<std::uint32_t      , 2> texture_ids    , color_space color_space = color_space::automatic)
+  {  
+    std::array<vr::Texture_t, 2> textures;
+    std::transform(texture_ids.begin(), texture_ids.end(), textures.begin(), [&color_space] (std::uint32_t iteratee)
+    {
+      return vr::Texture_t{reinterpret_cast<void*>(static_cast<std::uintptr_t>(iteratee)), vr::TextureType_OpenGL, static_cast<vr::EColorSpace>(color_space)};
+    });
+    vr::VRCompositor()->SetSkyboxOverride(textures.data(), static_cast<std::uint32_t>(textures.size()));                                                                                                                     
+  }                                                                                                                             
+  void                                   set_skybox                          (std::array<texture_data_vulkan, 2> texture_data   , color_space color_space = color_space::automatic)
+  {                  
+    std::array<vr::Texture_t, 2> textures;
+    std::transform(texture_data.begin(), texture_data.end(), textures.begin(), [&color_space] (texture_data_vulkan& iteratee)
+    {
+      return vr::Texture_t{reinterpret_cast<void*>(&iteratee), vr::TextureType_Vulkan, static_cast<vr::EColorSpace>(color_space)};
+    });
+    vr::VRCompositor()->SetSkyboxOverride(textures.data(), static_cast<std::uint32_t>(textures.size()));                                                                                                          
+  }                                                                                                                             
+  void                                   set_skybox                          (std::array<ID3D11Texture2D*   , 6> texture_ptrs   , color_space color_space = color_space::automatic)
+  {  
+    std::array<vr::Texture_t, 6> textures;
+    std::transform(texture_ptrs.begin(), texture_ptrs.end(), textures.begin(), [&color_space] (ID3D11Texture2D* iteratee)
+    {
+      return vr::Texture_t{reinterpret_cast<void*>(iteratee), vr::TextureType_DirectX, static_cast<vr::EColorSpace>(color_space)};
+    });
+    vr::VRCompositor()->SetSkyboxOverride(textures.data(), static_cast<std::uint32_t>(textures.size()));                                                                                                                          
+  }                                                                                                                             
+  void                                   set_skybox                          (std::array<texture_data_d3d12 , 6> texture_data   , color_space color_space = color_space::automatic)
+  { 
+    std::array<vr::Texture_t, 6> textures;
+    std::transform(texture_data.begin(), texture_data.end(), textures.begin(), [&color_space] (texture_data_d3d12& iteratee)
+    {
+      return vr::Texture_t{reinterpret_cast<void*>(&iteratee), vr::TextureType_DirectX12, static_cast<vr::EColorSpace>(color_space)};
+    });
+    vr::VRCompositor()->SetSkyboxOverride(textures.data(), static_cast<std::uint32_t>(textures.size()));                                                                                                                          
+  }                                                                                                                             
+  void                                   set_skybox                          (std::array<void*              , 6> io_surface_refs, color_space color_space = color_space::automatic)
+  {                                                                                                                             
+    std::array<vr::Texture_t, 6> textures;
+    std::transform(io_surface_refs.begin(), io_surface_refs.end(), textures.begin(), [&color_space] (void* iteratee)
+    {
+      return vr::Texture_t{iteratee, vr::TextureType_IOSurface, static_cast<vr::EColorSpace>(color_space)};
+    });
+    vr::VRCompositor()->SetSkyboxOverride(textures.data(), static_cast<std::uint32_t>(textures.size()));                                                                                                                             
+  }                                                                                                                             
+  void                                   set_skybox                          (std::array<std::uint32_t      , 6> texture_ids    , color_space color_space = color_space::automatic)
+  {      
+    std::array<vr::Texture_t, 6> textures;
+    std::transform(texture_ids.begin(), texture_ids.end(), textures.begin(), [&color_space] (std::uint32_t iteratee)
+    {
+      return vr::Texture_t{reinterpret_cast<void*>(static_cast<std::uintptr_t>(iteratee)), vr::TextureType_OpenGL, static_cast<vr::EColorSpace>(color_space)};
+    });
+    vr::VRCompositor()->SetSkyboxOverride(textures.data(), static_cast<std::uint32_t>(textures.size()));                                                                                                                     
+  }                                                                                                                             
+  void                                   set_skybox                          (std::array<texture_data_vulkan, 6> texture_data   , color_space color_space = color_space::automatic)
+  {
+    std::array<vr::Texture_t, 6> textures;
+    std::transform(texture_data.begin(), texture_data.end(), textures.begin(), [&color_space] (texture_data_vulkan& iteratee)
+    {
+      return vr::Texture_t{reinterpret_cast<void*>(&iteratee), vr::TextureType_Vulkan, static_cast<vr::EColorSpace>(color_space)};
+    });
+    vr::VRCompositor()->SetSkyboxOverride(textures.data(), static_cast<std::uint32_t>(textures.size()));
+  }
   void                                   clear_skybox                        ()                                           const
   {
     vr::VRCompositor()->ClearSkyboxOverride();
   }
-                                                                                                                          
-  bool                                   is_fullscreen                       ()                                           const
-  {
-    return vr::VRCompositor()->IsFullscreen();
-  }                                
-  bool                                   can_render                          ()                                           const
-  {
-    return vr::VRCompositor()->CanRenderScene();
-  }
-  bool                                   low_resources                       ()                                           const
-  {
-    return vr::VRCompositor()->ShouldAppRenderWithLowResources();
-  }
-                                                                                                                          
+                                                                                                                        
   void                                   to_front                            ()                                           const
   {
     vr::VRCompositor()->CompositorBringToFront();
@@ -538,7 +648,20 @@ public:
   {
     vr::VRCompositor()->CompositorDumpImages();
   }
-                                                                                                                          
+                                                                                                                              
+  bool                                   is_fullscreen                       ()                                           const
+  {
+    return vr::VRCompositor()->IsFullscreen();
+  }                                
+  bool                                   can_render                          ()                                           const
+  {
+    return vr::VRCompositor()->CanRenderScene();
+  }
+  bool                                   low_resources                       ()                                           const
+  {
+    return vr::VRCompositor()->ShouldAppRenderWithLowResources();
+  }
+                                                                                                                        
   std::uint32_t                          process_id                          ()                                           const
   {
     return vr::VRCompositor()->GetCurrentSceneFocusProcess();
