@@ -14,7 +14,7 @@ namespace ne
 struct vr_controller_state : tracking_device_pose
 {
   vr_controller_state           (
-    const vr::TrackedDevicePose_t& native_pose, 
+    const vr::TrackedDevicePose_t& native_pose , 
     const vr::VRControllerState_t& native_state, 
     const std::array<vr_controller_axis, vr::k_unControllerStateAxisCount>& axis_types)
   : tracking_device_pose(native_pose)
