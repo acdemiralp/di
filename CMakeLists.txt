@@ -68,9 +68,11 @@ set(PROJECT_SOURCES
   include/nano_engine/systems/vr/hmd.hpp
   include/nano_engine/systems/vr/mirror_texture_d3d11.hpp
   include/nano_engine/systems/vr/mirror_texture_opengl.hpp
+  include/nano_engine/systems/vr/statistics.hpp
   include/nano_engine/systems/vr/submit_flags.hpp
   include/nano_engine/systems/vr/texture_data_d3d12.hpp
   include/nano_engine/systems/vr/texture_data_vulkan.hpp
+  include/nano_engine/systems/vr/timing_info.hpp
   include/nano_engine/systems/vr/timing_mode.hpp
   include/nano_engine/systems/vr/tracking_device.hpp
   include/nano_engine/systems/vr/tracking_device_activity.hpp

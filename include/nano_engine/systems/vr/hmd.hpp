@@ -467,7 +467,6 @@ public:
     vr::Compositor_CumulativeStats stats;
   }
 
-
   void                                   set_timing_mode                     (timing_mode timing_mode)
   {
     vr::VRCompositor()->SetExplicitTimingMode(static_cast<vr::EVRCompositorTimingMode>(timing_mode));
