@@ -17,9 +17,11 @@
 #include <nano_engine/systems/vr/eye.hpp>
 #include <nano_engine/systems/vr/mirror_texture_d3d11.hpp>
 #include <nano_engine/systems/vr/mirror_texture_opengl.hpp>
+#include <nano_engine/systems/vr/statistics.hpp>
 #include <nano_engine/systems/vr/submit_flags.hpp>
 #include <nano_engine/systems/vr/texture_data_d3d12.hpp>
 #include <nano_engine/systems/vr/texture_data_vulkan.hpp>
+#include <nano_engine/systems/vr/timing_info.hpp>
 #include <nano_engine/systems/vr/timing_mode.hpp>
 #include <nano_engine/systems/vr/tracking_device.hpp>
 #include <nano_engine/systems/vr/tracking_mode.hpp>
@@ -458,13 +460,55 @@ public:
   {
     return std::chrono::duration<float>(vr::VRCompositor()->GetFrameTimeRemaining());
   }
-  void                                   frame_time_data                     ()                                           const
+  timing_info                            frame_time_data                     ()                                           const
   {
-    vr::Compositor_FrameTiming frame_time_data;
+    vr::Compositor_FrameTiming frame_timing;
+    vr::VRCompositor()->GetFrameTiming(&frame_timing);
+    return timing_info {
+      static_cast<std::size_t>                (frame_timing.m_nFrameIndex              ),
+      static_cast<std::size_t>                (frame_timing.m_nNumFramePresents        ),
+      static_cast<std::size_t>                (frame_timing.m_nNumMisPresented         ),
+      static_cast<std::size_t>                (frame_timing.m_nNumDroppedFrames        ),
+      std::chrono::duration<double>           (frame_timing.m_flSystemTimeInSeconds    ),
+      std::chrono::duration<float, std::milli>(frame_timing.m_flPreSubmitGpuMs         ),
+      std::chrono::duration<float, std::milli>(frame_timing.m_flPostSubmitGpuMs        ),
+      std::chrono::duration<float, std::milli>(frame_timing.m_flTotalRenderGpuMs       ),
+      std::chrono::duration<float, std::milli>(frame_timing.m_flCompositorRenderGpuMs  ),
+      std::chrono::duration<float, std::milli>(frame_timing.m_flCompositorRenderCpuMs  ),
+      std::chrono::duration<float, std::milli>(frame_timing.m_flCompositorIdleCpuMs    ),
+      std::chrono::duration<float, std::milli>(frame_timing.m_flClientFrameIntervalMs  ),
+      std::chrono::duration<float, std::milli>(frame_timing.m_flPresentCallCpuMs       ),
+      std::chrono::duration<float, std::milli>(frame_timing.m_flWaitForPresentCpuMs    ),
+      std::chrono::duration<float, std::milli>(frame_timing.m_flSubmitFrameMs          ),
+      std::chrono::duration<float, std::milli>(frame_timing.m_flWaitGetPosesCalledMs   ),
+      std::chrono::duration<float, std::milli>(frame_timing.m_flNewPosesReadyMs        ),
+      std::chrono::duration<float, std::milli>(frame_timing.m_flNewFrameReadyMs        ),
+      std::chrono::duration<float, std::milli>(frame_timing.m_flCompositorUpdateStartMs),
+      std::chrono::duration<float, std::milli>(frame_timing.m_flCompositorUpdateEndMs  ),
+      std::chrono::duration<float, std::milli>(frame_timing.m_flCompositorRenderStartMs)
+    };
   }
-  void                                   cumulative_statistics               ()                                           const 
+  statistics                             cumulative_statistics               ()                                           const 
   {
     vr::Compositor_CumulativeStats stats;
+    vr::VRCompositor()->GetCumulativeStats(&stats, sizeof vr::Compositor_CumulativeStats);
+    return statistics {
+      static_cast<std::size_t>(stats.m_nPid                           ),
+      static_cast<std::size_t>(stats.m_nNumFramePresents              ),
+      static_cast<std::size_t>(stats.m_nNumDroppedFrames              ),
+      static_cast<std::size_t>(stats.m_nNumReprojectedFrames          ),
+      static_cast<std::size_t>(stats.m_nNumFramePresentsOnStartup     ),
+      static_cast<std::size_t>(stats.m_nNumDroppedFramesOnStartup     ),
+      static_cast<std::size_t>(stats.m_nNumReprojectedFramesOnStartup ),
+      static_cast<std::size_t>(stats.m_nNumLoading                    ),
+      static_cast<std::size_t>(stats.m_nNumFramePresentsLoading       ),
+      static_cast<std::size_t>(stats.m_nNumDroppedFramesLoading       ),
+      static_cast<std::size_t>(stats.m_nNumReprojectedFramesLoading   ),
+      static_cast<std::size_t>(stats.m_nNumTimedOut                   ),
+      static_cast<std::size_t>(stats.m_nNumFramePresentsTimedOut      ),
+      static_cast<std::size_t>(stats.m_nNumDroppedFramesTimedOut      ),
+      static_cast<std::size_t>(stats.m_nNumReprojectedFramesTimedOut  )
+    };
   }
 
   void                                   set_timing_mode                     (timing_mode timing_mode)
