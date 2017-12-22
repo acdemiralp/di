@@ -2,6 +2,7 @@
 #define NANO_ENGINE_SYSTEMS_VR_VR_SYSTEM_HPP_
 
 #include <algorithm>
+#include <cstdint>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -169,7 +170,34 @@ public:
   {
     return static_cast<ne::tracking_mode>(vr::VRCompositor()->GetTrackingSpace());
   }
-                                                                
+
+  // IVR Resources
+  std::string                           load_resource           (const std::string& name)
+  {
+    std::string resource(vr::VRResources()->LoadSharedResource(name.c_str(), nullptr, 0), ' ');
+    vr::VRResources()->LoadSharedResource(name.c_str(), &resource[0], resource.size());
+    return resource;
+  }
+  std::string                           resource_full_path      (const std::string& name, const std::string& directory = std::string()) const
+  {
+    char path[vr::k_unMaxPropertyStringSize];
+    vr::VRResources()->GetResourceFullPath(name.c_str(), directory.c_str(), path, vr::k_unMaxPropertyStringSize);
+    return std::string(path);
+  }
+
+  // IVR Driver Manager
+  std::vector<std::string>              drivers                 () const
+  {
+    std::vector<std::string> drivers(vr::VRDriverManager()->GetDriverCount());
+    for (auto i = 0; i < drivers.size(); ++i)
+    {
+      char driver[vr::k_unMaxPropertyStringSize];
+      vr::VRDriverManager()->GetDriverName(static_cast<vr::DriverId_t>(i), driver, vr::k_unMaxPropertyStringSize);
+      drivers[i] = driver;
+    }
+    return drivers;
+  }
+
 private:                                                        
   void                                  pre_tick                () override
   {
