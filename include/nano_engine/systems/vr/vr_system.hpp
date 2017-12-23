@@ -10,6 +10,7 @@
 
 #include <openvr.h>
 
+#include <nano_engine/systems/vr/chaperone.hpp>
 #include <nano_engine/systems/vr/display_redirect.hpp>
 #include <nano_engine/systems/vr/hmd.hpp>
 #include <nano_engine/systems/vr/tracking_device.hpp>
@@ -198,6 +199,12 @@ public:
     return drivers;
   }
 
+  // Auxiliary
+  chaperone*                            chaperone               ()
+  {
+    return &chaperone_;
+  }
+
 private:                                                        
   void                                  pre_tick                () override
   {
@@ -239,6 +246,7 @@ private:
     }
   }
 
+  ne::chaperone                                         chaperone_               ;
   std::vector<std::unique_ptr<hmd>>                     hmds_                    ;
   std::vector<std::unique_ptr<vr_controller>>           controllers_             ;
   std::vector<std::unique_ptr<tracking_reference>>      tracking_references_     ;
