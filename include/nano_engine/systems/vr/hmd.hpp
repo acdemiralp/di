@@ -167,14 +167,14 @@ public:
   {
     vr::VRSystem()->ResetSeatedZeroPose();
   }                                  
-  std::array<float, 12>                  seated_zero_pose_to_standing_pose   ()                                           const
+  std::array<float, 12>                  seated_zero_pose_to_absolute_pose   ()                                           const
   {
     std::array<float, 12> matrix;
     const auto native_matrix = vr::VRSystem()->GetSeatedZeroPoseToStandingAbsoluteTrackingPose();
     std::copy(&native_matrix.m[0][0], &native_matrix.m[0][0] + 12, matrix.begin());
     return matrix;
   }
-  std::array<float, 12>                  raw_zero_pose_to_standing_pose      ()                                           const
+  std::array<float, 12>                  raw_zero_pose_to_absolute_pose      ()                                           const
   {
     std::array<float, 12> matrix;
     const auto native_matrix = vr::VRSystem()->GetRawZeroPoseToStandingAbsoluteTrackingPose();
