@@ -34,6 +34,8 @@ public:
         + std::string(": ")
         + std::string(vr::VR_GetVRInitErrorAsEnglishDescription(error)));
 
+    chaperone_ = std::make_unique<ne::chaperone>();
+
     std::vector<std::uint32_t> indices(vr::k_unMaxTrackedDeviceCount);
     auto count  = vr::VRSystem()->GetSortedTrackedDeviceIndicesOfClass(vr::TrackedDeviceClass_HMD        , indices.data(), static_cast<std::uint32_t>(indices.size())); 
     for (auto i = 0u; i < count; i++) 
@@ -202,7 +204,7 @@ public:
   // Auxiliary
   chaperone*                            chaperone               ()
   {
-    return &chaperone_;
+    return chaperone_.get();
   }
 
 private:                                                        
@@ -246,7 +248,7 @@ private:
     }
   }
 
-  ne::chaperone                                         chaperone_               ;
+  std::unique_ptr<ne::chaperone>                        chaperone_               ;
   std::vector<std::unique_ptr<hmd>>                     hmds_                    ;
   std::vector<std::unique_ptr<vr_controller>>           controllers_             ;
   std::vector<std::unique_ptr<tracking_reference>>      tracking_references_     ;
