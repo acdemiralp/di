@@ -88,6 +88,8 @@ set(PROJECT_SOURCES
   include/nano_engine/systems/vr/vr_controller_button.hpp
   include/nano_engine/systems/vr/vr_controller_button_state.hpp
   include/nano_engine/systems/vr/vr_controller_state.hpp
+  include/nano_engine/systems/vr/vr_screenshot.hpp
+  include/nano_engine/systems/vr/vr_screenshot_type.hpp
   include/nano_engine/systems/vr/vr_system.hpp
   include/nano_engine/utility/bitset_enum.hpp
   include/nano_engine/utility/frame_timer.hpp

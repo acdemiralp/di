@@ -24,7 +24,8 @@
 #include <nano_engine/systems/vr/timing_info.hpp>
 #include <nano_engine/systems/vr/timing_mode.hpp>
 #include <nano_engine/systems/vr/tracking_device.hpp>
-#include <nano_engine/systems/vr/tracking_mode.hpp>
+#include <nano_engine/systems/vr/vr_screenshot.hpp>
+#include <nano_engine/systems/vr/vr_screenshot_type.hpp>
 #include <nano_engine/utility/rectangle.hpp>
 
 #ifdef _WIN32
@@ -742,6 +743,33 @@ public:
   void                                   force_quit                          ()                                           const
   {
     return vr::VRCompositor()->CompositorQuit();
+  }
+
+  // IVR Screenshots
+  void                                   obtain_screenshot_focus             ()                                           const
+  {
+    std::vector<vr::EVRScreenshotType> types 
+    {
+      vr::VRScreenshotType_None          ,
+      vr::VRScreenshotType_Mono          ,
+      vr::VRScreenshotType_Stereo        ,
+      vr::VRScreenshotType_Cubemap       ,
+      vr::VRScreenshotType_MonoPanorama  ,
+      vr::VRScreenshotType_StereoPanorama
+    };
+    vr::VRScreenshots()->HookScreenshot(types.data(), static_cast<int>(types.size()));
+  }
+  vr_screenshot                          create_screenshot                   (vr_screenshot_type type, const std::string& name, const std::string& preview_name = "") const
+  {
+    vr::ScreenshotHandle_t handle;
+    vr::VRScreenshots()->RequestScreenshot(&handle, static_cast<vr::EVRScreenshotType>(type), !preview_name.empty() ? preview_name.c_str() : (name + "_preview").c_str(), name.c_str());
+    return vr_screenshot(handle);
+  }
+  vr_screenshot                          create_quick_screenshot             (                         const std::string& name, const std::string& preview_name = "") const
+  {
+    vr::ScreenshotHandle_t handle;
+    vr::VRScreenshots()->TakeStereoScreenshot(&handle, !preview_name.empty() ? preview_name.c_str() : (name + "_preview").c_str(), name.c_str());
+    return vr_screenshot(handle);
   }
 };
 }
