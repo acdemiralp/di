@@ -176,7 +176,7 @@ public:
   std::string                           load_resource           (const std::string& name)
   {
     std::string resource(vr::VRResources()->LoadSharedResource(name.c_str(), nullptr, 0), ' ');
-    vr::VRResources()->LoadSharedResource(name.c_str(), &resource[0], resource.size());
+    vr::VRResources()->LoadSharedResource(name.c_str(), &resource[0], static_cast<std::uint32_t>(resource.size()));
     return resource;
   }
   std::string                           resource_full_path      (const std::string& name, const std::string& directory = std::string()) const
