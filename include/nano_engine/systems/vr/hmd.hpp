@@ -786,11 +786,25 @@ public:
     std::copy(&native_matrix.m[0][0], &native_matrix.m[0][0] + 16, matrix.begin());
     return matrix;
   }
+  std::array<std::size_t, 2>             camera_stream_size                  (                                   camera_frame_type type = camera_frame_type::distorted)                                                                                                          const
+  {
+    vr::VRTextureBounds_t        bounds;
+    std::array<std::uint32_t, 2> size  ;
+    vr::VRTrackedCamera()->GetVideoStreamTextureSize(index_, static_cast<vr::EVRTrackedCameraFrameType>(type), &bounds, &size[0], &size[1]);
+    return {static_cast<std::size_t>(size[0]), static_cast<std::size_t>(size[1])};
+  }
+  rectangle<float>                       camera_stream_bounds                (                                   camera_frame_type type = camera_frame_type::distorted)                                                                                                          const
+  {
+    vr::VRTextureBounds_t        bounds;
+    std::array<std::uint32_t, 2> size  ;
+    vr::VRTrackedCamera()->GetVideoStreamTextureSize(index_, static_cast<vr::EVRTrackedCameraFrameType>(type), &bounds, &size[0], &size[1]);
+    return rectangle<float> {bounds.uMin, bounds.vMin, bounds.uMax, bounds.vMax};
+  } 
   std::unique_ptr<camera_stream>         camera_stream                       (                                   camera_frame_type type = camera_frame_type::distorted)                                                                                                          const
   {
     vr::TrackedCameraHandle_t handle;
     vr::VRTrackedCamera()->AcquireVideoStreamingService(index_, &handle);
-    return std::make_unique<ne::camera_stream>(handle);
+    return std::make_unique<ne::camera_stream>(handle, type);
   }
 
   // IVR Screenshots                                                                                                                                                                                                                                                             

@@ -217,6 +217,10 @@ public:
     vr::VRSystem()->PerformFirmwareUpdate(index_);
   }
   
+  // IVR System - Render Models
+  // TODO
+
+  // Auxiliary
   std::uint32_t            index                           () const
   {
     return index_;

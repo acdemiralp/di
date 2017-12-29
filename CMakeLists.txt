@@ -61,6 +61,7 @@ set(PROJECT_SOURCES
   include/nano_engine/systems/input/touch_device.hpp
   include/nano_engine/systems/renderer/render_pass.hpp
   include/nano_engine/systems/renderer/renderer.hpp
+  include/nano_engine/systems/vr/camera_frame_header.hpp
   include/nano_engine/systems/vr/camera_frame_type.hpp
   include/nano_engine/systems/vr/camera_stream.hpp
   include/nano_engine/systems/vr/chaperone.hpp
