@@ -13,6 +13,8 @@
 #include <boost/optional.hpp>
 #include <openvr.h>
 
+#include <nano_engine/systems/vr/camera_frame_type.hpp>
+#include <nano_engine/systems/vr/camera_stream.hpp>
 #include <nano_engine/systems/vr/color_space.hpp>
 #include <nano_engine/systems/vr/eye.hpp>
 #include <nano_engine/systems/vr/mirror_texture_d3d11.hpp>
@@ -55,13 +57,13 @@ public:
   hmd& operator=(const hmd&  that) = default;
   hmd& operator=(      hmd&& temp) = default;
   
-  std::chrono::duration<float>           time_to_photons                     ()                                           const
+  std::chrono::duration<float>           time_to_photons                     ()                                                                                                                                                                                                  const
   {
     return std::chrono::duration<float>(1.0F / display_frequency() - time_since_last_vsync().count() + time_from_vsync_to_photons().count());
   }
-
-  // IVR System - Display
-  std::array<std::size_t, 2>             recommended_render_target_size      ()                                           const
+                                                                                                                                                                                                                                                                                 
+  // IVR System - Display                                                                                                                                                                                                                                                        
+  std::array<std::size_t, 2>             recommended_render_target_size      ()                                                                                                                                                                                                  const
   {
     std::array<std::size_t, 2> size;
     vr::VRSystem()->GetRecommendedRenderTargetSize(
@@ -69,27 +71,27 @@ public:
       reinterpret_cast<std::uint32_t*>(&size[1]));
     return size;
   }
-  std::array<float, 16>                  projection_matrix                   (eye eye, const float near, const float far) const
+  std::array<float, 16>                  projection_matrix                   (eye eye, const float near, const float far)                                                                                                                                                        const
   {
     std::array<float, 16> matrix;
     const auto native_matrix = vr::VRSystem()->GetProjectionMatrix(static_cast<vr::EVREye>(eye), near, far);
     std::copy(&native_matrix.m[0][0], &native_matrix.m[0][0] + 16, matrix.begin());
     return matrix;
   }
-  rectangle<float>                       projection_parameters               (eye eye)                                    const
+  rectangle<float>                       projection_parameters               (eye eye)                                                                                                                                                                                           const
   {
     rectangle<float> parameters;
     vr::VRSystem()->GetProjectionRaw(static_cast<vr::EVREye>(eye), &parameters.left, &parameters.right, &parameters.top, &parameters.bottom);
     return parameters;
   }
-  std::array<float, 12>                  eye_to_head_transform               (eye eye)                                    const
+  std::array<float, 12>                  eye_to_head_transform               (eye eye)                                                                                                                                                                                           const
   {
     std::array<float, 12> matrix;
     const auto native_matrix = vr::VRSystem()->GetEyeToHeadTransform(static_cast<vr::EVREye>(eye));
     std::copy(&native_matrix.m[0][0], &native_matrix.m[0][0] + 12, matrix.begin());
     return matrix;
   }
-  std::array<std::array<float, 2>, 3>    compute_distortion                  (eye eye, const std::array<float, 2>& uv)    const
+  std::array<std::array<float, 2>, 3>    compute_distortion                  (eye eye, const std::array<float, 2>& uv)                                                                                                                                                           const
   {
     std::array<std::array<float, 2>, 3> distortion;
     vr::DistortionCoordinates_t native_distortion;
@@ -99,102 +101,102 @@ public:
     distortion[2][0] = native_distortion.rfBlue [0]; distortion[2][1] = native_distortion.rfBlue [1];
     return distortion;
   }
-                                                                                                                          
-  std::chrono::duration<float>           time_since_last_vsync               ()                                           const
+                                                                                                                                                                                                                                                                                 
+  std::chrono::duration<float>           time_since_last_vsync               ()                                                                                                                                                                                                  const
   {
     float         time       ;
     std::uint64_t frame_count;
     vr::VRSystem()->GetTimeSinceLastVsync(&time, &frame_count);
     return std::chrono::duration<float>(time);
   }
-  std::uint64_t                          frame_count                         ()                                           const
+  std::uint64_t                          frame_count                         ()                                                                                                                                                                                                  const
   {
     float         time       ;
     std::uint64_t frame_count;
     vr::VRSystem()->GetTimeSinceLastVsync(&time, &frame_count);
     return frame_count;
   }
-                                                                                                                          
-#ifdef _WIN32                                                                                                               
-  std::uint32_t                          adapter_index_d3d9                  ()                                           const
+                                                                                                                                                                                                                                                                                 
+#ifdef _WIN32                                                                                                                                                                                                                                                                    
+  std::uint32_t                          adapter_index_d3d9                  ()                                                                                                                                                                                                  const
   {
     return static_cast<std::uint32_t>(vr::VRSystem()->GetD3D9AdapterIndex());
   }
-  std::uint32_t                          adapter_index_d3d10_d3d11           ()                                           const
+  std::uint32_t                          adapter_index_d3d10_d3d11           ()                                                                                                                                                                                                  const
   {
     std::int32_t index;
     vr::VRSystem()->GetDXGIOutputInfo(&index);
     return static_cast<std::uint32_t>(index);
   }
-  LUID                                   output_device_d3d10_d3d11           ()                                           const
+  LUID                                   output_device_d3d10_d3d11           ()                                                                                                                                                                                                  const
   {
     LUID   luid;
     vr::VRSystem()->GetOutputDevice(reinterpret_cast<std::uint64_t*>(&luid), vr::ETextureType::TextureType_DirectX);
     return luid;
   }
-  LUID                                   output_device_d3d12                 ()                                           const
+  LUID                                   output_device_d3d12                 ()                                                                                                                                                                                                  const
   {
     LUID   luid;
     vr::VRSystem()->GetOutputDevice(reinterpret_cast<std::uint64_t*>(&luid), vr::ETextureType::TextureType_DirectX12);
     return luid;
-  }                                                                                                                                            
-#elif __APPLE__                                                           
-  std::uint64_t                          output_device_metal                 ()                                           const
-  {
-    std::uint64_t id;
-    vr::VRSystem()->GetOutputDevice(&id, vr::ETextureType::TextureType_IOSurface);
-    return        id;
-  }                                                                                                                                                                                                                                        
-#endif                                                                                                                 
-  VkPhysicalDevice                       output_device_vulkan                (VkInstance instance)                        const
+  }                                                                                                                                                                                                                                         
+#elif __APPLE__                                                                                                                                                                                                                                                                  
+  std::uint64_t                          output_device_metal                 ()                                                                                                                                                                                                  const
+  {                                                                                                                                                                                                                                                                              
+    std::uint64_t id;                                                                                                                                                                                                                                                            
+    vr::VRSystem()->GetOutputDevice(&id, vr::ETextureType::TextureType_IOSurface);                                                                                                                                                                                               
+    return        id;                                                                                                                                                                                                                                                            
+  }                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+#endif                                                                                                                                                                                                                                                                           
+  VkPhysicalDevice                       output_device_vulkan                (VkInstance instance)                                                                                                                                                                               const
   {
     VkPhysicalDevice device;
     vr::VRSystem()->GetOutputDevice(reinterpret_cast<std::uint64_t*>(&device), vr::ETextureType::TextureType_Vulkan, instance);
     return           device;
   }
-                                                                                                                          
-  // IVR System - Display Mode                                                                                            
-  bool                                   extended_display_mode               ()                                           const
+                                                                                                                                                                                                                                                                                 
+  // IVR System - Display Mode                                                                                                                                                                                                                                                   
+  bool                                   extended_display_mode               ()                                                                                                                                                                                                  const
   {
     return vr::VRSystem()->IsDisplayOnDesktop();
   }
   void                                   set_extended_display_mode           (const bool enabled)
   {
     vr::VRSystem()->SetDisplayVisibility(enabled);
-  }                
-                                                                                                                          
-  // IVR System - Tracking                                                                                                
+  }                                                                                                                                                                       
+                                                                                                                                                                                                                                                                                 
+  // IVR System - Tracking                                                                                                                                                                                                                                                       
   void                                   set_current_pose_as_seated_zero_pose()
   {
     vr::VRSystem()->ResetSeatedZeroPose();
-  }                                  
-  std::array<float, 12>                  seated_zero_pose_to_absolute_pose   ()                                           const
+  }                                                                                                                                                                                         
+  std::array<float, 12>                  seated_zero_pose_to_absolute_pose   ()                                                                                                                                                                                                  const
   {
     std::array<float, 12> matrix;
     const auto native_matrix = vr::VRSystem()->GetSeatedZeroPoseToStandingAbsoluteTrackingPose();
     std::copy(&native_matrix.m[0][0], &native_matrix.m[0][0] + 12, matrix.begin());
     return matrix;
   }
-  std::array<float, 12>                  raw_zero_pose_to_absolute_pose      ()                                           const
+  std::array<float, 12>                  raw_zero_pose_to_absolute_pose      ()                                                                                                                                                                                                  const
   {
     std::array<float, 12> matrix;
     const auto native_matrix = vr::VRSystem()->GetRawZeroPoseToStandingAbsoluteTrackingPose();
     std::copy(&native_matrix.m[0][0], &native_matrix.m[0][0] + 12, matrix.begin());
     return matrix;
   }
-                                                                                                                          
-  // IVR System - Property                                                                                                
-  std::array<float, 12>                  camera_to_head_transform            ()                                           const
+                                                                                                                                                                                                                                                                                 
+  // IVR System - Property                                                                                                                                                                                                                                                       
+  std::array<float, 12>                  camera_to_head_transform            ()                                                                                                                                                                                                  const
   {
     return get_property_matrix34(vr::Prop_CameraToHeadTransform_Matrix34);
   } 
-  std::array<float, 2>                   lens_center_uv                      (const eye eye)                              const
+  std::array<float, 2>                   lens_center_uv                      (const eye eye)                                                                                                                                                                                     const
   {
     return eye == eye::left ? 
       std::array<float, 2>{get_property_float(vr::Prop_LensCenterLeftU_Float ), get_property_float(vr::Prop_LensCenterLeftV_Float )} :
       std::array<float, 2>{get_property_float(vr::Prop_LensCenterRightU_Float), get_property_float(vr::Prop_LensCenterRightV_Float)} ;
   }
-  std::array<float, 2>                   screenshot_field_of_view            ()                                           const
+  std::array<float, 2>                   screenshot_field_of_view            ()                                                                                                                                                                                                  const
   {
     return 
     {
@@ -202,89 +204,89 @@ public:
       get_property_float(vr::Prop_ScreenshotVerticalFieldOfViewDegrees_Float  )
     };
   }
-                                                                                                                          
-  float                                  head_to_eye_depth_distance          ()                                           const
+                                                                                                                                                                                                                                                                                 
+  float                                  head_to_eye_depth_distance          ()                                                                                                                                                                                                  const
   {
     return get_property_float(vr::Prop_UserHeadToEyeDepthMeters_Float);
   }
-  float                                  interpupillary_distance             ()                                           const
+  float                                  interpupillary_distance             ()                                                                                                                                                                                                  const
   {
     return get_property_float(vr::Prop_UserIpdMeters_Float);
   }
-                                                                                                                          
-  std::chrono::duration<float>           time_from_vsync_to_photons          ()                                           const
+                                                                                                                                                                                                                                                                                 
+  std::chrono::duration<float>           time_from_vsync_to_photons          ()                                                                                                                                                                                                  const
   {
     return std::chrono::duration<float>(get_property_float(vr::Prop_SecondsFromVsyncToPhotons_Float));
   }
-  std::chrono::duration<float>           time_from_photons_to_vblank         ()                                           const
+  std::chrono::duration<float>           time_from_photons_to_vblank         ()                                                                                                                                                                                                  const
   {
     return std::chrono::duration<float>(get_property_float(vr::Prop_SecondsFromPhotonsToVblank_Float));
   }
-  float                                  display_frequency                   ()                                           const
+  float                                  display_frequency                   ()                                                                                                                                                                                                  const
   {
     return get_property_float(vr::Prop_DisplayFrequency_Float);
   }
-                                                                                                                          
-  bool                                   direct_mode_sends_vsync_events      ()                                           const
+                                                                                                                                                                                                                                                                                 
+  bool                                   direct_mode_sends_vsync_events      ()                                                                                                                                                                                                  const
   {
     return get_property_bool(vr::Prop_DriverDirectModeSendsVsyncEvents_Bool);
   }
-  bool                                   reports_time_since_vsync            ()                                           const
+  bool                                   reports_time_since_vsync            ()                                                                                                                                                                                                  const
   {
     return get_property_bool(vr::Prop_ReportsTimeSinceVSync_Bool);
   }
-  bool                                   on_desktop                          ()                                           const
+  bool                                   on_desktop                          ()                                                                                                                                                                                                  const
   {
     return get_property_bool(vr::Prop_IsOnDesktop_Bool);
   }
-  bool                                   prediction                          ()                                           const
+  bool                                   prediction                          ()                                                                                                                                                                                                  const
   {
     return !get_property_bool(vr::Prop_DoNotApplyPrediction_Bool);
   }
-  bool                                   suppressed                          ()                                           const
+  bool                                   suppressed                          ()                                                                                                                                                                                                  const
   {
     return get_property_bool(vr::Prop_DisplaySuppressed_Bool);
   }
-  bool                                   night_mode_support                  ()                                           const
+  bool                                   night_mode_support                  ()                                                                                                                                                                                                  const
   {
     return get_property_bool(vr::Prop_DisplayAllowNightMode_Bool);
   }
-  bool                                   debug                               ()                                           const
+  bool                                   debug                               ()                                                                                                                                                                                                  const
   {
     return get_property_bool(vr::Prop_DisplayDebugMode_Bool);
   }
-                                                                                                                          
-  std::size_t                            expected_controller_count           ()                                           const
+                                                                                                                                                                                                                                                                                 
+  std::size_t                            expected_controller_count           ()                                                                                                                                                                                                  const
   {
     return static_cast<std::size_t>(get_property_int(vr::Prop_ExpectedControllerCount_Int32));
   }
-  std::size_t                            expected_tracking_reference_count   ()                                           const
+  std::size_t                            expected_tracking_reference_count   ()                                                                                                                                                                                                  const
   {
     return static_cast<std::size_t>(get_property_int(vr::Prop_ExpectedTrackingReferenceCount_Int32));
   }
-                                                                                                                          
-  std::uint64_t                          current_universe_id                 ()                                           const
+                                                                                                                                                                                                                                                                                 
+  std::uint64_t                          current_universe_id                 ()                                                                                                                                                                                                  const
   {
     return get_property_uint64(vr::Prop_CurrentUniverseId_Uint64);
   }
-  std::uint64_t                          previous_universe_id                ()                                           const
+  std::uint64_t                          previous_universe_id                ()                                                                                                                                                                                                  const
   {
     return get_property_uint64(vr::Prop_PreviousUniverseId_Uint64);
   }
-                                                                                                                          
-  int                                    mc_type                             ()                                           const
+                                                                                                                                                                                                                                                                                 
+  int                                    mc_type                             ()                                                                                                                                                                                                  const
   {
     return get_property_int(vr::Prop_DisplayMCType_Int32);
   }
-  float                                  mc_offset                           ()                                           const
+  float                                  mc_offset                           ()                                                                                                                                                                                                  const
   {
     return get_property_float(vr::Prop_DisplayMCOffset_Float);
   }
-  float                                  mc_scale                            ()                                           const
+  float                                  mc_scale                            ()                                                                                                                                                                                                  const
   {
     return get_property_float(vr::Prop_DisplayMCScale_Float);
   }
-  std::array<std::size_t, 2>             mc_image_size                       ()                                           const
+  std::array<std::size_t, 2>             mc_image_size                       ()                                                                                                                                                                                                  const
   {
     return 
     {
@@ -292,113 +294,113 @@ public:
       static_cast<std::size_t>(get_property_int(vr::Prop_DisplayMCImageHeight_Int32))
     };
   }
-  std::size_t                            mc_image_num_channels               ()                                           const
+  std::size_t                            mc_image_num_channels               ()                                                                                                                                                                                                  const
   {
     return static_cast<std::size_t>(get_property_int(vr::Prop_DisplayMCImageNumChannels_Int32));
   }
-  std::string                            mc_image_path                       (const eye eye)                              const
+  std::string                            mc_image_path                       (const eye eye)                                                                                                                                                                                     const
   {
     return get_property_string(eye == eye::left ? vr::Prop_DisplayMCImageLeft_String : vr::Prop_DisplayMCImageRight_String);
   }
-  void*                                  mc_image                            ()                                           const
+  void*                                  mc_image                            ()                                                                                                                                                                                                  const
   {
     return reinterpret_cast<void*>(get_property_uint64(vr::Prop_DisplayMCImageData_Binary));
   }
-                                                                                                                          
-  int                                    gc_type                             ()                                           const
+                                                                                                                                                                                                                                                                                 
+  int                                    gc_type                             ()                                                                                                                                                                                                  const
   {
     return get_property_int(vr::Prop_DisplayGCType_Int32);
   }
-  float                                  gc_offset                           ()                                           const
+  float                                  gc_offset                           ()                                                                                                                                                                                                  const
   {
     return get_property_float(vr::Prop_DisplayGCOffset_Float);
   }
-  float                                  gc_scale                            ()                                           const
+  float                                  gc_scale                            ()                                                                                                                                                                                                  const
   {
     return get_property_float(vr::Prop_DisplayGCScale_Float);
   }
-  float                                  gc_prescale                         ()                                           const
+  float                                  gc_prescale                         ()                                                                                                                                                                                                  const
   {
     return get_property_float(vr::Prop_DisplayGCPrescale_Float);
   }
-  std::string                            gc_image_path                       ()                                           const
+  std::string                            gc_image_path                       ()                                                                                                                                                                                                  const
   {
     return get_property_string(vr::Prop_DisplayGCImage_String);
   }
-  float                                  gc_black_clamp                      ()                                           const
+  float                                  gc_black_clamp                      ()                                                                                                                                                                                                  const
   {
     return get_property_float(vr::Prop_DisplayGCBlackClamp_Float);
   }
-                                                                                                                          
-  int                                    edid_vendor_id                      ()                                           const
+                                                                                                                                                                                                                                                                                 
+  int                                    edid_vendor_id                      ()                                                                                                                                                                                                  const
   {
     return get_property_int(vr::Prop_EdidVendorID_Int32);
   }
-  int                                    edid_product_id                     ()                                           const
+  int                                    edid_product_id                     ()                                                                                                                                                                                                  const
   {
     return get_property_int(vr::Prop_EdidProductID_Int32);
   }
-                                                                                                                          
-  std::uint64_t                          audio_firmware_version              ()                                           const
+                                                                                                                                                                                                                                                                                 
+  std::uint64_t                          audio_firmware_version              ()                                                                                                                                                                                                  const
   {
     return get_property_uint64(vr::Prop_AudioFirmwareVersion_Uint64);
   }
-  std::uint64_t                          camera_firmware_version             ()                                           const
+  std::uint64_t                          camera_firmware_version             ()                                                                                                                                                                                                  const
   {
     return get_property_uint64(vr::Prop_CameraFirmwareVersion_Uint64);
   }
-  std::string                            camera_firmware_description         ()                                           const
+  std::string                            camera_firmware_description         ()                                                                                                                                                                                                  const
   {
     return get_property_string(vr::Prop_CameraFirmwareDescription_String);
   }
-  int                                    camera_compatibility_mode           ()                                           const
+  int                                    camera_compatibility_mode           ()                                                                                                                                                                                                  const
   {
     return get_property_int(vr::Prop_CameraCompatibilityMode_Int32);
   }
-  std::uint64_t                          display_firmware_version            ()                                           const
+  std::uint64_t                          display_firmware_version            ()                                                                                                                                                                                                  const
   {
     return get_property_uint64(vr::Prop_DisplayFirmwareVersion_Uint64);
   }
-                                                                                                                          
-  std::uint64_t                          fpga_version                        ()                                           const
+                                                                                                                                                                                                                                                                                 
+  std::uint64_t                          fpga_version                        ()                                                                                                                                                                                                  const
   {
     return get_property_uint64(vr::Prop_DisplayFPGAVersion_Uint64);
   }
-  std::uint64_t                          bootloader_version                  ()                                           const
+  std::uint64_t                          bootloader_version                  ()                                                                                                                                                                                                  const
   {
     return get_property_uint64(vr::Prop_DisplayBootloaderVersion_Uint64);
   }
-  std::uint64_t                          hardware_version                    ()                                           const
+  std::uint64_t                          hardware_version                    ()                                                                                                                                                                                                  const
   {
     return get_property_uint64(vr::Prop_DisplayHardwareVersion_Uint64);
   }
-                                                                                                                          
-  std::uint64_t                          graphics_adapter_luid               ()                                           const
+                                                                                                                                                                                                                                                                                 
+  std::uint64_t                          graphics_adapter_luid               ()                                                                                                                                                                                                  const
   {
     return get_property_uint64(vr::Prop_GraphicsAdapterLuid_Uint64);
   }
-                                                                                                                          
-  std::string                            chaperone_path                      ()                                           const
+                                                                                                                                                                                                                                                                                 
+  std::string                            chaperone_path                      ()                                                                                                                                                                                                  const
   {
     return get_property_string(vr::Prop_DriverProvidedChaperonePath_String);
   }
-                                                                                                                          
-  // IVR System - Rendering                                                                                               
-  std::vector<std::array<float, 2>>      hidden_area_mesh                    (eye eye)                                    const
+                                                                                                                                                                                                                                                                                 
+  // IVR System - Rendering                                                                                                                                                                                                                                                      
+  std::vector<std::array<float, 2>>      hidden_area_mesh                    (eye eye)                                                                                                                                                                                           const
   {
     const auto hidden_area_mesh = vr::VRSystem()->GetHiddenAreaMesh(static_cast<vr::EVREye>(eye), vr::k_eHiddenAreaMesh_Standard);
     std::vector<std::array<float, 2>> vertices(3 * hidden_area_mesh.unTriangleCount);
     std::copy(&hidden_area_mesh.pVertexData->v[0], &hidden_area_mesh.pVertexData->v[0] + 2 * vertices.size(), &vertices[0][0]);
     return vertices;
   }
-  std::vector<std::array<float, 2>>      hidden_area_mesh_inverse            (eye eye)                                    const
+  std::vector<std::array<float, 2>>      hidden_area_mesh_inverse            (eye eye)                                                                                                                                                                                           const
   {
     const auto hidden_area_mesh = vr::VRSystem()->GetHiddenAreaMesh(static_cast<vr::EVREye>(eye), vr::k_eHiddenAreaMesh_Inverse);
     std::vector<std::array<float, 2>> vertices(3 * hidden_area_mesh.unTriangleCount);
     std::copy(&hidden_area_mesh.pVertexData->v[0], &hidden_area_mesh.pVertexData->v[0] + 2 * vertices.size(), &vertices[0][0]);
     return vertices;
   }
-  std::vector<std::array<float, 2>>      hidden_area_mesh_wireframe          (eye eye)                                    const
+  std::vector<std::array<float, 2>>      hidden_area_mesh_wireframe          (eye eye)                                                                                                                                                                                           const
   {
     const auto hidden_area_mesh = vr::VRSystem()->GetHiddenAreaMesh(static_cast<vr::EVREye>(eye), vr::k_eHiddenAreaMesh_LineLoop);
     std::vector<std::array<float, 2>> vertices(2 * hidden_area_mesh.unTriangleCount);
@@ -452,16 +454,16 @@ public:
       bounds = {rectangle->left, rectangle->bottom, rectangle->right, rectangle->top};
     vr::VRCompositor()->Submit(static_cast<vr::EVREye>(eye), &texture, rectangle != boost::none ? &bounds : nullptr, static_cast<vr::EVRSubmitFlags>(flags));
   } 
-  void                                   clear                               ()                                           const
+  void                                   clear                               ()                                                                                                                                                                                                  const
   {
     vr::VRCompositor()->ClearLastSubmittedFrame();
   }
-
-  std::chrono::duration<float>           remaining_frame_time                ()                                           const
+                                                                                                                                                                                                                                                                                 
+  std::chrono::duration<float>           remaining_frame_time                ()                                                                                                                                                                                                  const
   {
     return std::chrono::duration<float>(vr::VRCompositor()->GetFrameTimeRemaining());
   }
-  timing_info                            frame_time_data                     ()                                           const
+  timing_info                            frame_time_data                     ()                                                                                                                                                                                                  const
   {
     vr::Compositor_FrameTiming frame_timing;
     vr::VRCompositor()->GetFrameTiming(&frame_timing);
@@ -489,7 +491,7 @@ public:
       std::chrono::duration<float, std::milli>(frame_timing.m_flCompositorRenderStartMs)
     };
   }
-  statistics                             cumulative_statistics               ()                                           const 
+  statistics                             cumulative_statistics               ()                                                                                                                                                                                                  const 
   {
     vr::Compositor_CumulativeStats stats;
     vr::VRCompositor()->GetCumulativeStats(&stats, sizeof vr::Compositor_CumulativeStats);
@@ -511,51 +513,51 @@ public:
       static_cast<std::size_t>(stats.m_nNumReprojectedFramesTimedOut  )
     };
   }
-
+                                                                                                                                                                                                                                                                                 
   void                                   set_timing_mode                     (timing_mode timing_mode)
   {
     vr::VRCompositor()->SetExplicitTimingMode(static_cast<vr::EVRCompositorTimingMode>(timing_mode));
-  }
-  void                                   submit_explicit_timing_data         ()                                           const
+  }                                                                                                                                                                  
+  void                                   submit_explicit_timing_data         ()                                                                                                                                                                                                  const
   {
     vr::VRCompositor()->SubmitExplicitTimingData();
   }                                                                                                                         
-  void                                   post_present_handoff                ()                                           const
+  void                                   post_present_handoff                ()                                                                                                                                                                                                  const
   {
     vr::VRCompositor()->PostPresentHandoff();
   }
-                                                                                                                     
+                                                                                                                                                                                                                                                                                 
   void                                   set_mirror_window_visible           (const bool visible)
   {
     visible ? vr::VRCompositor()->ShowMirrorWindow() : vr::VRCompositor()->HideMirrorWindow();
-  }                
-  bool                                   mirror_window_visible               ()                                           const
+  }                               
+  bool                                   mirror_window_visible               ()                                                                                                                                                                                                  const
   {
     return vr::VRCompositor()->IsMirrorWindowVisible();
   }
-  std::unique_ptr<mirror_texture_d3d11>  mirror_texture_d3d11                (eye eye)                                    const
+  std::unique_ptr<mirror_texture_d3d11>  mirror_texture_d3d11                (eye eye)                                                                                                                                                                                           const
   {
     return std::make_unique<ne::mirror_texture_d3d11>(eye);
   }
-  std::unique_ptr<mirror_texture_opengl> mirror_texture_opengl               (eye eye)                                    const
+  std::unique_ptr<mirror_texture_opengl> mirror_texture_opengl               (eye eye)                                                                                                                                                                                           const
   {
     return std::make_unique<ne::mirror_texture_opengl>(eye);
   }
              
-  void                                   fade_to_color                       (std::array<float, 4> color  , std::chrono::duration<float> duration = std::chrono::duration<float>(1.0F), const bool background = false) const
+  void                                   fade_to_color                       (std::array<float, 4> color  , std::chrono::duration<float> duration = std::chrono::duration<float>(1.0F), const bool background = false)                                                           const
   {                                                
     vr::VRCompositor()->FadeToColor(duration.count(), color[0], color[1], color[2], color[3], background);
   }                                                
-  std::array<float, 4>                   fade_color                          (                                                                                                          const bool background = false) const
+  std::array<float, 4>                   fade_color                          (                                                                                                          const bool background = false)                                                           const
   {                                                
     const auto native_color = vr::VRCompositor()->GetCurrentFadeColor(background);
     return {native_color.r, native_color.g, native_color.b, native_color.a};
   }
-  void                                   fade_grid                           (const bool           fade_in, std::chrono::duration<float> duration = std::chrono::duration<float>(1.0F))                                const
+  void                                   fade_grid                           (const bool           fade_in, std::chrono::duration<float> duration = std::chrono::duration<float>(1.0F))                                                                                          const
   {                                                
     vr::VRCompositor()->FadeGrid(duration.count(), fade_in);
   }                                                
-  float                                  fade_grid_alpha                     ()                                           const
+  float                                  fade_grid_alpha                     ()                                                                                                                                                                                                  const
   {                                                                                                                                        
     return vr::VRCompositor()->GetCurrentGridAlpha();                                                                                                 
   }                                                                                                                                        
@@ -620,7 +622,7 @@ public:
       return vr::Texture_t{reinterpret_cast<void*>(static_cast<std::uintptr_t>(iteratee)), vr::TextureType_OpenGL, static_cast<vr::EColorSpace>(color_space)};
     });
     vr::VRCompositor()->SetSkyboxOverride(textures.data(), static_cast<std::uint32_t>(textures.size()));                                                                                                                     
-  }                                                                                                                             
+  }                                                                                                                                                           
   void                                   set_skybox                          (std::array<texture_data_vulkan, 2> texture_data   , color_space color_space = color_space::automatic)
   {                  
     std::array<vr::Texture_t, 2> textures;
@@ -629,7 +631,7 @@ public:
       return vr::Texture_t{reinterpret_cast<void*>(&iteratee), vr::TextureType_Vulkan, static_cast<vr::EColorSpace>(color_space)};
     });
     vr::VRCompositor()->SetSkyboxOverride(textures.data(), static_cast<std::uint32_t>(textures.size()));                                                                                                          
-  }                                                                                                                             
+  }                                                                                                                                                           
   void                                   set_skybox                          (std::array<ID3D11Texture2D*   , 6> texture_ptrs   , color_space color_space = color_space::automatic)
   {  
     std::array<vr::Texture_t, 6> textures;
@@ -638,7 +640,7 @@ public:
       return vr::Texture_t{reinterpret_cast<void*>(iteratee), vr::TextureType_DirectX, static_cast<vr::EColorSpace>(color_space)};
     });
     vr::VRCompositor()->SetSkyboxOverride(textures.data(), static_cast<std::uint32_t>(textures.size()));                                                                                                                          
-  }                                                                                                                             
+  }                                                                                                                                                           
   void                                   set_skybox                          (std::array<texture_data_d3d12 , 6> texture_data   , color_space color_space = color_space::automatic)
   { 
     std::array<vr::Texture_t, 6> textures;
@@ -647,7 +649,7 @@ public:
       return vr::Texture_t{reinterpret_cast<void*>(&iteratee), vr::TextureType_DirectX12, static_cast<vr::EColorSpace>(color_space)};
     });
     vr::VRCompositor()->SetSkyboxOverride(textures.data(), static_cast<std::uint32_t>(textures.size()));                                                                                                                          
-  }                                                                                                                             
+  }                                                                                                                                                           
   void                                   set_skybox                          (std::array<void*              , 6> io_surface_refs, color_space color_space = color_space::automatic)
   {                                                                                                                             
     std::array<vr::Texture_t, 6> textures;
@@ -656,7 +658,7 @@ public:
       return vr::Texture_t{iteratee, vr::TextureType_IOSurface, static_cast<vr::EColorSpace>(color_space)};
     });
     vr::VRCompositor()->SetSkyboxOverride(textures.data(), static_cast<std::uint32_t>(textures.size()));                                                                                                                             
-  }                                                                                                                             
+  }                                                                                                                                                           
   void                                   set_skybox                          (std::array<std::uint32_t      , 6> texture_ids    , color_space color_space = color_space::automatic)
   {      
     std::array<vr::Texture_t, 6> textures;
@@ -665,7 +667,7 @@ public:
       return vr::Texture_t{reinterpret_cast<void*>(static_cast<std::uintptr_t>(iteratee)), vr::TextureType_OpenGL, static_cast<vr::EColorSpace>(color_space)};
     });
     vr::VRCompositor()->SetSkyboxOverride(textures.data(), static_cast<std::uint32_t>(textures.size()));                                                                                                                     
-  }                                                                                                                             
+  }                                                                                                                                                           
   void                                   set_skybox                          (std::array<texture_data_vulkan, 6> texture_data   , color_space color_space = color_space::automatic)
   {
     std::array<vr::Texture_t, 6> textures;
@@ -675,47 +677,47 @@ public:
     });
     vr::VRCompositor()->SetSkyboxOverride(textures.data(), static_cast<std::uint32_t>(textures.size()));
   }
-  void                                   clear_skybox                        ()                                           const
+  void                                   clear_skybox                        ()                                                                                                                                                                                                  const
   {
     vr::VRCompositor()->ClearSkyboxOverride();
   }
-                                                                                                                        
-  void                                   to_front                            ()                                           const
+                                                                                                                                                                                                                                                                                 
+  void                                   to_front                            ()                                                                                                                                                                                                  const
   {
     vr::VRCompositor()->CompositorBringToFront();
   }
-  void                                   to_back                             ()                                           const
+  void                                   to_back                             ()                                                                                                                                                                                                  const
   {
     vr::VRCompositor()->CompositorGoToBack();
   }
-  void                                   dump_images                         ()                                           const
+  void                                   dump_images                         ()                                                                                                                                                                                                  const
   {
     vr::VRCompositor()->CompositorDumpImages();
   }
-                                                                                                                              
-  bool                                   is_fullscreen                       ()                                           const
+                                                                                                                                                                                                                                                                                     
+  bool                                   is_fullscreen                       ()                                                                                                                                                                                                  const
   {
     return vr::VRCompositor()->IsFullscreen();
   }                                
-  bool                                   can_render                          ()                                           const
+  bool                                   can_render                          ()                                                                                                                                                                                                  const
   {
     return vr::VRCompositor()->CanRenderScene();
   }
-  bool                                   low_resources                       ()                                           const
+  bool                                   low_resources                       ()                                                                                                                                                                                                  const
   {
     return vr::VRCompositor()->ShouldAppRenderWithLowResources();
   }
-                                                                                                                        
-  std::uint32_t                          process_id                          ()                                           const
+                                                                                                                                                                                                                                                                                 
+  std::uint32_t                          process_id                          ()                                                                                                                                                                                                  const
   {
     return vr::VRCompositor()->GetCurrentSceneFocusProcess();
   }
-  std::uint32_t                          last_process_id                     ()                                           const
+  std::uint32_t                          last_process_id                     ()                                                                                                                                                                                                  const
   {
     return vr::VRCompositor()->GetLastFrameRenderer();
   }
-  
-  std::vector<std::string>               required_vulkan_instance_extensions ()                                           const
+                                                                                                                                                                                                                                                                                 
+  std::vector<std::string>               required_vulkan_instance_extensions ()                                                                                                                                                                                                  const
   {
     std::vector<std::string> extensions;
     char extensions_string[vr::k_unMaxPropertyStringSize];
@@ -723,7 +725,7 @@ public:
     boost::algorithm::split(extensions, extensions_string, boost::is_any_of(" "));
     return extensions;
   }                                      
-  std::vector<std::string>               required_vulkan_device_extensions   (VkPhysicalDevice_T* device)                 const
+  std::vector<std::string>               required_vulkan_device_extensions   (VkPhysicalDevice_T* device)                                                                                                                                                                        const
   {
     std::vector<std::string> extensions;
     char extensions_string[vr::k_unMaxPropertyStringSize];
@@ -731,22 +733,68 @@ public:
     boost::algorithm::split(extensions, extensions_string, boost::is_any_of(" "));
     return extensions;
   }
-
-  void                                   force_interleaved_projection        (const bool enabled)                         const
+                                                                                                                                                                                                                                                                                 
+  void                                   force_interleaved_projection        (const bool enabled)                                                                                                                                                                                const
   {
     vr::VRCompositor()->ForceInterleavedReprojectionOn(enabled);
   }               
-  void                                   force_reconnect_to_process          ()                                           const
+  void                                   force_reconnect_to_process          ()                                                                                                                                                                                                  const
   {
     vr::VRCompositor()->ForceReconnectProcess();
   }                                 
-  void                                   force_quit                          ()                                           const
+  void                                   force_quit                          ()                                                                                                                                                                                                  const
   {
     return vr::VRCompositor()->CompositorQuit();
   }
+                                                                                                                                                                                                                       
+  // IVR Tracked Camera                                                                                                                                                                                                
+  bool                                   has_camera                          ()                                                                                                                                                                                                  const
+  {
+    bool   has_camera;
+    vr::VRTrackedCamera()->HasCamera(index_, &has_camera);
+    return has_camera;
+  }
+  std::array<std::size_t, 2>             camera_frame_size                   (                                   camera_frame_type type = camera_frame_type::distorted)                                                                                                          const
+  {
+    std::uint32_t width, height, framebuffer_size;
+    vr::VRTrackedCamera()->GetCameraFrameSize(index_, static_cast<vr::EVRTrackedCameraFrameType>(type), &width, &height, &framebuffer_size);
+    return std::array<std::size_t, 2>{static_cast<std::size_t>(width), static_cast<std::size_t>(height)};
+  }
+  std::size_t                            camera_framebuffer_size             (                                   camera_frame_type type = camera_frame_type::distorted)                                                                                                          const
+  {
+    std::uint32_t width, height, framebuffer_size;
+    vr::VRTrackedCamera()->GetCameraFrameSize(index_, static_cast<vr::EVRTrackedCameraFrameType>(type), &width, &height, &framebuffer_size);
+    return static_cast<std::size_t>(framebuffer_size);
+  }
+  std::array<float, 2>                   camera_focal_length                 (                                   camera_frame_type type = camera_frame_type::distorted)                                                                                                          const
+  {
+    vr::HmdVector2_t focal_length, center;
+    vr::VRTrackedCamera()->GetCameraIntrinsics(index_, static_cast<vr::EVRTrackedCameraFrameType>(type), &focal_length, &center);
+    return {focal_length.v[0], focal_length.v[1]};
+  }
+  std::array<float, 2>                   camera_center                       (                                   camera_frame_type type = camera_frame_type::distorted)                                                                                                          const
+  {
+    vr::HmdVector2_t focal_length, center;
+    vr::VRTrackedCamera()->GetCameraIntrinsics(index_, static_cast<vr::EVRTrackedCameraFrameType>(type), &focal_length, &center);
+    return {center.v[0], center.v[1]};
+  }
+  std::array<float, 16>                  camera_projection_matrix            (const float near, const float far, camera_frame_type type = camera_frame_type::distorted)                                                                                                          const
+  {
+    std::array<float, 16> matrix       ;
+    vr::HmdMatrix44_t     native_matrix;
+    vr::VRTrackedCamera()->GetCameraProjection(index_, static_cast<vr::EVRTrackedCameraFrameType>(type), near, far, &native_matrix);
+    std::copy(&native_matrix.m[0][0], &native_matrix.m[0][0] + 16, matrix.begin());
+    return matrix;
+  }
+  std::unique_ptr<camera_stream>         camera_stream                       (                                   camera_frame_type type = camera_frame_type::distorted)                                                                                                          const
+  {
+    vr::TrackedCameraHandle_t handle;
+    vr::VRTrackedCamera()->AcquireVideoStreamingService(index_, &handle);
+    return std::make_unique<ne::camera_stream>(handle);
+  }
 
-  // IVR Screenshots
-  void                                   obtain_screenshot_focus             ()                                           const
+  // IVR Screenshots                                                                                                                                                                                                                                                             
+  void                                   obtain_screenshot_focus             ()                                                                                                                                                                                                  const
   {
     std::vector<vr::EVRScreenshotType> types 
     {
@@ -759,13 +807,13 @@ public:
     };
     vr::VRScreenshots()->HookScreenshot(types.data(), static_cast<int>(types.size()));
   }
-  vr_screenshot                          create_screenshot                   (vr_screenshot_type type, const std::string& name, const std::string& preview_name = "") const
+  vr_screenshot                          create_screenshot                   (vr_screenshot_type type, const std::string& name, const std::string& preview_name = "")                                                                                                            const
   {
     vr::ScreenshotHandle_t handle;
     vr::VRScreenshots()->RequestScreenshot(&handle, static_cast<vr::EVRScreenshotType>(type), !preview_name.empty() ? preview_name.c_str() : (name + "_preview").c_str(), name.c_str());
     return vr_screenshot(handle);
   }
-  vr_screenshot                          create_quick_screenshot             (                         const std::string& name, const std::string& preview_name = "") const
+  vr_screenshot                          create_quick_screenshot             (                         const std::string& name, const std::string& preview_name = "")                                                                                                            const
   {
     vr::ScreenshotHandle_t handle;
     vr::VRScreenshots()->TakeStereoScreenshot(&handle, !preview_name.empty() ? preview_name.c_str() : (name + "_preview").c_str(), name.c_str());
