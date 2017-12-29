@@ -81,8 +81,10 @@ set(PROJECT_SOURCES
   include/nano_engine/systems/vr/timing_mode.hpp
   include/nano_engine/systems/vr/tracking_device.hpp
   include/nano_engine/systems/vr/tracking_device_activity.hpp
+  include/nano_engine/systems/vr/tracking_device_mesh.hpp
   include/nano_engine/systems/vr/tracking_device_pose.hpp
   include/nano_engine/systems/vr/tracking_device_state.hpp
+  include/nano_engine/systems/vr/tracking_device_texture.hpp
   include/nano_engine/systems/vr/tracking_device_type.hpp
   include/nano_engine/systems/vr/tracking_mode.hpp
   include/nano_engine/systems/vr/tracking_reference.hpp
