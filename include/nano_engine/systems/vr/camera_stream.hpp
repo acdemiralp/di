@@ -35,7 +35,7 @@ public:
   camera_frame_header                                  header            () const
   {
     vr::CameraVideoStreamFrameHeader_t header;
-    vr::VRTrackedCamera()->GetVideoStreamFrameBuffer(id_, static_cast<vr::EVRTrackedCameraFrameType>(type_), nullptr, 0, &header, sizeof vr::CameraVideoStreamFrameHeader_t);
+    vr::VRTrackedCamera()->GetVideoStreamFrameBuffer(id_, static_cast<vr::EVRTrackedCameraFrameType>(type_), nullptr, 0u, &header, sizeof vr::CameraVideoStreamFrameHeader_t);
     return
     {
       static_cast<camera_frame_type>(header.eFrameType),
@@ -51,19 +51,19 @@ public:
   {
     auto header_info = header();
     std::vector<std::uint8_t> buffer(header_info.size[0] * header_info.size[1] * header_info.bytes_per_pixel);
-    vr::VRTrackedCamera()->GetVideoStreamFrameBuffer(id_, static_cast<vr::EVRTrackedCameraFrameType>(type_), buffer.data(), buffer.size(), nullptr, 0);
+    vr::VRTrackedCamera()->GetVideoStreamFrameBuffer(id_, static_cast<vr::EVRTrackedCameraFrameType>(type_), buffer.data(), static_cast<std::uint32_t>(buffer.size()), nullptr, 0u);
     return buffer;
   }
   std::pair<ID3D11Device*, ID3D11ShaderResourceView**> d3d11_texture_data() const
   {
     std::pair<ID3D11Device*, ID3D11ShaderResourceView**> texture_data;
-    vr::VRTrackedCamera()->GetVideoStreamTextureD3D11(id_, static_cast<vr::EVRTrackedCameraFrameType>(type_), texture_data.first, reinterpret_cast<void**>(texture_data.second), nullptr, 0);
+    vr::VRTrackedCamera()->GetVideoStreamTextureD3D11(id_, static_cast<vr::EVRTrackedCameraFrameType>(type_), texture_data.first, reinterpret_cast<void**>(texture_data.second), nullptr, 0u);
     return texture_data;
   }
   std::uint32_t                                        opengl_texture_id () const
   {
     std::uint32_t id;
-    vr::VRTrackedCamera()->GetVideoStreamTextureGL(id_, static_cast<vr::EVRTrackedCameraFrameType>(type_), &id, nullptr, 0);
+    vr::VRTrackedCamera()->GetVideoStreamTextureGL(id_, static_cast<vr::EVRTrackedCameraFrameType>(type_), &id, nullptr, 0u);
     return        id;
   }
 
