@@ -69,7 +69,7 @@ struct tracking_device_model
   tracking_device_model& operator=(const tracking_device_model&  that) = default;
   tracking_device_model& operator=(      tracking_device_model&& temp) = default;
 
-  std::unique_ptr<tracking_device_texture> texture      ()                         const
+  std::unique_ptr<tracking_device_texture>            texture      ()                         const
   {
     vr::RenderModel_TextureMap_t* native_texture;
     vr::EVRRenderModelError       error         ;
@@ -88,7 +88,7 @@ struct tracking_device_model
 
     return texture;
   }
-  ID3D11Texture2D*                         d3d11_texture(ID3D11Device*    device ) const
+  ID3D11Texture2D*                                    d3d11_texture(ID3D11Device*    device ) const
   {
     ID3D11Texture2D* texture = nullptr;
 
@@ -101,7 +101,7 @@ struct tracking_device_model
 
     return texture;
   }
-  void                                     d3d11_texture(ID3D11Texture2D* texture) const
+  void                                                d3d11_texture(ID3D11Texture2D* texture) const
   {
     vr::EVRRenderModelError error;
     do
@@ -109,6 +109,19 @@ struct tracking_device_model
       error = vr::VRRenderModels()->LoadIntoTextureD3D11_Async(texture_id, texture);
     }
     while (error == vr::VRRenderModelError_Loading);
+  }
+  std::vector<std::unique_ptr<tracking_device_model>> components   ()                         const
+  {
+    std::vector<std::unique_ptr<tracking_device_model>> components(vr::VRRenderModels()->GetComponentCount(name.c_str()));
+    for(std::uint32_t i = 0; i < components.size(); ++i)
+    {
+      char component_name             [vr::k_unMaxPropertyStringSize];
+      char component_render_model_name[vr::k_unMaxPropertyStringSize];
+      vr::VRRenderModels()->GetComponentName           (name.c_str(), i, component_name,                              vr::k_unMaxPropertyStringSize);
+      vr::VRRenderModels()->GetComponentRenderModelName(name.c_str(),    component_name, component_render_model_name, vr::k_unMaxPropertyStringSize);
+      components[i] = std::make_unique<tracking_device_model>(component_render_model_name);
+    }
+    return components;
   }
   
   std::string                       name               ;
