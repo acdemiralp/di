@@ -67,12 +67,14 @@ set(PROJECT_SOURCES
   include/nano_engine/systems/vr/chaperone.hpp
   include/nano_engine/systems/vr/chaperone_calibration_state.hpp
   include/nano_engine/systems/vr/color_space.hpp
+  include/nano_engine/systems/vr/dashboard_overlay.hpp
   include/nano_engine/systems/vr/display_redirect.hpp
   include/nano_engine/systems/vr/eye.hpp
   include/nano_engine/systems/vr/hand.hpp
   include/nano_engine/systems/vr/hmd.hpp
   include/nano_engine/systems/vr/mirror_texture_d3d11.hpp
   include/nano_engine/systems/vr/mirror_texture_opengl.hpp
+  include/nano_engine/systems/vr/overlay.hpp
   include/nano_engine/systems/vr/statistics.hpp
   include/nano_engine/systems/vr/submit_flags.hpp
   include/nano_engine/systems/vr/texture_data_d3d12.hpp
