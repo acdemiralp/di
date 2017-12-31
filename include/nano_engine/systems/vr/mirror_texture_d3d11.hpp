@@ -14,9 +14,9 @@ namespace ne
 class mirror_texture_d3d11
 {
 public:
-  explicit mirror_texture_d3d11  (eye eye)
+  explicit mirror_texture_d3d11  (eye eye, ID3D11Device* device)
   {
-    vr::VRCompositor()->GetMirrorTextureD3D11(static_cast<vr::EVREye>(eye), device_, reinterpret_cast<void**>(shader_resource_view_));
+    vr::VRCompositor()->GetMirrorTextureD3D11(static_cast<vr::EVREye>(eye), device, reinterpret_cast<void**>(&shader_resource_view_));
   }
   mirror_texture_d3d11           (const mirror_texture_d3d11&  that) = default;
   mirror_texture_d3d11           (      mirror_texture_d3d11&& temp) = default;
@@ -27,18 +27,13 @@ public:
   mirror_texture_d3d11& operator=(const mirror_texture_d3d11&  that) = default;
   mirror_texture_d3d11& operator=(      mirror_texture_d3d11&& temp) = default;
   
-  ID3D11Device*              device              () const
-  {
-    return device_;
-  }
-  ID3D11ShaderResourceView** shared_resource_view() const
+  ID3D11ShaderResourceView* shader_resource_view() const
   {
     return shader_resource_view_;
   }
 
 protected:
-  ID3D11Device*              device_               = nullptr;
-  ID3D11ShaderResourceView** shader_resource_view_ = nullptr;
+  ID3D11ShaderResourceView* shader_resource_view_ = nullptr;
 };
 }
 

@@ -69,7 +69,7 @@ struct tracking_device_model
   tracking_device_model& operator=(const tracking_device_model&  that) = default;
   tracking_device_model& operator=(      tracking_device_model&& temp) = default;
 
-  std::unique_ptr<tracking_device_texture> texture      ()                                                const
+  std::unique_ptr<tracking_device_texture> texture      ()                         const
   {
     vr::RenderModel_TextureMap_t* native_texture;
     vr::EVRRenderModelError       error         ;
@@ -88,16 +88,20 @@ struct tracking_device_model
 
     return texture;
   }
-  void                                     d3d11_texture(ID3D11Device* device, ID3D11Texture2D** texture) const
+  ID3D11Texture2D*                         d3d11_texture(ID3D11Device*    device ) const
   {
+    ID3D11Texture2D* texture = nullptr;
+
     vr::EVRRenderModelError error;
     do
     {
-      error = vr::VRRenderModels()->LoadTextureD3D11_Async(texture_id, device, reinterpret_cast<void**>(texture));
+      error = vr::VRRenderModels()->LoadTextureD3D11_Async(texture_id, device, reinterpret_cast<void**>(&texture));
     }
     while (error == vr::VRRenderModelError_Loading);
+
+    return texture;
   }
-  void                                     d3d11_texture(                      ID3D11Texture2D*  texture) const
+  void                                     d3d11_texture(ID3D11Texture2D* texture) const
   {
     vr::EVRRenderModelError error;
     do

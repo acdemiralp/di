@@ -32,7 +32,7 @@ public:
   camera_stream& operator=(const camera_stream&  that) = default;
   camera_stream& operator=(      camera_stream&& temp) = default;
 
-  camera_frame_header                                  header            () const
+  camera_frame_header       header           ()                     const
   {
     vr::CameraVideoStreamFrameHeader_t header;
     vr::VRTrackedCamera()->GetVideoStreamFrameBuffer(id_, static_cast<vr::EVRTrackedCameraFrameType>(type_), nullptr, 0u, &header, sizeof vr::CameraVideoStreamFrameHeader_t);
@@ -47,20 +47,20 @@ public:
       static_cast<std::size_t>(header.nFrameSequence)
     };
   }
-  std::vector<std::uint8_t>                            buffer            () const
+  std::vector<std::uint8_t> buffer           ()                     const
   {
     auto header_info = header();
     std::vector<std::uint8_t> buffer(header_info.size[0] * header_info.size[1] * header_info.bytes_per_pixel);
     vr::VRTrackedCamera()->GetVideoStreamFrameBuffer(id_, static_cast<vr::EVRTrackedCameraFrameType>(type_), buffer.data(), static_cast<std::uint32_t>(buffer.size()), nullptr, 0u);
     return buffer;
   }
-  std::pair<ID3D11Device*, ID3D11ShaderResourceView**> d3d11_texture_data() const
+  ID3D11ShaderResourceView* d3d11_texture    (ID3D11Device* device) const
   {
-    std::pair<ID3D11Device*, ID3D11ShaderResourceView**> texture_data;
-    vr::VRTrackedCamera()->GetVideoStreamTextureD3D11(id_, static_cast<vr::EVRTrackedCameraFrameType>(type_), texture_data.first, reinterpret_cast<void**>(texture_data.second), nullptr, 0u);
-    return texture_data;
+    ID3D11ShaderResourceView* texture;
+    vr::VRTrackedCamera()->GetVideoStreamTextureD3D11(id_, static_cast<vr::EVRTrackedCameraFrameType>(type_), device, reinterpret_cast<void**>(&texture), nullptr, 0u);
+    return texture;
   }
-  std::uint32_t                                        opengl_texture_id () const
+  std::uint32_t             opengl_texture_id()                     const
   {
     std::uint32_t id;
     vr::VRTrackedCamera()->GetVideoStreamTextureGL(id_, static_cast<vr::EVRTrackedCameraFrameType>(type_), &id, nullptr, 0u);
