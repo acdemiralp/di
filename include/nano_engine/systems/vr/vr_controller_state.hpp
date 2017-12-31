@@ -1,7 +1,6 @@
 #ifndef NANO_ENGINE_SYSTEMS_VR_VR_CONTROLLER_STATE_HPP_
 #define NANO_ENGINE_SYSTEMS_VR_VR_CONTROLLER_STATE_HPP_
 
-#include <algorithm>
 #include <array>
 #include <map>
 
