@@ -82,7 +82,7 @@ struct tracking_device_model
     auto texture  = std::make_unique<tracking_device_texture>();
     texture->size = {static_cast<std::size_t>(native_texture->unWidth), static_cast<std::size_t>(native_texture->unHeight)};
     texture->data.resize(4 * texture->size[0] * texture->size[1]);
-    std::copy(native_texture->rubTextureMapData, native_texture->rubTextureMapData + texture->data.size(), texture->data);
+    std::copy(native_texture->rubTextureMapData, native_texture->rubTextureMapData + texture->data.size(), texture->data.data());
 
     vr::VRRenderModels()->FreeTexture(native_texture);
 
