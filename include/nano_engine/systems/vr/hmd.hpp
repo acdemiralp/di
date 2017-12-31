@@ -40,6 +40,7 @@
 typedef struct VkInstance_T*       VkInstance      ;
 typedef struct VkPhysicalDevice_T* VkPhysicalDevice;
 
+class ID3D11Device;
 class ID3D11Texture2D;
 
 namespace ne
@@ -535,9 +536,9 @@ public:
   {
     return vr::VRCompositor()->IsMirrorWindowVisible();
   }
-  std::unique_ptr<mirror_texture_d3d11>  mirror_texture_d3d11                (eye eye)                                                                                                                                                                                           const
+  std::unique_ptr<mirror_texture_d3d11>  mirror_texture_d3d11                (eye eye, ID3D11Device* device)                                                                                                                                                                                           const
   {
-    return std::make_unique<ne::mirror_texture_d3d11>(eye);
+    return std::make_unique<ne::mirror_texture_d3d11>(eye, device);
   }
   std::unique_ptr<mirror_texture_opengl> mirror_texture_opengl               (eye eye)                                                                                                                                                                                           const
   {
