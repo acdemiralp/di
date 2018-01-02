@@ -7,6 +7,7 @@
 #include <functional>
 #include <stdexcept>
 #include <string>
+#include <utility>
 
 #include <boost/signals2.hpp>
 #include <SDL2/SDL.h>
@@ -37,13 +38,73 @@ public:
       throw std::runtime_error("Failed to create SDL window. SDL Error: " + std::string(SDL_GetError()));
   }
   window           (const window&  that) = delete ;
-  window           (      window&& temp) = default;
+  window           (      window&& temp) noexcept 
+  : on_visibility_change    (std::move(temp.on_visibility_change    ))
+  , on_expose               (std::move(temp.on_expose               ))
+  , on_move                 (std::move(temp.on_move                 ))
+  , on_resize               (std::move(temp.on_resize               ))
+  , on_minimize             (std::move(temp.on_minimize             ))
+  , on_maximize             (std::move(temp.on_maximize             ))
+  , on_restore              (std::move(temp.on_restore              ))
+  , on_mouse_focus_change   (std::move(temp.on_mouse_focus_change   ))
+  , on_keyboard_focus_change(std::move(temp.on_keyboard_focus_change))
+  , on_drop_file            (std::move(temp.on_drop_file            ))
+  , on_drop_text            (std::move(temp.on_drop_text            ))
+  , on_drop_start           (std::move(temp.on_drop_start           ))
+  , on_drop_end             (std::move(temp.on_drop_end             ))
+  , on_close                (std::move(temp.on_close                ))
+  , native_                 (std::move(temp.native_                 ))
+  , hit_test_callback_      (std::move(temp.hit_test_callback_      ))
+  {
+    if(hit_test_callback_ != nullptr)
+    {
+      SDL_SetWindowHitTest(temp. native_, nullptr, nullptr);
+      SDL_SetWindowHitTest(this->native_, static_cast<SDL_HitTest>(hit_test_callback), reinterpret_cast<void*>(this));
+      temp.hit_test_callback_ = nullptr;
+    }
+
+    temp.native_ = nullptr;
+  }
   virtual ~window  ()
   {
-    SDL_DestroyWindow(native_ );
+    if (hit_test_callback_)
+      SDL_SetWindowHitTest(native_, nullptr, nullptr);
+    if (native_)
+      SDL_DestroyWindow(native_);
   }
   window& operator=(const window&  that) = delete ;
-  window& operator=(      window&& temp) = default;
+  window& operator=(      window&& temp) noexcept
+  {
+    if (this != &temp)
+    {
+      on_visibility_change    = std::move(temp.on_visibility_change    );
+      on_expose               = std::move(temp.on_expose               );
+      on_move                 = std::move(temp.on_move                 );
+      on_resize               = std::move(temp.on_resize               );
+      on_minimize             = std::move(temp.on_minimize             );
+      on_maximize             = std::move(temp.on_maximize             );
+      on_restore              = std::move(temp.on_restore              );
+      on_mouse_focus_change   = std::move(temp.on_mouse_focus_change   );
+      on_keyboard_focus_change= std::move(temp.on_keyboard_focus_change);
+      on_drop_file            = std::move(temp.on_drop_file            );
+      on_drop_text            = std::move(temp.on_drop_text            );
+      on_drop_start           = std::move(temp.on_drop_start           );
+      on_drop_end             = std::move(temp.on_drop_end             );
+      on_close                = std::move(temp.on_close                );
+      native_                 = std::move(temp.native_                 );
+      hit_test_callback_      = std::move(temp.hit_test_callback_      );
+
+      if (hit_test_callback_ != nullptr)
+      {
+        SDL_SetWindowHitTest(temp.native_, nullptr, nullptr);
+        SDL_SetWindowHitTest(this->native_, static_cast<SDL_HitTest>(hit_test_callback), reinterpret_cast<void*>(this));
+        temp.hit_test_callback_ = nullptr;
+      }
+
+      temp.native_ = nullptr;
+    }
+    return *this;
+  }
 
   virtual void update() { }
 
@@ -154,7 +215,7 @@ public:
   void set_hit_test    (const std::function<hit_test_result(std::array<std::size_t, 2>)>& callback)
   {
     hit_test_callback_ = callback;
-    SDL_SetWindowHitTest(native_, static_cast<SDL_HitTest>(hit_test_callback), reinterpret_cast<void*>(this));
+    SDL_SetWindowHitTest(native_, hit_test_callback_ != nullptr ? static_cast<SDL_HitTest>(hit_test_callback) : nullptr, reinterpret_cast<void*>(this));
   }
 
   bool                                          visible         () const

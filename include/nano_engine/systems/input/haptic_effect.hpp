@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <stdexcept>
+#include <utility>
 
 #include <SDL2/SDL_haptic.h>
 
@@ -20,14 +21,28 @@ public:
       throw std::runtime_error("Failed to create SDL haptic effect: Unsupported by the device.");
     index_ = static_cast<std::size_t>(SDL_HapticNewEffect(owner_, &native));
   }
-  haptic_effect           (const haptic_effect&  that) = default;
-  haptic_effect           (      haptic_effect&& temp) = default;
+  haptic_effect           (const haptic_effect&  that) = delete ;
+  haptic_effect           (      haptic_effect&& temp) noexcept : owner_(std::move(temp.owner_)), index_(std::move(temp.index_))
+  {
+    temp.owner_ = nullptr;
+  }
   ~haptic_effect          ()
   {
-    SDL_HapticDestroyEffect(owner_, static_cast<int>(index_));
+    if(owner_)
+      SDL_HapticDestroyEffect(owner_, static_cast<int>(index_));
   }
-  haptic_effect& operator=(const haptic_effect&  that) = default;
-  haptic_effect& operator=(      haptic_effect&& temp) = default;
+  haptic_effect& operator=(const haptic_effect&  that) = delete ;
+  haptic_effect& operator=(      haptic_effect&& temp) noexcept
+  {
+    if (this != &temp)
+    {
+      owner_ = std::move(temp.owner_);
+      index_ = std::move(temp.index_);
+
+      temp.owner_ = nullptr;
+    }
+    return *this;
+  }
   
   void update    (const haptic_effect_description& description) const
   {

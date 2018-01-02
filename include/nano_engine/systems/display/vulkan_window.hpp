@@ -1,7 +1,15 @@
 #ifndef NANO_ENGINE_SYSTEMS_DISPLAY_VULKAN_WINDOW_HPP_
 #define NANO_ENGINE_SYSTEMS_DISPLAY_VULKAN_WINDOW_HPP_
 
+#include <array>
+#include <cstddef>
+#include <stdexcept>
+#include <string>
+#include <utility>
+
 #include <SDL2/SDL_vulkan.h>
+
+#include <nano_engine/systems/display/window.hpp>
 
 namespace ne
 {
@@ -22,15 +30,33 @@ public:
       throw std::runtime_error("Failed to create Vulkan surface. SDL Error: " + std::string(SDL_GetError()));
   }
   vulkan_window           (const vulkan_window&  that) = delete ;
-  vulkan_window           (      vulkan_window&& temp) = default;
+  vulkan_window           (      vulkan_window&& temp) noexcept : window(std::move(temp)), instance_(std::move(temp.instance_)), surface_(std::move(temp.surface_))
+  {
+    temp.instance_ = nullptr;
+    temp.surface_  = nullptr;
+  }
   ~vulkan_window          ()
   {
 #ifdef VULKAN_H_
-    vkDestroySurfaceKHR(instance_, surface_, nullptr);
+    if(instance_ != nullptr && surface_ != nullptr)
+      vkDestroySurfaceKHR(instance_, surface_, nullptr);
 #endif
   }
   vulkan_window& operator=(const vulkan_window&  that) = delete ;
-  vulkan_window& operator=(      vulkan_window&& temp) = default;
+  vulkan_window& operator=(      vulkan_window&& temp) noexcept
+  {
+    if (this != &temp)
+    {
+      window::operator=(std::move(temp));
+
+      instance_ = std::move(temp.instance_);
+      surface_  = std::move(temp.surface_ );
+      
+      temp.instance_ = nullptr;
+      temp.surface_  = nullptr;
+    }
+    return *this;
+  }
 
   std::array<std::size_t, 2> drawable_size() const
   {

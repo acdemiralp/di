@@ -28,13 +28,13 @@ public:
       throw std::runtime_error("Failed to initialize SDL Video subsystem. Error: " + std::string(SDL_GetError()));
   }
   display_system           (const display_system&  that) = delete ;
-  display_system           (      display_system&& temp) = default;
+  display_system           (      display_system&& temp) = delete ;
   virtual ~display_system  ()
   {
     SDL_VideoQuit();
   }
   display_system& operator=(const display_system&  that) = delete ;
-  display_system& operator=(      display_system&& temp) = default;
+  display_system& operator=(      display_system&& temp) = delete ;
 
   template<typename... argument_types>
   window*              create_window       (argument_types&&... arguments)

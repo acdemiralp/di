@@ -19,7 +19,6 @@ namespace ne
 {
 class vr_system;
 
-// Important Note: Accesses globals of OpenVR. Do not instantiate until vr::VR_Init has been called.
 template <tracking_device_type type>
 class tracking_device
 {

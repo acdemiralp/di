@@ -6,6 +6,7 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <SDL2/SDL_haptic.h>
@@ -32,13 +33,27 @@ public:
       SDL_HapticRumbleInit(native_);
   }  
   haptic_device           (const haptic_device&  that) = delete ;
-  haptic_device           (      haptic_device&& temp) = default;
+  haptic_device           (      haptic_device&& temp) noexcept : native_(std::move(temp.native_)), effects_(std::move(temp.effects_))
+  {
+    temp.native_ = nullptr;
+  }
   ~haptic_device          ()
   {
-    SDL_HapticClose(native_);
+    if(native_)
+      SDL_HapticClose(native_);
   }
   haptic_device& operator=(const haptic_device&  that) = delete ;
-  haptic_device& operator=(      haptic_device&& temp) = default;
+  haptic_device& operator=(      haptic_device&& temp) noexcept
+  {
+    if (this != &temp)
+    {
+      native_  = std::move(temp.native_ );
+      effects_ = std::move(temp.effects_);
+
+      temp.native_ = nullptr;
+    }
+    return *this;
+  }
   
   std::string                 name                        () const
   {

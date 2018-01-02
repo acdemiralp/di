@@ -56,13 +56,13 @@ public:
     set_tracking_mode(tracking_mode);
   }
   vr_system           (const vr_system&  that) = delete ;
-  vr_system           (      vr_system&& temp) = default;
+  vr_system           (      vr_system&& temp) = delete ;
   ~vr_system          ()
   {
     vr::VR_Shutdown();
   }
   vr_system& operator=(const vr_system&  that) = delete ;
-  vr_system& operator=(      vr_system&& temp) = default;
+  vr_system& operator=(      vr_system&& temp) = delete ;
   
   static bool                           available               ()
   {

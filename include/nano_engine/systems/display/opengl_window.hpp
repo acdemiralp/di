@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <stdexcept>
 #include <string>
+#include <utility>
 
 #include <SDL2/SDL_video.h>
 
@@ -30,13 +31,28 @@ public:
       throw std::runtime_error("Failed to create OpenGL context. SDL Error: " + std::string(SDL_GetError()));
   }
   opengl_window           (const opengl_window&  that) = delete ;
-  opengl_window           (      opengl_window&& temp) = default;
+  opengl_window           (      opengl_window&& temp) noexcept : window(std::move(temp)), opengl_context_(std::move(temp.opengl_context_))
+  {
+    temp.opengl_context_ = nullptr;
+  }
   ~opengl_window          ()
   {
-    SDL_GL_DeleteContext(opengl_context_);
+    if(opengl_context_ != nullptr)
+      SDL_GL_DeleteContext(opengl_context_);
   }
   opengl_window& operator=(const opengl_window&  that) = delete ;
-  opengl_window& operator=(      opengl_window&& temp) = default;
+  opengl_window& operator=(      opengl_window&& temp) noexcept
+  {
+    if (this != &temp)
+    {
+      window::operator=(std::move(temp));
+
+      opengl_context_ = std::move(temp.opengl_context_);
+
+      temp.opengl_context_ = nullptr;
+    }
+    return *this;
+  }
 
   void update() override
   {

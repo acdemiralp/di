@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <boost/signals2.hpp>
@@ -32,14 +33,43 @@ public:
       throw std::runtime_error("Failed to create SDL joystick. SDL Error: " + std::string(SDL_GetError()));
   }
   joystick           (const joystick&  that) = delete ;
-  joystick           (      joystick&& temp) = default;
+  joystick           (      joystick&& temp) noexcept
+  : on_axis_motion     (std::move(temp.on_axis_motion     ))
+  , on_button_press    (std::move(temp.on_button_press    ))
+  , on_button_release  (std::move(temp.on_button_release  ))
+  , on_hat_motion      (std::move(temp.on_hat_motion      ))
+  , on_trackball_motion(std::move(temp.on_trackball_motion))
+  , on_close           (std::move(temp.on_close           ))
+  , native_            (std::move(temp.native_            ))
+  , managed_           (std::move(temp.managed_           ))
+  , haptics_           (std::move(temp.haptics_           ))
+  {
+    temp.native_ = nullptr;
+  }
   ~joystick          ()
   {
-    if(managed_)
+    if(native_ && managed_)
       SDL_JoystickClose(native_);
   }
   joystick& operator=(const joystick&  that) = delete ;
-  joystick& operator=(      joystick&& temp) = default;
+  joystick& operator=(      joystick&& temp) noexcept
+  {
+    if (this != &temp)
+    {
+      on_axis_motion      = std::move(temp.on_axis_motion     );
+      on_button_press     = std::move(temp.on_button_press    );
+      on_button_release   = std::move(temp.on_button_release  );
+      on_hat_motion       = std::move(temp.on_hat_motion      );
+      on_trackball_motion = std::move(temp.on_trackball_motion);
+      on_close            = std::move(temp.on_close           );
+      native_             = std::move(temp.native_            );
+      managed_            = std::move(temp.managed_           );
+      haptics_            = std::move(temp.haptics_           );
+
+      temp.native_ = nullptr;
+    }
+    return *this;
+  }
   
   joystick_type                           type           () const
   {

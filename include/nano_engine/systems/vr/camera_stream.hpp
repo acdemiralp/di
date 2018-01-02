@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 #include <utility>
 #include <vector>
 
@@ -10,6 +11,9 @@
 
 #include <nano_engine/systems/vr/camera_frame_header.hpp>
 #include <nano_engine/systems/vr/camera_frame_type.hpp>
+
+#undef min
+#undef max
 
 class ID3D11Device;
 class ID3D11ShaderResourceView;
@@ -23,14 +27,28 @@ public:
   {
     
   }
-  camera_stream           (const camera_stream&  that) = default;
-  camera_stream           (      camera_stream&& temp) = default;
+  camera_stream           (const camera_stream&  that) = delete ;
+  camera_stream           (      camera_stream&& temp) noexcept : id_(std::move(temp.id_)), type_(std::move(temp.type_))
+  {
+    temp.id_ = invalid_id;
+  }
   virtual ~camera_stream  ()
   {
-    vr::VRTrackedCamera()->ReleaseVideoStreamingService(id_);
+    if(id_ != invalid_id)
+      vr::VRTrackedCamera()->ReleaseVideoStreamingService(id_);
   }
-  camera_stream& operator=(const camera_stream&  that) = default;
-  camera_stream& operator=(      camera_stream&& temp) = default;
+  camera_stream& operator=(const camera_stream&  that) = delete ;
+  camera_stream& operator=(      camera_stream&& temp) noexcept
+  {
+    if (this != &temp)
+    {
+      id_   = std::move(temp.id_  );
+      type_ = std::move(temp.type_);
+
+      temp.id_ = invalid_id;
+    }
+    return *this;
+  }
 
   camera_frame_header       header           ()                     const
   {
@@ -68,6 +86,8 @@ public:
   }
 
 protected:
+  static const std::uint64_t invalid_id = std::numeric_limits<std::uint64_t>::max();
+
   std::uint64_t     id_  ;
   camera_frame_type type_;
 };

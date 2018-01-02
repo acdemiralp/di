@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <stdexcept>
 #include <string>
+#include <utility>
 
 #include <boost/signals2.hpp>
 #include <SDL2/SDL_gamecontroller.h>
@@ -25,13 +26,39 @@ public:
       throw std::runtime_error("Failed to create SDL game controller. SDL Error: " + std::string(SDL_GetError()));
   }
   game_controller           (const game_controller&  that) = delete ;
-  game_controller           (      game_controller&& temp) = default;
+  game_controller           (      game_controller&& temp) noexcept
+  : on_axis_motion   (std::move(temp.on_axis_motion   ))
+  , on_button_press  (std::move(temp.on_button_press  ))
+  , on_button_release(std::move(temp.on_button_release))
+  , on_remap         (std::move(temp.on_remap         ))
+  , on_close         (std::move(temp.on_close         ))
+  , native_          (std::move(temp.native_          ))
+  , underlying_      (std::move(temp.underlying_      ))
+  {
+    temp.native_ = nullptr;
+  }
   ~game_controller          ()
   {
-    SDL_GameControllerClose(native_);
+    if(native_)
+      SDL_GameControllerClose(native_);
   }
   game_controller& operator=(const game_controller&  that) = delete ;
-  game_controller& operator=(      game_controller&& temp) = default;
+  game_controller& operator=(      game_controller&& temp) noexcept
+  {
+    if (this != &temp)
+    {
+      on_axis_motion    = std::move(temp.on_axis_motion   );
+      on_button_press   = std::move(temp.on_button_press  );
+      on_button_release = std::move(temp.on_button_release);
+      on_remap          = std::move(temp.on_remap         );
+      on_close          = std::move(temp.on_close         );
+      native_           = std::move(temp.native_          );
+      underlying_       = std::move(temp.underlying_      );
+
+      temp.native_ = nullptr;
+    }
+    return *this;
+  }
   
   std::string          name                () const
   {

@@ -2,14 +2,18 @@
 #define NANO_ENGINE_SYSTEMS_VR_MIRROR_TEXTURE_OPENGL_HPP_
 
 #include <cstdint>
+#include <limits>
+#include <utility>
 
 #include <openvr.h>
 
 #include <nano_engine/systems/vr/eye.hpp>
 
+#undef min
+#undef max
+
 namespace ne
 {
-// Important Note: Accesses globals of OpenVR. Do not instantiate until vr::VR_Init has been called.
 class mirror_texture_opengl
 {
 public:
@@ -17,14 +21,28 @@ public:
   {
     vr::VRCompositor()->GetMirrorTextureGL(static_cast<vr::EVREye>(eye), &id_, reinterpret_cast<void**>(&handle_));
   }
-  mirror_texture_opengl           (const mirror_texture_opengl&  that) = default;
-  mirror_texture_opengl           (      mirror_texture_opengl&& temp) = default;
+  mirror_texture_opengl           (const mirror_texture_opengl&  that) = delete ;
+  mirror_texture_opengl           (      mirror_texture_opengl&& temp) noexcept : id_(std::move(temp.id_)), handle_(std::move(temp.handle_))
+  {
+    temp.id_ = invalid_id;
+  }
   virtual ~mirror_texture_opengl  ()
   {
-    vr::VRCompositor()->ReleaseSharedGLTexture(id_, reinterpret_cast<void*>(handle_));
+    if(id_ != invalid_id)
+      vr::VRCompositor()->ReleaseSharedGLTexture(id_, reinterpret_cast<void*>(handle_));
   }
-  mirror_texture_opengl& operator=(const mirror_texture_opengl&  that) = default;
-  mirror_texture_opengl& operator=(      mirror_texture_opengl&& temp) = default;
+  mirror_texture_opengl& operator=(const mirror_texture_opengl&  that) = delete ;
+  mirror_texture_opengl& operator=(      mirror_texture_opengl&& temp) noexcept
+  {
+    if (this != &temp)
+    {
+      id_     = std::move(temp.id_    );
+      handle_ = std::move(temp.handle_);
+
+      temp.id_ = invalid_id;
+    }
+    return *this;
+  }
     
   void          lock  () const
   {
@@ -45,6 +63,8 @@ public:
   }
 
 protected:
+  static const std::uint32_t invalid_id = std::numeric_limits<std::uint32_t>::max();
+
   std::uint32_t id_    ;
   std::uint64_t handle_;
 };
