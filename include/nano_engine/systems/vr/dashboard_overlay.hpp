@@ -42,6 +42,18 @@ public:
     return *this;
   }
 
+  void          set_scene_process(const std::uint32_t process_id)
+  {
+    vr::VROverlay()->SetDashboardOverlaySceneProcess(id_, process_id);
+  }
+
+  std::uint32_t scene_process    ()                               const
+  {
+    std::uint32_t process_id;
+    vr::VROverlay()->GetDashboardOverlaySceneProcess(id_, &process_id);
+    return process_id;
+  }
+
 protected:
   std::uint64_t thumbnail_id_;
 };
