@@ -31,8 +31,11 @@ public:
   vr_controller& operator=(      vr_controller&& temp) = default;
 
   // IVR System - Controller
-  vr_controller_state state                 (tracking_mode mode)                                                                                     const
+  vr_controller_state state                 (tracking_mode mode = tracking_mode::automatic)                                                          const
   {
+    if (mode == tracking_mode::automatic) 
+      mode = static_cast<tracking_mode>(vr::VRCompositor()->GetTrackingSpace());
+
     vr::VRControllerState_t controller_state;
     vr::TrackedDevicePose_t controller_pose ;
     vr::VRSystem()->GetControllerStateWithPose(

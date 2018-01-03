@@ -167,6 +167,7 @@ public:
   // IVR Compositor
   void                                  set_tracking_mode       (const tracking_mode tracking_mode)
   {
+    if (tracking_mode == tracking_mode::automatic) return;
     vr::VRCompositor()->SetTrackingSpace(static_cast<vr::ETrackingUniverseOrigin>(tracking_mode));
   }                                                           
   tracking_mode                         tracking_mode           () const

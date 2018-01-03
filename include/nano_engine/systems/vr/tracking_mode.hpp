@@ -9,7 +9,8 @@ enum class tracking_mode
 {
   seated       = vr::ETrackingUniverseOrigin::TrackingUniverseSeated  ,
   standing     = vr::ETrackingUniverseOrigin::TrackingUniverseStanding,
-  uncalibrated = vr::ETrackingUniverseOrigin::TrackingUniverseRawAndUncalibrated
+  uncalibrated = vr::ETrackingUniverseOrigin::TrackingUniverseRawAndUncalibrated,
+  automatic    = 3
 };
 }
 
