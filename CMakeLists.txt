@@ -75,6 +75,7 @@ set(PROJECT_SOURCES
   include/nano_engine/systems/vr/mirror_texture_d3d11.hpp
   include/nano_engine/systems/vr/mirror_texture_opengl.hpp
   include/nano_engine/systems/vr/overlay.hpp
+  include/nano_engine/systems/vr/raycast_result.hpp
   include/nano_engine/systems/vr/statistics.hpp
   include/nano_engine/systems/vr/submit_flags.hpp
   include/nano_engine/systems/vr/texture_data_d3d12.hpp
