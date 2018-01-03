@@ -13,6 +13,8 @@
 #include <openvr.h>
 
 #include <nano_engine/systems/vr/color_space.hpp>
+#include <nano_engine/systems/vr/raycast_result.hpp>
+#include <nano_engine/systems/vr/tracking_mode.hpp>
 #include <nano_engine/utility/rectangle.hpp>
 
 #undef min
@@ -48,31 +50,53 @@ public:
     }
     return *this;
   }
-  
-  std::string                key                    ()                                                                                                          const
+ 
+  std::string                key                    ()                                                                                                                           const
   {
     char key[vr::k_unMaxPropertyStringSize];
     vr::VROverlay()->GetOverlayKey(id_, key, vr::k_unMaxPropertyStringSize);
     return std::string(key);
   }
-  std::array<std::size_t, 2> image_size             ()                                                                                                          const
+  std::array<std::size_t, 2> image_size             ()                                                                                                                           const
   {
     std::array<std::uint32_t, 2> size;
     vr::VROverlay()->GetOverlayImageData(id_, nullptr, 0, &size[0], &size[1]);
     return {static_cast<std::size_t>(size[0]), static_cast<std::size_t>(size[1])};
   }
-  std::vector<std::uint8_t>  image_data             ()                                                                                                          const
+  std::vector<std::uint8_t>  image_data             ()                                                                                                                           const
   {
     auto size = image_size();
     std::vector<std::uint8_t> data(4 * size[0] * size[1]);
     vr::VROverlay()->GetOverlayImageData(id_, data.data(), data.size(), nullptr, nullptr);
     return data;
   }
-  bool                       is_hover_target_display()                                                                                                          const
+  bool                       is_hover_target_display()                                                                                                                           const
   {
     return vr::VROverlay()->IsHoverTargetOverlay(id_);
   }
-  
+   
+  raycast_result             raycast                (const std::array<float, 3>& position, const std::array<float, 3>& direction, tracking_mode mode = tracking_mode::automatic) const
+  {
+    if (mode == tracking_mode::automatic)
+      mode = static_cast<tracking_mode>(vr::VRCompositor()->GetTrackingSpace());
+
+    vr::VROverlayIntersectionParams_t  parameters
+    {
+      {position [0], position [1], position [2]},
+      {direction[0], direction[1], direction[2]},
+      static_cast<vr::ETrackingUniverseOrigin>(mode)
+    };
+    vr::VROverlayIntersectionResults_t results;
+    vr::VROverlay()->ComputeOverlayIntersection(id_, &parameters, &results);
+    return
+    {
+      {results.vPoint .v[0], results.vPoint .v[1], results.vPoint .v[2]},
+      {results.vNormal.v[0], results.vNormal.v[1], results.vNormal.v[2]},
+      {results.vUVs   .v[0], results.vUVs   .v[1]},
+      results.fDistance
+    };
+  }
+
   void                       set_name               (const std::string&          name              )        
   {
     vr::VROverlay()->SetOverlayName(id_, name.c_str());
@@ -136,54 +160,54 @@ public:
     vr::VROverlay()->SetOverlayAutoCurveDistanceRangeInMeters(id_, auto_curve_range[0], auto_curve_range[1]);
   }
   
-  std::string                name                   ()                                                                                                          const
+  std::string                name                   ()                                                                                                                           const
   {
     char name[vr::k_unMaxPropertyStringSize];
     vr::VROverlay()->GetOverlayName(id_, name, vr::k_unMaxPropertyStringSize);
     return std::string(name);
   }                                            
-  bool                       visible                ()                                                                                                          const
+  bool                       visible                ()                                                                                                                           const
   {
     return vr::VROverlay()->IsOverlayVisible(id_);
   }
-  std::array<float, 4>       color                  ()                                                                                                          const
+  std::array<float, 4>       color                  ()                                                                                                                           const
   {
     std::array<float, 4> color;
     vr::VROverlay()->GetOverlayColor(id_, &color[0], &color[1], &color[2]);
     vr::VROverlay()->GetOverlayAlpha(id_, &color[3]);
     return color;
   }
-  color_space                color_space            ()                                                                                                          const
+  color_space                color_space            ()                                                                                                                           const
   {
     vr::EColorSpace color_space;
     vr::VROverlay()->GetOverlayTextureColorSpace(id_, &color_space);
     return static_cast<ne::color_space>(color_space);
   }
-  rectangle<float>           texture_bounds         ()                                                                                                          const
+  rectangle<float>           texture_bounds         ()                                                                                                                           const
   {
     vr::VRTextureBounds_t texture_bounds;
     vr::VROverlay()->SetOverlayTextureBounds(id_, &texture_bounds);
     return rectangle<float> {texture_bounds.uMin, texture_bounds.vMin, texture_bounds.uMax, texture_bounds.vMax};
   }
-  float                      width                  ()                                                                                                          const
+  float                      width                  ()                                                                                                                           const
   {
     float  width;
     vr::VROverlay()->GetOverlayWidthInMeters(id_, &width);
     return width;
   }  
-  float                      texel_aspect_ratio     ()                                                                                                          const
+  float                      texel_aspect_ratio     ()                                                                                                                           const
   {
     float  texel_aspect_ratio;
     vr::VROverlay()->GetOverlayTexelAspect(id_, &texel_aspect_ratio);
     return texel_aspect_ratio;
   }   
-  std::uint32_t              sort_order             ()                                                                                                          const
+  std::uint32_t              sort_order             ()                                                                                                                           const
   {
     std::uint32_t sort_order;
     vr::VROverlay()->GetOverlaySortOrder(id_, &sort_order);
     return        sort_order;
   }                                                               
-  std::string                render_model_name      ()                                                                                                          const
+  std::string                render_model_name      ()                                                                                                                           const
   {
     char                render_model_name[vr::k_unMaxPropertyStringSize];
     vr::HmdColor_t      color;
@@ -191,7 +215,7 @@ public:
     vr::VROverlay()->GetOverlayRenderModel(id_, render_model_name, vr::k_unMaxPropertyStringSize, &color, &error);
     return std::string(render_model_name);
   }
-  std::array<float, 4>       render_model_color     ()                                                                                                          const
+  std::array<float, 4>       render_model_color     ()                                                                                                                           const
   {
     char                render_model_name[vr::k_unMaxPropertyStringSize];
     vr::HmdColor_t      color;
@@ -199,25 +223,25 @@ public:
     vr::VROverlay()->GetOverlayRenderModel(id_, render_model_name, vr::k_unMaxPropertyStringSize, &color, &error);
     return {color.r, color.g, color.b, color.a};
   }
-  std::uint32_t              rendering_pid          ()                                                                                                          const
+  std::uint32_t              rendering_pid          ()                                                                                                                           const
   {
     return vr::VROverlay()->GetOverlayRenderingPid(id_);
   } 
-  bool                       is_high_quality        ()                                                                                                          const
+  bool                       is_high_quality        ()                                                                                                                           const
   {
     return vr::VROverlay()->GetHighQualityOverlay() == id_;
   }
-  bool                       gamepad_focus          ()                                                                                                          const
+  bool                       gamepad_focus          ()                                                                                                                           const
   {
     return vr::VROverlay()->GetGamepadFocusOverlay() == id_;
   }
-  std::array<float, 2>       mouse_scale            ()                                                                                                          const
+  std::array<float, 2>       mouse_scale            ()                                                                                                                           const
   {
     vr::HmdVector2_t mouse_scale;
     vr::VROverlay()->GetOverlayMouseScale(id_, &mouse_scale);
     return {mouse_scale.v[0], mouse_scale.v[1]};
   } 
-  std::array<float, 2>       auto_curve_range       ()                                                                                                          const
+  std::array<float, 2>       auto_curve_range       ()                                                                                                                           const
   {
     std::array<float, 2> auto_curve_range;
     vr::VROverlay()->GetOverlayAutoCurveDistanceRangeInMeters(id_, &auto_curve_range[0], &auto_curve_range[1]);
