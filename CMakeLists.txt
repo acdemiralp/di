@@ -68,6 +68,7 @@ set(PROJECT_SOURCES
   include/nano_engine/systems/vr/chaperone_calibration_state.hpp
   include/nano_engine/systems/vr/color_space.hpp
   include/nano_engine/systems/vr/dashboard_overlay.hpp
+  include/nano_engine/systems/vr/direction.hpp
   include/nano_engine/systems/vr/display_redirect.hpp
   include/nano_engine/systems/vr/eye.hpp
   include/nano_engine/systems/vr/hand.hpp

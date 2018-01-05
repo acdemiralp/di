@@ -41,19 +41,64 @@ public:
     }
     return *this;
   }
+  
+  // IVR Overlay - Rendering
+  void                       set_tab_visible      (const bool enabled)
+  {
+    vr::VROverlay()->SetOverlayFlag(id_, vr::VROverlayFlags::VROverlayFlags_NoDashboardTab, enabled);
+  }
+  void                       set_gamepad_events   (const bool enabled)
+  {
+    vr::VROverlay()->SetOverlayFlag(id_, vr::VROverlayFlags::VROverlayFlags_AcceptsGamepadEvents, enabled);
+  }
+  
+  bool                       tab_visible          () const
+  {
+    bool   enabled;
+    vr::VROverlay()->GetOverlayFlag(id_, vr::VROverlayFlags::VROverlayFlags_NoDashboardTab, &enabled);
+    return enabled;
+  }
+  bool                       gamepad_events       () const
+  {
+    bool   enabled;
+    vr::VROverlay()->GetOverlayFlag(id_, vr::VROverlayFlags::VROverlayFlags_AcceptsGamepadEvents, &enabled);
+    return enabled;
+  }
 
-  void          set_scene_process(const std::uint32_t process_id)
+  // IVR Overlay - Dashboard
+  void                       set_active           ()
+  {
+    vr::VROverlay()->ShowDashboard(key().c_str());
+  }
+  void                       set_scene_process    (const std::uint32_t process_id)
   {
     vr::VROverlay()->SetDashboardOverlaySceneProcess(id_, process_id);
   }
-
-  std::uint32_t scene_process    ()                               const
+  
+  bool                       is_active            () const
+  {
+    vr::VROverlay()->IsActiveDashboardOverlay(id_);
+  }
+  std::uint32_t              scene_process        () const
   {
     std::uint32_t process_id;
     vr::VROverlay()->GetDashboardOverlaySceneProcess(id_, &process_id);
     return process_id;
   }
 
+  static void                set_dashboard_visible()
+  {
+    vr::VROverlay()->ShowDashboard(nullptr);
+  }
+  static bool                dashboard_visible    ()
+  {
+    return vr::VROverlay()->IsDashboardVisible();
+  }
+  static std::uint32_t       pointing_device_index()
+  {
+    return static_cast<std::uint32_t>(vr::VROverlay()->GetPrimaryDashboardDevice());
+  }
+  
 protected:
   std::uint64_t thumbnail_id_;
 };
