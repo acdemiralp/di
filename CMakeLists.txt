@@ -72,6 +72,7 @@ set(PROJECT_SOURCES
   include/nano_engine/systems/vr/eye.hpp
   include/nano_engine/systems/vr/hand.hpp
   include/nano_engine/systems/vr/hmd.hpp
+  include/nano_engine/systems/vr/message_overlay.hpp
   include/nano_engine/systems/vr/mirror_texture_d3d11.hpp
   include/nano_engine/systems/vr/mirror_texture_opengl.hpp
   include/nano_engine/systems/vr/overlay.hpp
