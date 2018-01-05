@@ -5,10 +5,10 @@ namespace ne
 {
 enum class direction
 {
-  north,
-  south,
-  west ,
-  east
+  up   ,
+  down ,
+  left ,
+  right
 };
 }
 

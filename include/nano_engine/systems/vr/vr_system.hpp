@@ -11,8 +11,10 @@
 #include <openvr.h>
 
 #include <nano_engine/systems/vr/chaperone.hpp>
+#include <nano_engine/systems/vr/dashboard_overlay.hpp>
 #include <nano_engine/systems/vr/display_redirect.hpp>
 #include <nano_engine/systems/vr/hmd.hpp>
+#include <nano_engine/systems/vr/overlay.hpp>
 #include <nano_engine/systems/vr/tracking_device.hpp>
 #include <nano_engine/systems/vr/tracking_mode.hpp>
 #include <nano_engine/systems/vr/tracking_reference.hpp>
@@ -64,25 +66,25 @@ public:
   vr_system& operator=(const vr_system&  that) = delete ;
   vr_system& operator=(      vr_system&& temp) = delete ;
   
-  static bool                           available               ()
+  static bool                           available                ()
   {
     return hardware_present() && runtime_installed();
   }
-  static bool                           hardware_present        ()
+  static bool                           hardware_present         ()
   {
     return vr::VR_IsHmdPresent();
   }
-  static bool                           runtime_installed       ()
+  static bool                           runtime_installed        ()
   {
     return vr::VR_IsRuntimeInstalled();
   }
-  static std::string                    runtime_location        ()
+  static std::string                    runtime_location         ()
   {
     return std::string(vr::VR_RuntimePath());
   }
   
   // IVR System - Tracking
-  std::vector<hmd*>                     hmds                    () const
+  std::vector<hmd*>                     hmds                     () const
   {
     std::vector<hmd*> hmds(hmds_.size());
     std::transform(
@@ -95,7 +97,7 @@ public:
       });
     return hmds;
   }
-  std::vector<vr_controller*>           controllers             () const
+  std::vector<vr_controller*>           controllers              () const
   {
     std::vector<vr_controller*> controllers(controllers_.size());
     std::transform(
@@ -108,7 +110,7 @@ public:
       });
     return controllers;
   }
-  std::vector<tracking_reference*>      tracking_references     () const
+  std::vector<tracking_reference*>      tracking_references      () const
   {
     std::vector<tracking_reference*> tracking_references(tracking_references_.size());
     std::transform(
@@ -121,7 +123,7 @@ public:
       });
     return tracking_references;
   }
-  std::vector<display_redirect*>        display_redirects       () const
+  std::vector<display_redirect*>        display_redirects        () const
   {
     std::vector<display_redirect*> display_redirects(display_redirects_.size());
     std::transform(
@@ -134,7 +136,7 @@ public:
       });
     return display_redirects;
   }
-  std::vector<generic_tracking_device*> generic_tracking_devices() const
+  std::vector<generic_tracking_device*> generic_tracking_devices () const
   {
     std::vector<generic_tracking_device*> generic_tracking_devices(generic_tracking_devices_.size());
     std::transform(
@@ -149,40 +151,78 @@ public:
   }
 
   // IVR System - Controller                                   
-  void                                  set_input_focus         (const bool enabled)
+  void                                  set_input_focus          (const bool enabled)
   {
     enabled ? vr::VRSystem()->CaptureInputFocus() : vr::VRSystem()->ReleaseInputFocus();
   }
-                                                                
-  // IVR System - Application Life Cycle                        
-  void                                  acknowledge_exit        () const
+                                                                 
+  // IVR System - Application Life Cycle                         
+  void                                  acknowledge_exit         () const
   {
     vr::VRSystem()->AcknowledgeQuit_Exiting();
   }
-  void                                  acknowledge_user_prompt () const
+  void                                  acknowledge_user_prompt  () const
   {
     vr::VRSystem()->AcknowledgeQuit_UserPrompt();
   }
   
   // IVR Compositor
-  void                                  set_tracking_mode       (const tracking_mode tracking_mode)
+  void                                  set_tracking_mode        (const tracking_mode tracking_mode)
   {
     if (tracking_mode == tracking_mode::automatic) return;
     vr::VRCompositor()->SetTrackingSpace(static_cast<vr::ETrackingUniverseOrigin>(tracking_mode));
   }                                                           
-  tracking_mode                         tracking_mode           () const
+  tracking_mode                         tracking_mode            () const
   {
     return static_cast<ne::tracking_mode>(vr::VRCompositor()->GetTrackingSpace());
   }
 
+  // IVR Overlay
+  template<typename... argument_types>
+  overlay*                              create_overlay           (argument_types&&... arguments)
+  {
+    overlays_.emplace_back(std::make_unique<overlay>(arguments...));
+    return static_cast<overlay*>(overlays_.back().get());
+  }
+  template<typename... argument_types>
+  dashboard_overlay*                    create_dashboard_overlay (argument_types&&... arguments)
+  {
+    overlays_.emplace_back(std::make_unique<dashboard_overlay>(arguments...));
+    return static_cast<dashboard_overlay*>(overlays_.back().get());
+  }
+  void                                  destroy_overlay          (overlay* overlay)
+  {
+    overlays_.erase(std::remove_if(
+      overlays_.begin(), 
+      overlays_.end  (), 
+      [&overlay] (const std::unique_ptr<ne::overlay>& iteratee)
+      {
+        return iteratee.get() == overlay;
+      }), 
+      overlays_.end  ());
+  }
+  std::vector<overlay*>                 overlays                 () const
+  {
+    std::vector<overlay*> overlays(overlays_.size());
+    std::transform(
+      overlays_.begin(), 
+      overlays_.end  (), 
+      overlays .begin(), 
+      [ ] (const std::unique_ptr<overlay>& overlay)
+      {
+        return overlay.get();
+      });
+    return overlays;
+  }
+
   // IVR Resources
-  std::string                           load_resource           (const std::string& name)
+  std::string                           load_resource            (const std::string& name)
   {
     std::string resource(vr::VRResources()->LoadSharedResource(name.c_str(), nullptr, 0), ' ');
     vr::VRResources()->LoadSharedResource(name.c_str(), &resource[0], static_cast<std::uint32_t>(resource.size()));
     return resource;
   }
-  std::string                           resource_full_path      (const std::string& name, const std::string& directory = std::string()) const
+  std::string                           resource_full_path       (const std::string& name, const std::string& directory = std::string()) const
   {
     char path[vr::k_unMaxPropertyStringSize];
     vr::VRResources()->GetResourceFullPath(name.c_str(), directory.c_str(), path, vr::k_unMaxPropertyStringSize);
@@ -190,7 +230,7 @@ public:
   }
 
   // IVR Driver Manager
-  std::vector<std::string>              drivers                 () const
+  std::vector<std::string>              drivers                  () const
   {
     std::vector<std::string> drivers(vr::VRDriverManager()->GetDriverCount());
     for (auto i = 0; i < drivers.size(); ++i)
@@ -203,13 +243,13 @@ public:
   }
 
   // Auxiliary
-  chaperone*                            chaperone               ()
+  chaperone*                            chaperone                ()
   {
     return chaperone_.get();
   }
 
 private:                                                        
-  void                                  pre_tick                () override
+  void                                  pre_tick                 () override
   {
     // Shallow pass: Low accuracy pose predictions of the tracking devices.
     vr::TrackedDevicePose_t poses[vr::k_unMaxTrackedDeviceCount];
@@ -220,7 +260,7 @@ private:
     for (auto& display_redirect        : display_redirects_       ) display_redirect       ->pose_ = tracking_device_pose(poses[display_redirect       ->index()]);
     for (auto& generic_tracking_device : generic_tracking_devices_) generic_tracking_device->pose_ = tracking_device_pose(poses[generic_tracking_device->index()]);
   }
-  void                                  tick                    () override
+  void                                  tick                     () override
   {
     // Deep pass: High accuracy poses of the tracking devices. Freezes the calling thread. Use just prior to rendering in order to correct the eye transforms.
     vr::TrackedDevicePose_t poses[vr::k_unMaxTrackedDeviceCount];
@@ -247,14 +287,20 @@ private:
         
       }
     }
+
+    for (auto& overlay : overlays_)
+      overlay->process_events();
   }
 
   std::unique_ptr<ne::chaperone>                        chaperone_               ;
+  
   std::vector<std::unique_ptr<hmd>>                     hmds_                    ;
   std::vector<std::unique_ptr<vr_controller>>           controllers_             ;
   std::vector<std::unique_ptr<tracking_reference>>      tracking_references_     ;
   std::vector<std::unique_ptr<display_redirect>>        display_redirects_       ;
   std::vector<std::unique_ptr<generic_tracking_device>> generic_tracking_devices_;
+
+  std::vector<std::unique_ptr<overlay>>                 overlays_                ;
 };
 }
 

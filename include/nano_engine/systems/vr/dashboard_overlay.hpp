@@ -52,13 +52,13 @@ public:
     vr::VROverlay()->SetOverlayFlag(id_, vr::VROverlayFlags::VROverlayFlags_AcceptsGamepadEvents, enabled);
   }
   
-  bool                       tab_visible          () const
+  bool                       tab_visible          ()                               const
   {
     bool   enabled;
     vr::VROverlay()->GetOverlayFlag(id_, vr::VROverlayFlags::VROverlayFlags_NoDashboardTab, &enabled);
     return enabled;
   }
-  bool                       gamepad_events       () const
+  bool                       gamepad_events       ()                               const
   {
     bool   enabled;
     vr::VROverlay()->GetOverlayFlag(id_, vr::VROverlayFlags::VROverlayFlags_AcceptsGamepadEvents, &enabled);
@@ -75,11 +75,11 @@ public:
     vr::VROverlay()->SetDashboardOverlaySceneProcess(id_, process_id);
   }
   
-  bool                       is_active            () const
+  bool                       active               ()                               const
   {
-    vr::VROverlay()->IsActiveDashboardOverlay(id_);
+    return vr::VROverlay()->IsActiveDashboardOverlay(id_);
   }
-  std::uint32_t              scene_process        () const
+  std::uint32_t              scene_process        ()                               const
   {
     std::uint32_t process_id;
     vr::VROverlay()->GetDashboardOverlaySceneProcess(id_, &process_id);

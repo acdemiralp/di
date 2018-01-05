@@ -1,6 +1,7 @@
 #ifndef NANO_ENGINE_SYSTEMS_VR_OVERLAY_HPP_
 #define NANO_ENGINE_SYSTEMS_VR_OVERLAY_HPP_
 
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <cstddef>
@@ -140,11 +141,11 @@ public:
   {
     vr::VROverlay()->SetOverlayFlag(id_, vr::VROverlayFlags::VROverlayFlags_TransferOwnershipToInternalProcess, enabled);
   }
-  void                       set_parallel_side_by_side     (const bool                   enabled           )
+  void                       set_texture_parallel          (const bool                   enabled           )
   {
     vr::VROverlay()->SetOverlayFlag(id_, vr::VROverlayFlags::VROverlayFlags_SideBySide_Parallel, enabled);
   }
-  void                       set_crossed_side_by_side      (const bool                   enabled           )
+  void                       set_texture_crossed           (const bool                   enabled           )
   {
     vr::VROverlay()->SetOverlayFlag(id_, vr::VROverlayFlags::VROverlayFlags_SideBySide_Crossed, enabled);
   }
@@ -279,13 +280,13 @@ public:
     vr::VROverlay()->GetOverlayFlag(id_, vr::VROverlayFlags::VROverlayFlags_TransferOwnershipToInternalProcess, &enabled);
     return enabled;
   }
-  bool                       parallel_side_by_side         () const
+  bool                       texture_parallel              () const
   {
     bool   enabled;
     vr::VROverlay()->GetOverlayFlag(id_, vr::VROverlayFlags::VROverlayFlags_SideBySide_Parallel, &enabled);
     return enabled;
   }
-  bool                       crossed_side_by_side          () const
+  bool                       texture_crossed               () const
   {
     bool   enabled;
     vr::VROverlay()->GetOverlayFlag(id_, vr::VROverlayFlags::VROverlayFlags_SideBySide_Crossed, &enabled);
@@ -399,7 +400,7 @@ public:
     std::copy(&native_matrix.m[0][0], &native_matrix.m[0][0] + 12, matrix.begin());
     return matrix;
   }
-  std::array<float, 12>      transform_coordinates         (const std::array<float, 2> position, tracking_mode mode = tracking_mode::automatic)
+  std::array<float, 12>      coordinate_transform          (const std::array<float, 2> position, tracking_mode mode = tracking_mode::automatic)
   {
     if (mode == tracking_mode::automatic)
       mode = static_cast<tracking_mode>(vr::VRCompositor()->GetTrackingSpace());
@@ -431,6 +432,15 @@ public:
   }
 
   // IVR Overlay - Input
+  void                       process_events                () const
+  {
+    vr::VREvent_t event;
+    while (vr::VROverlay()->PollNextOverlayEvent(id_, &event, sizeof vr::VREvent_t))
+    {
+      // TODO: Process events.
+    }
+  }
+
   void                       set_input_enabled             (const bool enabled)
   {
     vr::VROverlay()->SetOverlayInputMethod(id_, enabled ? vr::VROverlayInputMethod_Mouse : vr::VROverlayInputMethod_None);
@@ -580,7 +590,60 @@ public:
     vr::VROverlay()->SetOverlayFromFile(id_, filepath.c_str());
   }
 
-  // TODO: Overlay Keyboard Functionality, IVRSystem/Overlay Events, IVRApplications, IVRSettings
+  static void                show_keyboard                 (const std::string& description = "", const std::string& text = "", const bool submit = true, const bool password = false, const bool multiline = false, const bool minimal = false, const std::size_t& max_characters = 32 * 1024, const std::uint64_t user_data = 0u)
+  {
+    auto          input_mode = vr::k_EGamepadTextInputModeNormal  ;
+    if (submit  ) input_mode = vr::k_EGamepadTextInputModeSubmit  ;
+    if (password) input_mode = vr::k_EGamepadTextInputModePassword;
+    vr::VROverlay()->ShowKeyboard(
+      input_mode                                                                                          ,
+      multiline ? vr::k_EGamepadTextInputLineModeMultipleLines : vr::k_EGamepadTextInputLineModeSingleLine, 
+      description.c_str()                                                                                 , 
+      static_cast<std::uint32_t>(max_characters)                                                          , 
+      text       .c_str()                                                                                 , 
+      minimal                                                                                             , 
+      user_data                                                                                           );
+  }
+  static void                hide_keyboard                 ()
+  {
+    vr::VROverlay()->HideKeyboard();
+  }
+  static void                set_keyboard_transform        (const std::array<float, 12>& matrix, tracking_mode mode = tracking_mode::automatic)
+  {
+    if (mode == tracking_mode::automatic)
+      mode = static_cast<tracking_mode>(vr::VRCompositor()->GetTrackingSpace());
+    
+    vr::HmdMatrix34_t native_matrix;
+    std::copy(matrix.begin(), matrix.end(), &native_matrix.m[0][0]);
+    vr::VROverlay()->SetKeyboardTransformAbsolute(static_cast<vr::ETrackingUniverseOrigin>(mode), &native_matrix);
+  }
+  static std::string         keyboard_text                 ()
+  {
+    char text[vr::k_unMaxPropertyStringSize];
+    vr::VROverlay()->GetKeyboardText(text, vr::k_unMaxPropertyStringSize);
+    return std::string(text);
+  }
+                                                           
+  void                       show_keyboard                 (const std::string& description = "", const std::string& text = "", const bool submit = true, const bool password = false, const bool multiline = false, const bool minimal = false, const std::size_t& max_characters = 32 * 1024)
+  {
+    auto          input_mode = vr::k_EGamepadTextInputModeNormal  ;
+    if (submit  ) input_mode = vr::k_EGamepadTextInputModeSubmit  ;
+    if (password) input_mode = vr::k_EGamepadTextInputModePassword;
+    vr::VROverlay()->ShowKeyboardForOverlay(
+      id_                                                                                                 , 
+      input_mode                                                                                          ,
+      multiline ? vr::k_EGamepadTextInputLineModeMultipleLines : vr::k_EGamepadTextInputLineModeSingleLine, 
+      description.c_str()                                                                                 , 
+      static_cast<std::uint32_t>(max_characters)                                                          , 
+      text       .c_str()                                                                                 , 
+      minimal                                                                                             , 
+      id_                                                                                                 );
+  }
+  void                       set_keyboard_rectangle        (const rectangle<float>& rectangle)
+  {
+    const vr::HmdRect2_t native_rectangle {rectangle.left, rectangle.top, rectangle.right, rectangle.bottom};
+    vr::VROverlay()->SetKeyboardPositionForOverlay(id_, native_rectangle);
+  }
 
 protected:
   explicit overlay(const std::uint64_t& handle = 0) : id_(handle)
