@@ -60,7 +60,13 @@ public:
     }
     return *this;
   }
- 
+
+  // IVR Applications
+  void                       launch                        () const
+  {
+    vr::VRApplications()->LaunchDashboardOverlay(key().c_str());
+  }
+
   // IVR Overlay - Management
   static overlay             find                          (const std::string& key )
   {
