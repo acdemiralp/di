@@ -12,6 +12,7 @@
 #include <vector>
 
 #include <boost/optional.hpp>
+#include <boost/signals2.hpp>
 #include <openvr.h>
 
 #include <nano_engine/systems/vr/color_space.hpp>

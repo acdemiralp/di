@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 
+#include <boost/signals2.hpp>
 #include <openvr.h>
 
 #include <nano_engine/systems/vr/chaperone.hpp>
@@ -272,20 +273,9 @@ private:
     for (auto& generic_tracking_device : generic_tracking_devices_) generic_tracking_device->pose_ = tracking_device_pose(poses[generic_tracking_device->index()]);
 
     vr::VREvent_t event;
-    while (vr::VRSystem()->PollNextEvent(&event, sizeof event))
+    while (vr::VRSystem()->PollNextEvent(&event, sizeof vr::VREvent_t))
     {
-      if      (event.eventType == vr::VREvent_TrackedDeviceActivated  )
-      {
-        
-      }
-      else if (event.eventType == vr::VREvent_TrackedDeviceDeactivated)
-      {
-        
-      }
-      else if (event.eventType == vr::VREvent_TrackedDeviceUpdated    )
-      {
-        
-      }
+      // TODO: Process events.
     }
 
     for (auto& overlay : overlays_)
