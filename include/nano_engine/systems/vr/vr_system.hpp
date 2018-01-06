@@ -41,19 +41,19 @@ public:
 
     std::vector<std::uint32_t> indices(vr::k_unMaxTrackedDeviceCount);
     auto count  = vr::VRSystem()->GetSortedTrackedDeviceIndicesOfClass(vr::TrackedDeviceClass_HMD        , indices.data(), static_cast<std::uint32_t>(indices.size())); 
-    for (auto i = 0u; i < count; i++) 
-      hmds_                    .push_back(std::make_unique<hmd>                       (indices[i]));
+    for (auto i = 0u; i < count; ++i) 
+      hmds_                    .emplace_back(std::make_unique<hmd>                    (indices[i]));
     count = vr::VRSystem()->GetSortedTrackedDeviceIndicesOfClass(vr::TrackedDeviceClass_Controller       , indices.data(), static_cast<std::uint32_t>(indices.size()));
-    for (auto i = 0u; i < count; i++) 
+    for (auto i = 0u; i < count; ++i) 
       controllers_             .emplace_back(std::make_unique<vr_controller>          (indices[i]));
     count = vr::VRSystem()->GetSortedTrackedDeviceIndicesOfClass(vr::TrackedDeviceClass_TrackingReference, indices.data(), static_cast<std::uint32_t>(indices.size()));
-    for (auto i = 0u; i < count; i++) 
+    for (auto i = 0u; i < count; ++i) 
       tracking_references_     .emplace_back(std::make_unique<tracking_reference>     (indices[i]));
     count = vr::VRSystem()->GetSortedTrackedDeviceIndicesOfClass(vr::TrackedDeviceClass_DisplayRedirect  , indices.data(), static_cast<std::uint32_t>(indices.size()));
-    for (auto i = 0u; i < count; i++) 
+    for (auto i = 0u; i < count; ++i) 
       display_redirects_       .emplace_back(std::make_unique<display_redirect>       (indices[i]));
     count = vr::VRSystem()->GetSortedTrackedDeviceIndicesOfClass(vr::TrackedDeviceClass_GenericTracker   , indices.data(), static_cast<std::uint32_t>(indices.size()));
-    for (auto i = 0u; i < count; i++) 
+    for (auto i = 0u; i < count; ++i) 
       generic_tracking_devices_.emplace_back(std::make_unique<generic_tracking_device>(indices[i]));
     
     set_tracking_mode(tracking_mode);
@@ -248,6 +248,29 @@ public:
   {
     return chaperone_.get();
   }
+  
+  boost::signals2::signal<void(                                                                )> device_event                 ;
+  boost::signals2::signal<void(vr_controller_button                                            )> button_event                 ;
+  boost::signals2::signal<void(std::array<float, 2>                                            )> mouse_move_event             ;
+  boost::signals2::signal<void(std::size_t                                                     )> mouse_press_event            ;
+  boost::signals2::signal<void(std::array<float, 2>, std::size_t                               )> scroll_event                 ;
+  boost::signals2::signal<void(/* TODO */                                                      )> touchpad_move_event          ;
+  boost::signals2::signal<void(std::uint64_t, std::uint32_t                                    )> notification_event           ;
+  boost::signals2::signal<void(std::uint32_t, std::uint32_t, bool                              )> process_event                ;
+  boost::signals2::signal<void(std::uint64_t                                                   )> overlay_event                ;
+  boost::signals2::signal<void(vr::EVRState                                                    )> state_event                  ;
+  boost::signals2::signal<void(std::string, std::uint64_t                                      )> keyboard_event               ;
+  boost::signals2::signal<void(float                                                           )> interpupillary_distance_event;
+  boost::signals2::signal<void(std::uint64_t, std::uint64_t                                    )> chaperone_event              ;
+  boost::signals2::signal<void(std::uint32_t                                                   )> performance_test_event       ;
+  boost::signals2::signal<void(bool                                                            )> seated_pose_reset_event      ;
+  boost::signals2::signal<void(std::uint32_t, vr_screenshot_type                               )> screenshot_event             ;
+  boost::signals2::signal<void(float                                                           )> screenshot_progress_event    ;
+  boost::signals2::signal<void(std::uint32_t, std::uint32_t                                    )> application_launch_event     ;
+  boost::signals2::signal<void(std::uint64_t, std::uint32_t                                    )> camera_surface_edit_event    ;
+  boost::signals2::signal<void(std::uint32_t                                                   )> message_overlay_event        ;
+  boost::signals2::signal<void(vr::PropertyContainerHandle_t, vr::ETrackedDeviceProperty       )> property_event               ;
+  boost::signals2::signal<void(std::array<float, 2>, std::array<float, 2>, vr::EDualAnalogWhich)> dual_analog_event            ;
 
 private:                                                        
   void                                  pre_tick                 () override
