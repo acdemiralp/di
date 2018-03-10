@@ -1,6 +1,6 @@
 ##################################################    Project     ##################################################
 cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
-project               (nano_engine VERSION 1.0 LANGUAGES CXX)
+project               (di VERSION 1.0 LANGUAGES CXX)
 list                  (APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 set_property          (GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -13,52 +13,97 @@ set(PROJECT_SOURCES
   cmake/assign_source_group.cmake
   cmake/import_library.cmake
   
-  include/nano_engine/systems/display/display_info.hpp
-  include/nano_engine/systems/display/display_mode.hpp
-  include/nano_engine/systems/display/display_system.hpp
-  include/nano_engine/systems/display/hit_test_result.hpp
-  include/nano_engine/systems/display/message_box.hpp
-  include/nano_engine/systems/display/message_box_color_scheme.hpp
-  include/nano_engine/systems/display/message_box_level.hpp
-  include/nano_engine/systems/display/opengl_context_settings.hpp
-  include/nano_engine/systems/display/opengl_profile.hpp
-  include/nano_engine/systems/display/opengl_swap_mode.hpp
-  include/nano_engine/systems/display/opengl_window.hpp
-  include/nano_engine/systems/display/screensaver.hpp
-  include/nano_engine/systems/display/video_driver.hpp
-  include/nano_engine/systems/display/vulkan_window.hpp
-  include/nano_engine/systems/display/window.hpp
-  include/nano_engine/systems/display/window_flags.hpp
-  include/nano_engine/systems/display/window_mode.hpp
-  include/nano_engine/systems/input/clipboard.hpp
-  include/nano_engine/systems/input/finger.hpp
-  include/nano_engine/systems/input/game_controller.hpp
-  include/nano_engine/systems/input/game_controller_axis.hpp
-  include/nano_engine/systems/input/game_controller_button.hpp
-  include/nano_engine/systems/input/game_controller_default_mappings.hpp
-  include/nano_engine/systems/input/game_controller_info.hpp
-  include/nano_engine/systems/input/gesture.hpp
-  include/nano_engine/systems/input/input_system.hpp
-  include/nano_engine/systems/input/joystick.hpp
-  include/nano_engine/systems/input/joystick_hat_state.hpp
-  include/nano_engine/systems/input/joystick_info.hpp
-  include/nano_engine/systems/input/joystick_power_level.hpp
-  include/nano_engine/systems/input/joystick_type.hpp
-  include/nano_engine/systems/input/key.hpp
-  include/nano_engine/systems/input/key_code.hpp
-  include/nano_engine/systems/input/key_modifier.hpp
-  include/nano_engine/systems/input/keyboard.hpp
-  include/nano_engine/systems/input/mouse.hpp
-  include/nano_engine/systems/input/multi_gesture.hpp
-  include/nano_engine/systems/input/os_cursor.hpp
-  include/nano_engine/systems/input/scan_code.hpp
-  include/nano_engine/systems/input/touch_device.hpp
-  include/nano_engine/systems/renderer/render_pass.hpp
-  include/nano_engine/systems/renderer/renderer.hpp
-  include/nano_engine/utility/bitset_enum.hpp
-  include/nano_engine/utility/frame_timer.hpp
-  include/nano_engine/engine.hpp
-  include/nano_engine/system.hpp
+  include/di/systems/display/display_info.hpp
+  include/di/systems/display/display_mode.hpp
+  include/di/systems/display/display_system.hpp
+  include/di/systems/display/hit_test_result.hpp
+  include/di/systems/display/message_box.hpp
+  include/di/systems/display/message_box_color_scheme.hpp
+  include/di/systems/display/message_box_level.hpp
+  include/di/systems/display/opengl_context_settings.hpp
+  include/di/systems/display/opengl_profile.hpp
+  include/di/systems/display/opengl_swap_mode.hpp
+  include/di/systems/display/opengl_window.hpp
+  include/di/systems/display/screensaver.hpp
+  include/di/systems/display/video_driver.hpp
+  include/di/systems/display/vulkan_window.hpp
+  include/di/systems/display/window.hpp
+  include/di/systems/display/window_flags.hpp
+  include/di/systems/display/window_mode.hpp
+  include/di/systems/input/clipboard.hpp
+  include/di/systems/input/finger.hpp
+  include/di/systems/input/game_controller.hpp
+  include/di/systems/input/game_controller_axis.hpp
+  include/di/systems/input/game_controller_button.hpp
+  include/di/systems/input/game_controller_default_mappings.hpp
+  include/di/systems/input/game_controller_info.hpp
+  include/di/systems/input/gesture.hpp
+  include/di/systems/input/haptic_device.hpp
+  include/di/systems/input/haptic_device_info.hpp
+  include/di/systems/input/haptic_effect.hpp
+  include/di/systems/input/haptic_effect_description.hpp
+  include/di/systems/input/input_system.hpp
+  include/di/systems/input/joystick.hpp
+  include/di/systems/input/joystick_hat_state.hpp
+  include/di/systems/input/joystick_info.hpp
+  include/di/systems/input/joystick_power_level.hpp
+  include/di/systems/input/joystick_type.hpp
+  include/di/systems/input/key.hpp
+  include/di/systems/input/key_code.hpp
+  include/di/systems/input/key_modifier.hpp
+  include/di/systems/input/keyboard.hpp
+  include/di/systems/input/mouse.hpp
+  include/di/systems/input/multi_gesture.hpp
+  include/di/systems/input/os_cursor.hpp
+  include/di/systems/input/power_info.hpp
+  include/di/systems/input/power_state.hpp
+  include/di/systems/input/scan_code.hpp
+  include/di/systems/input/touch_device.hpp
+  include/di/systems/vr/camera_frame_header.hpp
+  include/di/systems/vr/camera_frame_type.hpp
+  include/di/systems/vr/camera_stream.hpp
+  include/di/systems/vr/chaperone.hpp
+  include/di/systems/vr/chaperone_calibration_state.hpp
+  include/di/systems/vr/color_space.hpp
+  include/di/systems/vr/dashboard_overlay.hpp
+  include/di/systems/vr/direction.hpp
+  include/di/systems/vr/display_redirect.hpp
+  include/di/systems/vr/eye.hpp
+  include/di/systems/vr/hand.hpp
+  include/di/systems/vr/hmd.hpp
+  include/di/systems/vr/message_overlay.hpp
+  include/di/systems/vr/mirror_texture_d3d11.hpp
+  include/di/systems/vr/mirror_texture_opengl.hpp
+  include/di/systems/vr/overlay.hpp
+  include/di/systems/vr/raycast_result.hpp
+  include/di/systems/vr/statistics.hpp
+  include/di/systems/vr/submit_flags.hpp
+  include/di/systems/vr/texture_data_d3d12.hpp
+  include/di/systems/vr/texture_data_vulkan.hpp
+  include/di/systems/vr/timing_info.hpp
+  include/di/systems/vr/timing_mode.hpp
+  include/di/systems/vr/tracking_device.hpp
+  include/di/systems/vr/tracking_device_activity.hpp
+  include/di/systems/vr/tracking_device_model.hpp
+  include/di/systems/vr/tracking_device_pose.hpp
+  include/di/systems/vr/tracking_device_state.hpp
+  include/di/systems/vr/tracking_device_texture.hpp
+  include/di/systems/vr/tracking_device_type.hpp
+  include/di/systems/vr/tracking_mode.hpp
+  include/di/systems/vr/tracking_reference.hpp
+  include/di/systems/vr/vr_controller.hpp
+  include/di/systems/vr/vr_controller_axis.hpp
+  include/di/systems/vr/vr_controller_button.hpp
+  include/di/systems/vr/vr_controller_button_state.hpp
+  include/di/systems/vr/vr_controller_state.hpp
+  include/di/systems/vr/vr_screenshot.hpp
+  include/di/systems/vr/vr_screenshot_type.hpp
+  include/di/systems/vr/vr_system.hpp
+  include/di/utility/bitset_enum.hpp
+  include/di/utility/frame_timer.hpp
+  include/di/utility/rectangle.hpp
+  include/di/engine.hpp
+  include/di/system.hpp
 )
 include(assign_source_group)
 assign_source_group(${PROJECT_SOURCES})
