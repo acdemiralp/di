@@ -15,7 +15,7 @@
 
 namespace di
 {
-class opengl_window final : public window
+class opengl_window : public window
 {
 public:
   explicit opengl_window  (const std::string& title, const opengl_context_settings& settings = opengl_context_settings(), const window_flags flags = window_flags::none)
@@ -35,7 +35,7 @@ public:
   {
     temp.opengl_context_ = nullptr;
   }
-  ~opengl_window          ()
+  virtual ~opengl_window  ()
   {
     if(opengl_context_ != nullptr)
       SDL_GL_DeleteContext(opengl_context_);
@@ -84,7 +84,7 @@ public:
     return drawable_size;
   }
 
-private:
+protected:
   SDL_GLContext opengl_context_ = nullptr;
 };
 }

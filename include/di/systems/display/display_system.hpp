@@ -19,7 +19,7 @@
 
 namespace di
 {
-class display_system final : public system
+class display_system : public system
 {
 public:
   display_system           ()
@@ -110,7 +110,7 @@ public:
   boost::signals2::signal<void()> on_render_targets_reset;
   boost::signals2::signal<void()> on_render_device_reset ;
 
-private:
+protected:
   void tick() override
   {
     std::array<SDL_Event, 128> events;

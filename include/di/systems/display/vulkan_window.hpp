@@ -14,7 +14,7 @@
 namespace di
 {
 // Note: Vulkan must be included prior to including this file.
-class vulkan_window final : public window
+class vulkan_window : public window
 {
 public:
   explicit vulkan_window  (const VkInstance instance, const std::string& title, const window_flags flags = window_flags::none) 
@@ -35,7 +35,7 @@ public:
     temp.instance_ = nullptr;
     temp.surface_  = nullptr;
   }
-  ~vulkan_window          ()
+  virtual ~vulkan_window  ()
   {
 #ifdef VULKAN_H_
     if(instance_ != nullptr && surface_ != nullptr)
@@ -70,7 +70,7 @@ public:
     return &surface_;
   }
 
-private:
+protected:
   VkInstance   instance_ = nullptr;
   VkSurfaceKHR surface_  = nullptr;
 };

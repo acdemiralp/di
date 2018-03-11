@@ -24,7 +24,7 @@
 
 namespace di
 {
-class vr_system final : public system
+class vr_system : public system
 {
 public:
   explicit vr_system  (const tracking_mode tracking_mode)
@@ -60,7 +60,7 @@ public:
   }
   vr_system           (const vr_system&  that) = delete ;
   vr_system           (      vr_system&& temp) = delete ;
-  ~vr_system          ()
+  virtual ~vr_system  ()
   {
     vr::VR_Shutdown();
   }
@@ -249,7 +249,7 @@ public:
     return chaperone_.get();
   }
   
-private:                                                        
+protected:                                                        
   void                                  pre_tick                 () override
   {
     // Shallow pass: Low accuracy pose predictions of the tracking devices.
