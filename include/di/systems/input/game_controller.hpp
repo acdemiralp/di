@@ -139,7 +139,7 @@ public:
   boost::signals2::signal<void()>                            on_remap         ;
   boost::signals2::signal<void()>                            on_close         ;
 
-private:
+protected:
   SDL_GameController* native_    ;
   joystick            underlying_; // Required due to several missing functions in the SDL game controller.
 };

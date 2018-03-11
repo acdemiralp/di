@@ -177,7 +177,7 @@ public:
   boost::signals2::signal<void(std::size_t, std::array<std::size_t, 2>)> on_trackball_motion;
   boost::signals2::signal<void()>                                        on_close           ;
 
-private:
+protected:
   friend game_controller;
 
   explicit joystick(SDL_Joystick* native) 

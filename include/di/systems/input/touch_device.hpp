@@ -68,7 +68,7 @@ public:
   boost::signals2::signal<void(gesture)>       on_gesture       ;
   boost::signals2::signal<void(multi_gesture)> on_multi_gesture ;
   
-private:
+protected:
   friend input_system;
 
   std::int64_t id_;
