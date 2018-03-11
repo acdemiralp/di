@@ -4,7 +4,7 @@ import os
 
 class DiConan(ConanFile):
     name            = "di"
-    version         = "1.0.0"                     
+    version         = "1.0.1"                     
     description     = "Conan package for di."           
     url             = "https://github.com/acdemiralp/di"
     license         = "MIT"                         
