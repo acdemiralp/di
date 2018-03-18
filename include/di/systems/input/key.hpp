@@ -22,6 +22,11 @@ struct key
     return std::string(SDL_GetScancodeName(static_cast<SDL_Scancode>(scan_code)));
   }
 
+  bool operator < (const key& rhs) const
+  {
+    return code < rhs.code;
+  }
+  
   key_code     code     ;
   key_modifier modifier ;
   scan_code    scan_code;
