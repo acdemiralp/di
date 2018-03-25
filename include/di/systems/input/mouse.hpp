@@ -40,16 +40,16 @@ inline void                           set_absolute_position(const std::array<std
 {
   SDL_WarpMouseGlobal(static_cast<int>(position[0]), static_cast<int>(position[1]));
 }
-inline std::array<std::size_t, 2>     absolute_position    ()
+inline std::array<std::uint32_t, 2>   absolute_position    ()
 {
-  std::array<std::size_t, 2> position;
+  std::array<std::uint32_t, 2> position;
   SDL_GetGlobalMouseState(reinterpret_cast<int*>(&position[0]), reinterpret_cast<int*>(&position[1]));
   return position;
 }
 
-inline std::array<std::size_t, 2>     relative_position    (bool delta = false)
+inline std::array<std::uint32_t, 2>   relative_position    (bool delta = false)
 {
-  std::array<std::size_t, 2> position;
+  std::array<std::uint32_t, 2> position;
   delta ?
     SDL_GetRelativeMouseState(reinterpret_cast<int*>(&position[0]), reinterpret_cast<int*>(&position[1])): 
     SDL_GetMouseState        (reinterpret_cast<int*>(&position[0]), reinterpret_cast<int*>(&position[1]));

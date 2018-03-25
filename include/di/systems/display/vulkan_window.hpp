@@ -3,6 +3,7 @@
 
 #include <array>
 #include <cstddef>
+#include <cstdint>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -58,9 +59,9 @@ public:
     return *this;
   }
 
-  std::array<std::size_t, 2> drawable_size() const
+  std::array<std::uint32_t, 2> drawable_size() const
   {
-    std::array<std::size_t, 2> drawable_size;
+    std::array<std::uint32_t, 2> drawable_size;
     SDL_Vulkan_GetDrawableSize(native_, reinterpret_cast<int*>(&drawable_size[0]), reinterpret_cast<int*>(&drawable_size[1]));
     return drawable_size;
   }

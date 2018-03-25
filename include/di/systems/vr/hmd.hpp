@@ -64,12 +64,10 @@ public:
   }
                                                                                                                                                                                                                                                                                  
   // IVR System - Display                                                                                                                                                                                                                                                        
-  std::array<std::size_t, 2>             recommended_render_target_size      ()                                                                                                                                                                                                  const
+  std::array<std::uint32_t, 2>           recommended_render_target_size      ()                                                                                                                                                                                                  const
   {
-    std::array<std::size_t, 2> size;
-    vr::VRSystem()->GetRecommendedRenderTargetSize(
-      reinterpret_cast<std::uint32_t*>(&size[0]), 
-      reinterpret_cast<std::uint32_t*>(&size[1]));
+    std::array<std::uint32_t, 2> size;
+    vr::VRSystem()->GetRecommendedRenderTargetSize(&size[0], &size[1]);
     return size;
   }
   std::array<float, 16>                  projection_matrix                   (eye eye, const float near, const float far)                                                                                                                                                        const
