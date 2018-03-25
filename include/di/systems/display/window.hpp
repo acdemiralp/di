@@ -260,33 +260,33 @@ public:
   {
     return std::string(SDL_GetWindowTitle(native_));
   }
-  std::array<std::size_t, 2>                    position        () const
+  std::array<std::uint32_t, 2>                  position        () const
   {
-    std::array<std::size_t, 2> position;
+    std::array<std::uint32_t, 2> position;
     SDL_GetWindowPosition(native_, reinterpret_cast<int*>(&position[0]), reinterpret_cast<int*>(&position[1]));
     return position;
   }
-  std::array<std::size_t, 2>                    size            () const
+  std::array<std::uint32_t, 2>                  size            () const
   {
-    std::array<std::size_t, 2> size;
+    std::array<std::uint32_t, 2> size;
     SDL_GetWindowSize(native_, reinterpret_cast<int*>(&size[0]), reinterpret_cast<int*>(&size[1]));
     return size;
   }
-  std::array<std::size_t, 2>                    minimum_size    () const
+  std::array<std::uint32_t, 2>                  minimum_size    () const
   {
-    std::array<std::size_t, 2> minimum_size;
+    std::array<std::uint32_t, 2> minimum_size;
     SDL_GetWindowMinimumSize(native_, reinterpret_cast<int*>(&minimum_size[0]), reinterpret_cast<int*>(&minimum_size[1]));
     return minimum_size;
   }
-  std::array<std::size_t, 2>                    maximum_size    () const
+  std::array<std::uint32_t, 2>                  maximum_size    () const
   {
-    std::array<std::size_t, 2> maximum_size;
+    std::array<std::uint32_t, 2> maximum_size;
     SDL_GetWindowMaximumSize(native_, reinterpret_cast<int*>(&maximum_size[0]), reinterpret_cast<int*>(&maximum_size[1]));
     return maximum_size;
   }
-  rectangle<std::size_t>                        border_size     () const
+  rectangle<std::uint32_t>                      border_size     () const
   {
-    rectangle<std::size_t> border_size;
+    rectangle<std::uint32_t> border_size;
     SDL_GetWindowBordersSize(native_, reinterpret_cast<int*>(&border_size.top), reinterpret_cast<int*>(&border_size.left), reinterpret_cast<int*>(&border_size.bottom), reinterpret_cast<int*>(&border_size.right));
     return border_size;
   }
@@ -316,8 +316,8 @@ public:
       return window_mode::fullscreen;
     
     auto display_info = display();
-    if(position() == std::array<std::size_t, 2>{0, 0} && 
-       size    () == std::array<std::size_t, 2>{display_info.size[0] - 1, display_info.size[1] - 1})
+    if(position() == std::array<std::uint32_t, 2>{0, 0} && 
+       size    () == std::array<std::uint32_t, 2>{display_info.size[0] - 1, display_info.size[1] - 1})
       return window_mode::fullscreen_windowed;
 
     return window_mode::windowed;

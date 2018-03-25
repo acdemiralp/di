@@ -71,54 +71,54 @@ public:
     return *this;
   }
   
-  joystick_type                           type           () const
+  joystick_type                            type           () const
   {
     return static_cast<joystick_type>(SDL_JoystickGetType(native_));
   }
-  std::string                             name           () const
+  std::string                              name           () const
   {
     return std::string(SDL_JoystickName(native_));
   }
-  std::string                             uuid           () const
+  std::string                              uuid           () const
   {
     char native_uuid[128];
     SDL_JoystickGetGUIDString(SDL_JoystickGetGUID(native_), native_uuid, 128);
     return std::string(native_uuid);
   }
-  std::uint32_t                           instance_id    () const
+  std::uint32_t                            instance_id    () const
   {
     return static_cast<std::uint32_t>(SDL_JoystickInstanceID(native_));
   }
-  std::uint32_t                           product        () const
+  std::uint32_t                            product        () const
   {
     return static_cast<std::uint32_t>(SDL_JoystickGetProduct(native_));
   }
-  std::uint32_t                           product_version() const
+  std::uint32_t                            product_version() const
   {
     return static_cast<std::uint32_t>(SDL_JoystickGetProductVersion(native_));
   }
-  std::uint32_t                           vendor         () const
+  std::uint32_t                            vendor         () const
   {
     return static_cast<std::uint32_t>(SDL_JoystickGetVendor(native_));
   }
-
-  joystick_power_level                    power_level    () const
+                                           
+  joystick_power_level                     power_level    () const
   {
     return static_cast<joystick_power_level>(SDL_JoystickCurrentPowerLevel(native_));
   }
-  bool                                    attached       () const
+  bool                                     attached       () const
   {
     return SDL_JoystickGetAttached(native_) != 0;
   }
-  
-  std::vector<float>                      axes           () const
+                                           
+  std::vector<float>                       axes           () const
   {
     std::vector<float> axes(SDL_JoystickNumAxes(native_));
     for(auto i = 0; i < axes.size(); ++i)
       axes[i] = static_cast<float>(SDL_JoystickGetAxis(native_, static_cast<int>(i))) / 32768.0F;
     return axes;
   }
-  std::vector<float>                      initial_axes   () const
+  std::vector<float>                       initial_axes   () const
   {
     std::vector<float> axes(SDL_JoystickNumAxes(native_));
     for (auto i = 0; i < axes.size(); ++i)
@@ -129,43 +129,43 @@ public:
     }
     return axes;
   }
-  std::vector<bool>                       buttons        () const
+  std::vector<bool>                        buttons        () const
   {
     std::vector<bool> buttons(SDL_JoystickNumButtons(native_));
     for(auto i = 0; i < buttons.size(); ++i)
       buttons[i] = SDL_JoystickGetButton(native_, static_cast<int>(i)) != 0;
     return buttons;
   }
-  std::vector<joystick_hat_state>         hats           () const
+  std::vector<joystick_hat_state>          hats           () const
   {
     std::vector<joystick_hat_state> hats(SDL_JoystickNumHats(native_));
     for(auto i = 0; i < hats.size(); ++i)
       hats[i] = static_cast<joystick_hat_state>(SDL_JoystickGetHat(native_, static_cast<int>(i)));
     return hats;
   }
-  std::vector<std::array<std::size_t, 2>> trackballs     () const
+  std::vector<std::array<std::int32_t, 2>> trackballs     () const
   {
-    std::vector<std::array<std::size_t, 2>> trackballs(SDL_JoystickNumBalls(native_));
+    std::vector<std::array<std::int32_t, 2>> trackballs(SDL_JoystickNumBalls(native_));
     for (auto i = 0; i < trackballs.size(); ++i)
       SDL_JoystickGetBall(native_, static_cast<int>(i), reinterpret_cast<int*>(&trackballs[i][0]), reinterpret_cast<int*>(&trackballs[i][1]));
     return trackballs;
   }
   
-  haptic_device*                          haptics        () const
+  haptic_device*                           haptics        () const
   {
     return haptics_.get();
   }
-
-  SDL_Joystick*                           native         () const
+                                           
+  SDL_Joystick*                            native         () const
   {
     return native_;
   }
-  
-  static void                             update_all     ()
+                                           
+  static void                              update_all     ()
   {
     SDL_JoystickUpdate();
   }
-  static void                             set_global_lock(bool lock)
+  static void                              set_global_lock(bool lock)
   {
     lock ? SDL_LockJoysticks() : SDL_UnlockJoysticks();
   }
