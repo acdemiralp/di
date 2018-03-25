@@ -317,7 +317,7 @@ public:
     
     auto display_info = display();
     if(position() == std::array<std::uint32_t, 2>{0, 0} && 
-       size    () == std::array<std::uint32_t, 2>{display_info.size[0] - 1, display_info.size[1] - 1})
+       size    () == std::array<std::uint32_t, 2>{std::uint32_t(display_info.size[0] - 1), std::uint32_t(display_info.size[1] - 1)})
       return window_mode::fullscreen_windowed;
 
     return window_mode::windowed;
