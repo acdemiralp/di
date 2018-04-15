@@ -150,13 +150,25 @@ public:
       });
     return generic_tracking_devices;
   }
-
-  // IVR System - Controller                                   
-  void                                  set_input_focus          (const bool enabled)
+  
+  // IVR System - Controller
+  bool                                  is_input_available       ()
   {
-    enabled ? vr::VRSystem()->CaptureInputFocus() : vr::VRSystem()->ReleaseInputFocus();
+    return vr::VRSystem()->IsInputAvailable();
   }
-                                                                 
+  bool                                  is_drawing_controllers   ()
+  {
+    return vr::VRSystem()->IsSteamVRDrawingControllers();
+  }
+  bool                                  should_pause             ()
+  {
+    return vr::VRSystem()->ShouldApplicationPause();
+  }
+  bool                                  should_reduce_rendering  ()
+  {
+    return vr::VRSystem()->ShouldApplicationReduceRenderingWork();
+  }
+  
   // IVR System - Application Life Cycle                         
   void                                  acknowledge_exit         () const
   {
