@@ -29,7 +29,7 @@ enum class vr_controller_button
 };
 
 // Enable iterating over non-contiguous enum.
-std::vector<vr_controller_button> vr_controller_buttons 
+static const std::vector<vr_controller_button> vr_controller_buttons 
 {
   vr_controller_button::system          ,
   vr_controller_button::application_menu,

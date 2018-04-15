@@ -12,7 +12,8 @@ enum class submit_flags
   none                    = vr::Submit_Default                     ,
   lens_distortion_applied = vr::Submit_LensDistortionAlreadyApplied,
   opengl_render_buffer    = vr::Submit_GlRenderBuffer              ,
-  texture_with_pose       = vr::Submit_TextureWithPose
+  texture_with_pose       = vr::Submit_TextureWithPose             ,
+  texture_with_depth      = vr::Submit_TextureWithDepth
 };
 }
 

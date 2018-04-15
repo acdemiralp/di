@@ -460,11 +460,6 @@ public:
   {
     vr::VROverlay()->SetOverlayInputMethod(id_, vr::VROverlayInputMethod_Mouse);
   }
-  template <tracking_device_type type>
-  void                       set_mouse_device              (const tracking_device<type>& device     )
-  {
-    vr::VROverlay()->HandleControllerOverlayInteractionAsMouse(id_, device.index());
-  }
   void                       set_mouse_scale               (const std::array<float, 2>&  mouse_scale) 
   {
     vr::HmdVector2_t scale {{mouse_scale[0], mouse_scale[1]}};
@@ -578,7 +573,12 @@ public:
   }
   void                       set_texture                   (texture_data_vulkan                texture_data   , color_space color_space = color_space::automatic)
   {
-    vr::Texture_t texture {reinterpret_cast<void*>(&texture_data), vr::TextureType_OpenGL, static_cast<vr::EColorSpace>(color_space)};
+    vr::Texture_t texture {reinterpret_cast<void*>(&texture_data), vr::TextureType_Vulkan, static_cast<vr::EColorSpace>(color_space)};
+    vr::VROverlay()->SetOverlayTexture(id_, &texture);
+  }
+  void                       set_texture_shared            (void*                              dxgi_handle    , color_space color_space = color_space::automatic)
+  {
+    vr::Texture_t texture {reinterpret_cast<void*>(dxgi_handle), vr::TextureType_DXGISharedHandle, static_cast<vr::EColorSpace>(color_space)};
     vr::VROverlay()->SetOverlayTexture(id_, &texture);
   }
   void                       clear_texture                 () const

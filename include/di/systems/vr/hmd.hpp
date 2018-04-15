@@ -356,6 +356,14 @@ public:
   {
     return get_property_int(vr::Prop_CameraCompatibilityMode_Int32);
   }
+  int                                    camera_count                        ()                                                                                                                                                                                                  const
+  {
+    return get_property_int(vr::Prop_NumCameras_Int32);
+  }
+  int                                    camera_frame_layout                 ()                                                                                                                                                                                                  const
+  {
+    return get_property_int(vr::Prop_CameraFrameLayout_Int32);
+  }
   std::uint64_t                          display_firmware_version            ()                                                                                                                                                                                                  const
   {
     return get_property_uint64(vr::Prop_DisplayFirmwareVersion_Uint64);
@@ -383,7 +391,20 @@ public:
   {
     return get_property_string(vr::Prop_DriverProvidedChaperonePath_String);
   }
-                                                                                                                                                                                                                                                                                 
+                                                                                                                                                                                                                                                                                        
+  bool                                   driver_is_drawing_controllers       ()                                                                                                                                                                                                  const
+  {
+    return get_property_bool(vr::Prop_DriverIsDrawingControllers_Bool);
+  }                                                                                                                                                                                                                                                                            
+  bool                                   driver_requests_pause               ()                                                                                                                                                                                                  const
+  {
+    return get_property_bool(vr::Prop_DriverRequestsApplicationPause_Bool);
+  }                                                                                                                                                                                                                                                                            
+  bool                                   driver_requests_reduced_rendering   ()                                                                                                                                                                                                  const
+  {
+    return get_property_bool(vr::Prop_DriverRequestsReducedRendering_Bool);
+  }
+  
   // IVR System - Rendering                                                                                                                                                                                                                                                      
   std::vector<std::array<float, 2>>      hidden_area_mesh                    (eye eye)                                                                                                                                                                                           const
   {
