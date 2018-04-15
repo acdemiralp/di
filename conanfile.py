@@ -4,13 +4,13 @@ import os
 
 class DiConan(ConanFile):
     name            = "di"
-    version         = "1.1.0"                     
+    version         = "1.1.2"                     
     description     = "Conan package for di."           
     url             = "https://github.com/acdemiralp/di"
     license         = "MIT"                         
     settings        = "arch", "build_type", "compiler", "os"
     generators      = "cmake"    
-    requires        = (("openvr/1.0.10@RWTH-VR/thirdparty"),
+    requires        = (("openvr/1.0.14@acdemiralp/makina"),
                        ("sdl2/2.0.7@bincrafters/stable"))
 
     def source(self):
