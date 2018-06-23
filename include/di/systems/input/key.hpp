@@ -24,7 +24,7 @@ struct key
 
   bool operator < (const key& rhs) const
   {
-    return code < rhs.code;
+    return scan_code < rhs.scan_code;
   }
   
   key_code     code     ;
