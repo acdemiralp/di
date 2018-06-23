@@ -3,15 +3,12 @@ from   conans.tools import download, unzip
 import os
 
 class DiConan(ConanFile):
-    name            = "di"
-    version         = "1.2.0"                     
-    description     = "Conan package for di."           
-    url             = "https://github.com/acdemiralp/di"
-    license         = "MIT"                         
-    settings        = "arch", "build_type", "compiler", "os"
-    generators      = "cmake"    
-    requires        = (("openvr/1.0.14@acdemiralp/makina"),
-                       ("sdl2/2.0.7@bincrafters/stable"))
+    name        = "di"
+    version     = "1.2.1"                     
+    description = "Conan package for di."           
+    url         = "https://github.com/acdemiralp/di"
+    license     = "MIT"                         
+    settings    = "arch", "build_type", "compiler", "os"
 
     def source(self):
         zip_name = "%s.zip" % self.version
