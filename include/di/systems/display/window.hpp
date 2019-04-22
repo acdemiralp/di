@@ -13,6 +13,11 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
 
+#ifdef _WIN32
+#include <windows.h>
+#include <dwmapi.h>
+#endif
+
 #include <di/systems/display/display_info.hpp>
 #include <di/systems/display/hit_test_result.hpp>
 #include <di/systems/display/window_flags.hpp>
@@ -217,6 +222,20 @@ public:
     hit_test_callback_ = callback;
     SDL_SetWindowHitTest(native_, hit_test_callback_ != nullptr ? static_cast<SDL_HitTest>(hit_test_callback) : nullptr, reinterpret_cast<void*>(this));
   }
+  void set_passthrough (bool                                                 passthrough       )
+  {
+#ifdef _WIN32
+    const auto hwnd  = std::get<0>(driver_data());
+    const auto style = GetWindowLong(hwnd, GWL_EXSTYLE);
+    SetWindowLong(hwnd, GWL_EXSTYLE, passthrough
+      ? style |  WS_EX_LAYERED |  WS_EX_TRANSPARENT
+      : style & ~WS_EX_LAYERED & ~WS_EX_TRANSPARENT);
+    MARGINS margins = { passthrough ? -1 : 0 };
+    DwmExtendFrameIntoClientArea(hwnd, &margins);
+#else
+    throw std::runtime_error("The function set_passthrough is not available on this operating system.");
+#endif
+  }
 
   bool                                          visible         () const
   {
@@ -321,6 +340,15 @@ public:
       return window_mode::fullscreen_windowed;
 
     return window_mode::windowed;
+  }
+  bool                                          passthrough     () const
+  {
+#ifdef _WIN32
+    const auto style = GetWindowLong(std::get<0>(driver_data()), GWL_EXSTYLE);
+    return style & WS_EX_LAYERED && style & WS_EX_TRANSPARENT;
+#else
+    throw std::runtime_error("The function passthrough is not available on this operating system.");
+#endif
   }
 
   SDL_Window*   native   () const 
