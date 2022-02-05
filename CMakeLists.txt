@@ -120,7 +120,7 @@ import_library(OPENVR_INCLUDE_DIRS OPENVR_LIBRARY)
 find_package  (SDL2 REQUIRED)
 import_library(SDL2_INCLUDE_DIR SDL2_LIBRARY)
 if   (WIN32)
-  list(APPEND PROJECT_LIBRARIES winmm.lib Imm32.lib Dwmapi.lib)
+  list(APPEND PROJECT_LIBRARIES winmm.lib imm32.lib)
 endif()
 
 ##################################################    Targets     ##################################################

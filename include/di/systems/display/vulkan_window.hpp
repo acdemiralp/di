@@ -19,13 +19,13 @@ class vulkan_window : public window
 {
 public:
   explicit vulkan_window  (const VkInstance instance, const std::string& title, const window_flags flags = window_flags::none) 
-  : window(title, flags), instance_(instance)
+  : window(title, flags | static_cast<window_flags>(SDL_WINDOW_VULKAN)), instance_(instance)
   {
     if(!SDL_Vulkan_CreateSurface(native_, instance_, &surface_))
       throw std::runtime_error("Failed to create Vulkan surface. SDL Error: " + std::string(SDL_GetError()));
   }
   vulkan_window           (const VkInstance instance, const std::string& title, const std::array<std::size_t, 2>& position, const std::array<std::size_t, 2>& size, const window_flags flags = window_flags::none)
-  : window(title, position, size, flags), instance_(instance)
+  : window(title, position, size, flags | static_cast<window_flags>(SDL_WINDOW_VULKAN)), instance_(instance)
   {
     if (!SDL_Vulkan_CreateSurface(native_, instance_, &surface_))
       throw std::runtime_error("Failed to create Vulkan surface. SDL Error: " + std::string(SDL_GetError()));
