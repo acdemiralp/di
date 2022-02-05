@@ -15,7 +15,6 @@
 
 #ifdef _WIN32
 #include <windows.h>
-#include <dwmapi.h>
 #endif
 
 #include <di/systems/display/display_info.hpp>
@@ -34,7 +33,7 @@ public:
   explicit window  (const std::string& title, const window_flags flags = window_flags::none)
   : window(title, {32, 32}, {800, 600}, flags)
   {
-    set_fullscreen_windowed();
+    set_mode(window_mode::fullscreen_windowed);
   }
   window           (const std::string& title, const std::array<std::size_t, 2>& position, const std::array<std::size_t, 2>& size, window_flags flags = window_flags::none) 
   : native_(SDL_CreateWindow(title.c_str(), static_cast<int>(position[0]), static_cast<int>(position[1]), static_cast<int>(size[0]), static_cast<int>(size[1]), static_cast<Uint32>(flags)))
@@ -138,51 +137,51 @@ public:
     SDL_WarpMouseInWindow(native_, static_cast<int>(position[0]), static_cast<int>(position[1]));
   }
 
-  void set_visible     (bool                                                 visible           )
+  void set_visible           (bool                                                 visible           )
   {
     visible ? SDL_ShowWindow(native_) : SDL_HideWindow(native_);
   }
-  void set_resizable   (bool                                                 resizable         )
+  void set_resizable         (bool                                                 resizable         )
   {
     SDL_SetWindowResizable(native_, SDL_bool(resizable));
   }
-  void set_bordered    (bool                                                 bordered          )
+  void set_bordered          (bool                                                 bordered          )
   {
     SDL_SetWindowBordered(native_, SDL_bool(bordered));
   }
-  void set_input_grab  (bool                                                 input_grab        )
+  void set_input_grab        (bool                                                 input_grab        )
   {
     SDL_SetWindowGrab(native_, SDL_bool(input_grab));
   }
-  void set_opacity     (float                                                opacity           )
+  void set_opacity           (float                                                opacity           )
   {
     SDL_SetWindowOpacity(native_, opacity);
   }
-  void set_brightness  (float                                                brightness        )
+  void set_brightness        (float                                                brightness        )
   {
     SDL_SetWindowBrightness(native_, brightness);
   }
-  void set_title       (const std::string&                                   title             )
+  void set_title             (const std::string&                                   title             )
   {
     SDL_SetWindowTitle(native_, title.c_str());
   }
-  void set_position    (const std::array<std::size_t, 2>&                    position          )
+  void set_position          (const std::array<std::size_t, 2>&                    position          )
   {
     SDL_SetWindowPosition(native_, static_cast<int>(position[0]), static_cast<int>(position[1]));
   }
-  void set_size        (const std::array<std::size_t, 2>&                    size              )
+  void set_size              (const std::array<std::size_t, 2>&                    size              )
   {
     SDL_SetWindowSize(native_, static_cast<int>(size[0]), static_cast<int>(size[1]));
   }
-  void set_minimum_size(const std::array<std::size_t, 2>&                    minimum_size      )
+  void set_minimum_size      (const std::array<std::size_t, 2>&                    minimum_size      )
   {
     SDL_SetWindowMinimumSize(native_, static_cast<int>(minimum_size[0]), static_cast<int>(minimum_size[1]));
   }
-  void set_maximum_size(const std::array<std::size_t, 2>&                    maximum_size      )
+  void set_maximum_size      (const std::array<std::size_t, 2>&                    maximum_size      )
   {
     SDL_SetWindowMaximumSize(native_, static_cast<int>(maximum_size[0]), static_cast<int>(maximum_size[1]));
   }
-  void set_gamma_ramp  (const std::array<std::array<std::uint16_t, 256>, 3>& translation_tables)
+  void set_gamma_ramp        (const std::array<std::array<std::uint16_t, 256>, 3>& translation_tables)
   {
     SDL_SetWindowGammaRamp(
       native_,
@@ -190,22 +189,20 @@ public:
       translation_tables[1].data(), 
       translation_tables[2].data());
   } 
-  void set_display_mode(const display_mode&                                  display_mode      )
+  void set_display_mode      (const display_mode&                                  display_mode      )
   {
     auto native_display_mode = display_mode.native();
     SDL_SetWindowDisplayMode(native_, &native_display_mode);
   }
-  void set_mode        (window_mode                                          mode              )
+  void set_mode              (window_mode                                          mode              )
   {
-    SDL_SetWindowFullscreen(native_, mode == window_mode::fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
-    if (mode == window_mode::fullscreen_windowed)
-      set_fullscreen_windowed();
+    SDL_SetWindowFullscreen(native_, static_cast<std::uint32_t>(mode));
   }
-  void set_parent      (window*                                              parent            )
+  void set_parent            (window*                                              parent            )
   {
     SDL_SetWindowModalFor(native_, parent->native_);
   }
-  void set_icon        (const std::array<std::size_t, 2>& dimensions, const std::vector<std::uint8_t>& pixels)
+  void set_icon              (const std::array<std::size_t, 2>& dimensions, const std::vector<std::uint8_t>& pixels)
   {
     const auto surface = SDL_CreateRGBSurfaceWithFormatFrom(
       const_cast<void*>(reinterpret_cast<const void*>(pixels.data())), 
@@ -217,99 +214,125 @@ public:
     SDL_SetWindowIcon(native_, surface);
     SDL_FreeSurface(surface);
   }
-  void set_hit_test    (const std::function<hit_test_result(std::array<std::size_t, 2>)>& callback)
+  void set_hit_test          (const std::function<hit_test_result(std::array<std::size_t, 2>)>& callback)
   {
     hit_test_callback_ = callback;
     SDL_SetWindowHitTest(native_, hit_test_callback_ != nullptr ? static_cast<SDL_HitTest>(hit_test_callback) : nullptr, reinterpret_cast<void*>(this));
   }
-  void set_passthrough (bool                                                 passthrough       )
+  void set_layered           (bool                                                 layered           )
+  {
+#ifdef _WIN32
+    const auto hwnd = std::get<0>(driver_data());
+
+    auto style = GetWindowLong(hwnd, GWL_EXSTYLE);
+    if      ( layered && !(style & WS_EX_LAYERED))
+      style |=  WS_EX_LAYERED;
+    else if (!layered &&  (style & WS_EX_LAYERED))
+      style &= ~WS_EX_LAYERED;
+    SetWindowLong(hwnd, GWL_EXSTYLE, style);
+#else
+    throw std::runtime_error("The function set_layered is not available on this operating system.");
+#endif
+  }
+  void set_transparent       (bool                                                 transparent       )
   {
 #ifdef _WIN32
     const auto hwnd  = std::get<0>(driver_data());
-    const auto style = GetWindowLong(hwnd, GWL_EXSTYLE);
-    SetWindowLong(hwnd, GWL_EXSTYLE, passthrough
-      ? style |  WS_EX_LAYERED |  WS_EX_TRANSPARENT
-      : style & ~WS_EX_LAYERED & ~WS_EX_TRANSPARENT);
-    MARGINS margins = { passthrough ? -1 : 0 };
-    DwmExtendFrameIntoClientArea(hwnd, &margins);
+
+    auto style = GetWindowLong(hwnd, GWL_EXSTYLE);
+    if      ( transparent && !(style & WS_EX_TRANSPARENT))
+      style |= WS_EX_TRANSPARENT;
+    else if (!transparent &&  (style & WS_EX_TRANSPARENT))
+      style &= ~WS_EX_TRANSPARENT;
+    SetWindowLong(hwnd, GWL_EXSTYLE, style);
 #else
-    throw std::runtime_error("The function set_passthrough is not available on this operating system.");
+    throw std::runtime_error("The function set_transparent is not available on this operating system.");
+#endif
+  }
+  void set_transparency_color(const std::array<std::uint8_t, 3>                    color             )
+  {
+#ifdef _WIN32
+    const auto hwnd = std::get<0>(driver_data());
+
+    SetLayeredWindowAttributes(hwnd, RGB(color[0], color[1], color[2]), 0, LWA_COLORKEY);
+#else
+    throw std::runtime_error("The function set_transparency_color is not available on this operating system.");
 #endif
   }
 
-  bool                                          visible         () const
+  bool                                          visible           () const
   {
     return (SDL_GetWindowFlags(native_) & SDL_WINDOW_SHOWN) != 0;
   }
-  bool                                          resizable       () const
+  bool                                          resizable         () const
   {
     return (SDL_GetWindowFlags(native_) & SDL_WINDOW_RESIZABLE) != 0;
   }
-  bool                                          bordered        () const
+  bool                                          bordered          () const
   {
     return !(SDL_GetWindowFlags(native_) & SDL_WINDOW_BORDERLESS);
   }
-  bool                                          input_grab      () const
+  bool                                          input_grab        () const
   {
     return SDL_GetWindowGrab(native_) != 0;
   }
-  bool                                          input_focus     () const
+  bool                                          input_focus       () const
   {
     return (SDL_GetWindowFlags(native_) & SDL_WINDOW_INPUT_FOCUS) != 0;
   }
-  bool                                          mouse_focus     () const
+  bool                                          mouse_focus       () const
   {
     return (SDL_GetWindowFlags(native_) & SDL_WINDOW_MOUSE_FOCUS) != 0;
   }
-  bool                                          keyboard_visible() const
+  bool                                          keyboard_visible  () const
   {
     return SDL_IsScreenKeyboardShown(native_) != 0;
   }
-  float                                         opacity         () const
+  float                                         opacity           () const
   {
     float opacity;
     SDL_GetWindowOpacity(native_, &opacity);
     return opacity;
   }
-  float                                         brightness      () const
+  float                                         brightness        () const
   {
     return SDL_GetWindowBrightness(native_);
   }
-  std::string                                   title           () const
+  std::string                                   title             () const
   {
     return std::string(SDL_GetWindowTitle(native_));
   }
-  std::array<std::uint32_t, 2>                  position        () const
+  std::array<std::uint32_t, 2>                  position          () const
   {
     std::array<std::uint32_t, 2> position;
     SDL_GetWindowPosition(native_, reinterpret_cast<int*>(&position[0]), reinterpret_cast<int*>(&position[1]));
     return position;
   }
-  std::array<std::uint32_t, 2>                  size            () const
+  std::array<std::uint32_t, 2>                  size              () const
   {
     std::array<std::uint32_t, 2> size;
     SDL_GetWindowSize(native_, reinterpret_cast<int*>(&size[0]), reinterpret_cast<int*>(&size[1]));
     return size;
   }
-  std::array<std::uint32_t, 2>                  minimum_size    () const
+  std::array<std::uint32_t, 2>                  minimum_size      () const
   {
     std::array<std::uint32_t, 2> minimum_size;
     SDL_GetWindowMinimumSize(native_, reinterpret_cast<int*>(&minimum_size[0]), reinterpret_cast<int*>(&minimum_size[1]));
     return minimum_size;
   }
-  std::array<std::uint32_t, 2>                  maximum_size    () const
+  std::array<std::uint32_t, 2>                  maximum_size      () const
   {
     std::array<std::uint32_t, 2> maximum_size;
     SDL_GetWindowMaximumSize(native_, reinterpret_cast<int*>(&maximum_size[0]), reinterpret_cast<int*>(&maximum_size[1]));
     return maximum_size;
   }
-  rectangle<std::uint32_t>                      border_size     () const
+  rectangle<std::uint32_t>                      border_size       () const
   {
     rectangle<std::uint32_t> border_size;
     SDL_GetWindowBordersSize(native_, reinterpret_cast<int*>(&border_size.top), reinterpret_cast<int*>(&border_size.left), reinterpret_cast<int*>(&border_size.bottom), reinterpret_cast<int*>(&border_size.right));
     return border_size;
   }
-  std::array<std::array<std::uint16_t, 256>, 3> gamma_ramp      () const
+  std::array<std::array<std::uint16_t, 256>, 3> gamma_ramp        () const
   {
     std::array<std::array<std::uint16_t, 256>, 3> translation_tables;
     SDL_GetWindowGammaRamp(
@@ -319,35 +342,52 @@ public:
       translation_tables[2].data());
     return translation_tables;
   }
-  display_mode                                  display_mode    () const
+  display_mode                                  display_mode      () const
   {
     SDL_DisplayMode native_display_mode;
     SDL_GetWindowDisplayMode(native_, &native_display_mode);
     return di::display_mode(native_display_mode);
   }
-  display_info                                  display         () const
+  display_info                                  display           () const
   {
     return displays()[SDL_GetWindowDisplayIndex(native_)];
   }
-  window_mode                                   mode            () const
+  window_mode                                   mode              () const
   {
-    if (SDL_GetWindowFlags(native_) & SDL_WINDOW_FULLSCREEN_DESKTOP)
+    if (SDL_GetWindowFlags(native_) & SDL_WINDOW_FULLSCREEN)
       return window_mode::fullscreen;
-    
-    auto display_info = display();
-    if(position() == std::array<std::uint32_t, 2>{0, 0} && 
-       size    () == std::array<std::uint32_t, 2>{std::uint32_t(display_info.size[0] - 1), std::uint32_t(display_info.size[1] - 1)})
+    if (SDL_GetWindowFlags(native_) & SDL_WINDOW_FULLSCREEN_DESKTOP)
       return window_mode::fullscreen_windowed;
-
     return window_mode::windowed;
   }
-  bool                                          passthrough     () const
+  bool                                          layered           () const
   {
 #ifdef _WIN32
     const auto style = GetWindowLong(std::get<0>(driver_data()), GWL_EXSTYLE);
-    return style & WS_EX_LAYERED && style & WS_EX_TRANSPARENT;
+    return style & WS_EX_LAYERED;
 #else
-    throw std::runtime_error("The function passthrough is not available on this operating system.");
+    throw std::runtime_error("The function layered is not available on this operating system.");
+#endif
+  }
+  bool                                          transparent       () const
+  {
+#ifdef _WIN32
+    const auto style = GetWindowLong(std::get<0>(driver_data()), GWL_EXSTYLE);
+    return style & WS_EX_TRANSPARENT;
+#else
+    throw std::runtime_error("The function transparent is not available on this operating system.");
+#endif
+  }
+  std::array<std::uint8_t, 3>                   transparency_color() const
+  {
+#ifdef _WIN32
+    const auto hwnd = std::get<0>(driver_data());
+
+    COLORREF color;
+    GetLayeredWindowAttributes(hwnd, &color, nullptr, nullptr);
+    return {GetRValue(color), GetGValue(color), GetBValue(color)};
+#else
+    throw std::runtime_error("The function transparency_color is not available on this operating system.");
 #endif
   }
 
@@ -416,12 +456,6 @@ protected:
     SDL_VERSION(&sys_wm_info.version);
     SDL_GetWindowWMInfo(native_, &sys_wm_info);
     return sys_wm_info;
-  }
-  void          set_fullscreen_windowed()
-  {
-    auto display_info = display();
-    set_position(std::array<std::size_t, 2>{0, 0});
-    set_size    (std::array<std::size_t, 2>{display_info.size[0] - 1, display_info.size[1] - 1});
   }
   
   SDL_Window* native_ = nullptr;
